@@ -1,5 +1,5 @@
 {
-  "name": "@yield-protocol/yield-utils-v2",
+  "name": "@yield-protocol/utils-v2",
   "version": "2.0.1",
   "description": "Yield v2 utility contracts",
   "main": "index.js",
