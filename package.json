@@ -1,6 +1,6 @@
 {
   "name": "@yield-protocol/utils-v2",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Yield v2 utility contracts",
   "main": "index.js",
   "author": "Yield Inc.",
