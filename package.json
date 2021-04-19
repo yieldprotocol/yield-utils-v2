@@ -1,9 +1,14 @@
 {
   "name": "@yield-protocol/utils-v2",
-  "version": "2.1.0",
+  "version": "2.1.2",
   "description": "Yield v2 utility contracts",
   "main": "index.js",
   "author": "Yield Inc.",
+  "files": [
+    "contracts",
+    "!contracts/mocks",
+    "dist"
+  ],
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
