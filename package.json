@@ -1,14 +1,15 @@
 {
   "name": "@yield-protocol/utils-v2",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Yield v2 utility contracts",
-  "main": "index.js",
   "author": "Yield Inc.",
   "files": [
     "contracts",
     "!contracts/mocks",
     "dist"
   ],
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "build": "hardhat compile",
     "test": "hardhat test",
@@ -46,5 +47,10 @@
     "typechain": "^4.0.1",
     "typechain-target-ethers-v5": "^5.0.1",
     "typescript": "^3.9.7"
-  }
+  },
+  "dependencies": {
+    "ethereumjs-util": "^7.0.8",
+    "ethers": "^5.0.7"
+  },
+  "license": "GPL-3.0-or-later"
 }
