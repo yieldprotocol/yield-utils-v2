@@ -60,8 +60,7 @@ contract AccessControl {
     /**
      * @dev Emitted when `account` is granted `role`.
      *
-     * `sender` is the account that originated the contract call, an admin role
-     * bearer except when using {_setupRole}.
+     * `sender` is the account that originated the contract call.
      */
     event RoleGranted(bytes4 indexed role, address indexed account, address indexed sender);
 
@@ -79,8 +78,8 @@ contract AccessControl {
      * Calling setRoleAdmin(msg.sig, LOCK) means no one can grant that msg.sig role anymore.
      */
     constructor () {
-        _setupRole(ROOT, msg.sender);   // Grant ROOT to msg.sender
-        setRoleAdmin(LOCK, LOCK);       // Create the LOCK role by setting itself as its own admin, creating an independent role tree
+        _grantRole(ROOT, msg.sender);   // Grant ROOT to msg.sender
+        _setRoleAdmin(LOCK, LOCK);      // Create the LOCK role by setting itself as its own admin, creating an independent role tree
     }
 
     /**
@@ -89,7 +88,7 @@ contract AccessControl {
      * a specific action, or even create other roles to delegate admin control over a function.
      */
     modifier auth() {
-        require (hasRole(msg.sig, msg.sender), "Access denied"); // TODO: Flatten functions when gas golfing
+        require (_hasRole(msg.sig, msg.sender), "Access denied");
         _;
     }
 
@@ -97,15 +96,15 @@ contract AccessControl {
      * @dev Allow only if the caller has been granted the admin role of `role`.
      */
     modifier admin(bytes4 role) {
-        require (hasRole(getRoleAdmin(role), msg.sender), "Only admin");
+        require (_hasRole(_getRoleAdmin(role), msg.sender), "Only admin");
         _;
     }
 
     /**
      * @dev Returns `true` if `account` has been granted `role`.
      */
-    function hasRole(bytes4 role, address account) public view returns (bool) {
-        return _roles[role].members[account];
+    function hasRole(bytes4 role, address account) external view returns (bool) {
+        return _hasRole(role, account);
     }
 
     /**
@@ -114,8 +113,21 @@ contract AccessControl {
      *
      * To change a role's admin, use {_setRoleAdmin}.
      */
-    function getRoleAdmin(bytes4 role) public view returns (bytes4) {
-        return _roles[role].adminRole;
+    function getRoleAdmin(bytes4 role) external view returns (bytes4) {
+        return _getRoleAdmin(role);
+    }
+
+    /**
+     * @dev Sets `adminRole` as ``role``'s admin role.
+
+     * If ``role``'s admin role is not `adminRole` emits a {RoleAdminChanged} event.
+     *
+     * Requirements:
+     *
+     * - the caller must have ``role``'s admin role.
+     */
+    function setRoleAdmin(bytes4 role, bytes4 adminRole) external virtual admin(role) {
+        _setRoleAdmin(role, adminRole);
     }
 
     /**
@@ -128,7 +140,7 @@ contract AccessControl {
      *
      * - the caller must have ``role``'s admin role.
      */
-    function grantRole(bytes4 role, address account) public virtual admin(role) {
+    function grantRole(bytes4 role, address account) external virtual admin(role) {
         _grantRole(role, account);
     }
 
@@ -143,23 +155,11 @@ contract AccessControl {
      *
      * - For each `role` in `roles`, the caller must have ``role``'s admin role.
      */
-    function grantRoles(bytes4[] memory roles, address account) public virtual {
+    function grantRoles(bytes4[] memory roles, address account) external virtual {
         for (uint256 i = 0; i < roles.length; i++) {
-            grantRole(roles[i], account);
+            require (_hasRole(_getRoleAdmin(roles[i]), msg.sender), "Only admin");
+            _grantRole(roles[i], account);
         }
-    }
-
-    /**
-     * @dev Sets `adminRole` as ``role``'s admin role.
-
-     * If ``role``'s admin role is not `adminRole` emits a {RoleAdminChanged} event.
-     *
-     * Requirements:
-     *
-     * - the caller must have ``role``'s admin role.
-     */
-    function setRoleAdmin(bytes4 role, bytes4 adminRole) public virtual admin(role) {
-        _setRoleAdmin(role, adminRole);
     }
 
     /**
@@ -171,7 +171,7 @@ contract AccessControl {
      *
      * - the caller must have ``role``'s admin role.
      */
-    function lockRole(bytes4 role) public virtual admin(role) {
+    function lockRole(bytes4 role) external virtual admin(role) {
         _setRoleAdmin(role, LOCK);
     }
 
@@ -184,7 +184,7 @@ contract AccessControl {
      *
      * - the caller must have ``role``'s admin role.
      */
-    function revokeRole(bytes4 role, address account) public virtual admin(role) {
+    function revokeRole(bytes4 role, address account) external virtual admin(role) {
         _revokeRole(role, account);
     }
 
@@ -202,48 +202,36 @@ contract AccessControl {
      *
      * - the caller must be `account`.
      */
-    function renounceRole(bytes4 role, address account) public virtual {
+    function renounceRole(bytes4 role, address account) external virtual {
         require(account == msg.sender, "Renounce only for self");
 
         _revokeRole(role, account);
     }
 
-    /**
-     * @dev Grants `role` to `account`.
-     *
-     * If `account` had not been already granted `role`, emits a {RoleGranted}
-     * event. Note that unlike {grantRole}, this function doesn't perform any
-     * checks on the calling account.
-     *
-     * [WARNING]
-     * ====
-     * This function should only be called from the constructor when setting
-     * up the initial roles for the system.
-     *
-     * Using this function in any other way is effectively circumventing the admin
-     * system imposed by {AccessControl}.
-     * ====
-     */
-    function _setupRole(bytes4 role, address account) internal virtual {
-        _grantRole(role, account);
+    function _hasRole(bytes4 role, address account) internal view returns (bool) {
+        return _roles[role].members[account];
+    }
+
+    function _getRoleAdmin(bytes4 role) internal view returns (bytes4) {
+        return _roles[role].adminRole;
     }
 
     function _setRoleAdmin(bytes4 role, bytes4 adminRole) internal virtual {
-        if (getRoleAdmin(role) != adminRole) {
+        if (_getRoleAdmin(role) != adminRole) {
             _roles[role].adminRole = adminRole;
             emit RoleAdminChanged(role, adminRole);
         }
     }
 
-    function _grantRole(bytes4 role, address account) private {
-        if (!hasRole(role, account)) {
+    function _grantRole(bytes4 role, address account) internal {
+        if (!_hasRole(role, account)) {
             _roles[role].members[account] = true;
             emit RoleGranted(role, account, msg.sender);
         }
     }
 
-    function _revokeRole(bytes4 role, address account) private {
-        if (hasRole(role, account)) {
+    function _revokeRole(bytes4 role, address account) internal {
+        if (_hasRole(role, account)) {
             _roles[role].members[account] = false;
             emit RoleRevoked(role, account, msg.sender);
         }

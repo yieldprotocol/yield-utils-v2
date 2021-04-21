@@ -45,7 +45,7 @@ abstract contract ERC20Permit is ERC20, IERC2612 {
      * In cases where the free option is not a concern, deadline can simply be
      * set to uint(-1), so it should be seen as an optional parameter
      */
-    function permit(address owner, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) public virtual override {
+    function permit(address owner, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external virtual override {
         require(deadline >= block.timestamp, "ERC20Permit: expired deadline");
 
         bytes32 hashStruct = keccak256(
