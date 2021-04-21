@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-import "@yield-protocol/utils/contracts/token/IERC20.sol";
+import "../token/IERC20.sol";
 
 pragma solidity ^0.8.0;
 

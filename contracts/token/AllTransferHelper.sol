@@ -3,12 +3,12 @@
 
 pragma solidity >=0.6.0;
 
-import "@yield-protocol/utils/contracts/token/IERC20.sol";
-import "./RevertMsgExtractor.sol";
+import "./IERC20.sol";
+import "../utils/RevertMsgExtractor.sol";
 
 
 // helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
-library TransferHelper {
+library AllTransferHelper {
     function safeTransfer(
         IERC20 token,
         address to,

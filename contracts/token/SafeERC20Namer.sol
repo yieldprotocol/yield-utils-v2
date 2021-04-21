@@ -2,7 +2,7 @@
 
 pragma solidity >=0.5.0;
 
-import './AddressStringUtil.sol';
+import '../utils/AddressStringUtil.sol';
 
 // produces token descriptors from inconsistent or absent ERC20 symbol implementations that can return string or bytes32
 // this library will always produce a string symbol to represent the token
