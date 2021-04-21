@@ -48,11 +48,9 @@ $ yarn test
 ```
 
 ### Fuzz
-You will need to install [echidna](https://github.com/crytic/echidna) separately, and then run:
-
-```
-$ echidna-test . --contract WhitepaperInvariant --config contracts/invariants/config.yaml
-```
+scribble --arm contracts/token/ERC20.sol --output-mode files
+mythx --api-key `cat .mythxKey` analyze contracts/token/ERC20.sol
+scribble --disarm contracts/token/ERC20.sol
 
 ### Start a local blockchain
 We use [ganache](https://www.trufflesuite.com/ganache) as a local blockchain:

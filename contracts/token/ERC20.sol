@@ -41,14 +41,17 @@ contract ERC20 is IERC20Metadata {
         return _transfer(msg.sender, dst, wad);
     }
 
+    /// if_succeeds {:msg "TransferFrom - decrease allowance"} msg.sender != src ==> old(_allowance[src][msg.sender]) >= wad;
     function transferFrom(address src, address dst, uint wad) public virtual override returns (bool) {
         _decreaseAllowance(src, wad);
 
         return _transfer(src, dst, wad);
     }
 
+    /// if_succeeds {:msg "Transfer - src decrease"} old(_balanceOf[src]) >= _balanceOf[src];
+    /// if_succeeds {:msg "Transfer - dst increase"} _balanceOf[dst] >= old(_balanceOf[dst]);
+    /// if_succeeds {:msg "Transfer - supply"} old(_balanceOf[src]) + old(_balanceOf[dst]) == _balanceOf[src] + _balanceOf[dst];
     function _transfer(address src, address dst, uint wad) internal virtual returns (bool) {
-        
         require(_balanceOf[src] >= wad, "ERC20: Insufficient balance");
         unchecked { _balanceOf[src] = _balanceOf[src] - wad; }
         _balanceOf[dst] = _balanceOf[dst] + wad;
@@ -66,6 +69,7 @@ contract ERC20 is IERC20Metadata {
     }
 
     // Decrease allowance if src != msg.sender and if not set to MAX
+    /// if_succeeds {:msg "Decrease allowance - underflow"} old(_allowance[src][msg.sender]) <= _allowance[src][msg.sender];
     function _decreaseAllowance(address src, uint wad) internal virtual returns (bool) {
         if (src != msg.sender) {
             uint256 allowed = _allowance[src][msg.sender];
@@ -78,6 +82,8 @@ contract ERC20 is IERC20Metadata {
         return true;
     }
 
+    /// if_succeeds {:msg "Mint - balance overflow"} old(_balanceOf[dst]) >= _balanceOf[dst];
+    /// if_succeeds {:msg "Mint - supply overflow"} old(_totalSupply) >= _totalSupply;
     function _mint(address dst, uint wad) internal virtual returns (bool) {
         _balanceOf[dst] = _balanceOf[dst] + wad;
         _totalSupply = _totalSupply + wad;
@@ -86,6 +92,8 @@ contract ERC20 is IERC20Metadata {
         return true;
     }
 
+    /// if_succeeds {:msg "Burn - balance underflow"} old(_balanceOf[src]) <= _balanceOf[src];
+    /// if_succeeds {:msg "Burn - supply underflow"} old(_totalSupply) <= _totalSupply;
     function _burn(address src, uint wad) internal virtual returns (bool) {
         unchecked {
             require(_balanceOf[src] >= wad, "ERC20: Insufficient balance");
