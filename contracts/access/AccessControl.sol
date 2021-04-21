@@ -208,11 +208,11 @@ contract AccessControl {
         _revokeRole(role, account);
     }
 
-    function _hasRole(bytes4 role, address account) private view returns (bool) {
+    function _hasRole(bytes4 role, address account) internal view returns (bool) {
         return _roles[role].members[account];
     }
 
-    function _getRoleAdmin(bytes4 role) private view returns (bytes4) {
+    function _getRoleAdmin(bytes4 role) internal view returns (bytes4) {
         return _roles[role].adminRole;
     }
 
@@ -223,14 +223,14 @@ contract AccessControl {
         }
     }
 
-    function _grantRole(bytes4 role, address account) private {
+    function _grantRole(bytes4 role, address account) internal {
         if (!_hasRole(role, account)) {
             _roles[role].members[account] = true;
             emit RoleGranted(role, account, msg.sender);
         }
     }
 
-    function _revokeRole(bytes4 role, address account) private {
+    function _revokeRole(bytes4 role, address account) internal {
         if (_hasRole(role, account)) {
             _roles[role].members[account] = false;
             emit RoleRevoked(role, account, msg.sender);
