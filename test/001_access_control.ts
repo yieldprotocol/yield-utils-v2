@@ -20,6 +20,7 @@ describe('Access Control', function () {
   let restrictedFromOther: Restricted
 
   const role = id('mint(address,uint256)')
+  const role2 = id('burn(address,uint256)')
 
   before(async () => {
     const signers = await ethers.getSigners()
@@ -64,6 +65,12 @@ describe('Access Control', function () {
     await expect(restrictedFromOther.mint(owner, 1)).to.be.revertedWith('Access denied')
   })
 
+  it('multiple roles can be granted', async () => {
+    await expect(restricted.grantRoles([role, role2], owner))
+      .to.emit(restricted, 'RoleGranted').withArgs(role, owner, owner)
+      .to.emit(restricted, 'RoleGranted').withArgs(role2, owner, owner)
+  })
+
   it('roles can be locked', async () => {
     await expect(restricted.lockRole(role)).to.emit(restricted, 'RoleAdminChanged').withArgs(role, '0xffffffff')
     await expect(restricted.grantRole(role, owner)).to.be.revertedWith('Only admin')
@@ -71,7 +78,7 @@ describe('Access Control', function () {
 
   describe('with a granted role', async () => {
     beforeEach(async () => {
-      await restricted.grantRole(role, other)
+      await restricted.grantRoles([role, role2], other)
     })
 
     it('only admin can grant roles', async () => {
@@ -82,6 +89,12 @@ describe('Access Control', function () {
       await expect(restrictedFromOther.revokeRole(role, other)).to.be.revertedWith('Only admin')
       await expect(restricted.revokeRole(role, other)).to.emit(restricted, 'RoleRevoked').withArgs(role, other, owner)
       expect(await restricted.hasRole(role, other)).to.be.false
+    })
+
+    it('multiple roles can be revoked in one go', async () => {
+      await expect(restricted.revokeRoles([role, role2], other))
+        .to.emit(restricted, 'RoleRevoked').withArgs(role, other, owner)
+        .to.emit(restricted, 'RoleRevoked').withArgs(role2, other, owner)
     })
 
     it('roles can be renounced', async () => {

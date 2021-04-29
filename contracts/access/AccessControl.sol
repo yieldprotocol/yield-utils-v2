@@ -189,6 +189,22 @@ contract AccessControl {
     }
 
     /**
+     * @dev Revokes all of `role` in `roles` from `account`.
+     *
+     * If `account` had been granted `role`, emits a {RoleRevoked} event.
+     *
+     * Requirements:
+     *
+     * - For each `role` in `roles`, the caller must have ``role``'s admin role.
+     */
+    function revokeRoles(bytes4[] memory roles, address account) external virtual {
+        for (uint256 i = 0; i < roles.length; i++) {
+            require (_hasRole(_getRoleAdmin(roles[i]), msg.sender), "Only admin");
+            _revokeRole(roles[i], account);
+        }
+    }
+
+    /**
      * @dev Revokes `role` from the calling account.
      *
      * Roles are often managed via {grantRole} and {revokeRole}: this function's
