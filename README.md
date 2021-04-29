@@ -48,11 +48,13 @@ $ yarn test
 ```
 
 ### Fuzz
+```
 npx hardhat flatten contracts/token/ERC20.sol > contracts/token/ERC20.flat.sol
 scribble --arm contracts/token/ERC20.flat.sol --output-mode files
 mythx --api-key `cat .mythxKey` analyze contracts/token/ERC20.flat.sol --solc-version 0.8.1
 scribble --disarm contracts/token/ERC20.flat.sol
 rm contracts/token/ERC20.flat.sol
+```
 
 ### Start a local blockchain
 We use [ganache](https://www.trufflesuite.com/ganache) as a local blockchain:
