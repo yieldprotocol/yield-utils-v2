@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address'
 // @ts-ignore
-import { PERMIT_TYPEHASH, getPermitDigest, getDomainSeparator, sign, privateKey1 } from '../src/signatures'
+import { PERMIT_TYPEHASH, getPermitDigest, getDomainSeparator, sign, privateKey0 } from '../src/signatures'
 
 import ERC20MockArtifact from '../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json'
 
@@ -58,7 +58,7 @@ describe('ERC20Permit', function () {
     const deadline = Math.floor(Date.now()) + 1000
 
     // Get the user's nonce
-    const nonce = await ownerAcc.getTransactionCount()
+    const nonce = await erc20.nonces(owner)
 
     // Get the EIP712 digest
     const digest = getPermitDigest(getDomainSeparator(name, erc20.address, await erc20.version(), chainId), approve, nonce, deadline)
@@ -66,7 +66,7 @@ describe('ERC20Permit', function () {
     // Sign it
     // NOTE: Using web3.eth.sign will hash the message internally again which
     // we do not want, so we're manually signing here
-    const { v, r, s } = sign(digest, privateKey1)
+    const { v, r, s } = sign(digest, privateKey0)
 
     // Approve and check it
     expect(await erc20.permit(approve.owner, approve.spender, approve.value, deadline, v, r, s)).to.emit(erc20, 'Approval')
