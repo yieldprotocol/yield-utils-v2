@@ -61,7 +61,7 @@ describe('ERC20Permit', function () {
     const nonce = await erc20.nonces(owner)
 
     // Get the EIP712 digest
-    const digest = getPermitDigest(getDomainSeparator(name, erc20.address, await erc20.version(), chainId), approve, nonce, deadline)
+    const digest = getPermitDigest(await erc20.DOMAIN_SEPARATOR(), approve, nonce, deadline)
 
     // Sign it
     // NOTE: Using web3.eth.sign will hash the message internally again which
