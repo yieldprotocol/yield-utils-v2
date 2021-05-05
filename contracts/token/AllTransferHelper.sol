@@ -8,7 +8,7 @@ import "../utils/RevertMsgExtractor.sol";
 
 
 // helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
-library TransferHelper {
+library AllTransferHelper {
     /// @notice Transfers tokens from msg.sender to a recipient
     /// @dev Errors with the underlying revert message if transfer fails
     /// @param token The contract address of the token which will be transferred
