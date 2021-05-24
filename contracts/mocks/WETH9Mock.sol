@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MIT
 import "../token/ERC20.sol";
 
 pragma solidity ^0.8.0;
