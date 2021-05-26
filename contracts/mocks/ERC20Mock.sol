@@ -14,4 +14,9 @@ contract ERC20Mock is ERC20Permit  {
     function mint(address to, uint256 amount) public virtual {
         _mint(to, amount);
     }
+
+    /// @dev Burn tokens from whoever.
+    function burn(address from, uint256 amount) public virtual {
+        _burn(from, amount);
+    }
 }

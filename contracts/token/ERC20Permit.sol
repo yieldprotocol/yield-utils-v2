@@ -17,23 +17,34 @@ abstract contract ERC20Permit is ERC20, IERC2612 {
     mapping (address => uint256) public override nonces;
 
     bytes32 public immutable PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-    bytes32 public immutable DOMAIN_SEPARATOR;
+    bytes32 private immutable _DOMAIN_SEPARATOR;
+    uint256 public immutable deploymentChainId;
 
     constructor(string memory name_, string memory symbol_, uint8 decimals_) ERC20(name_, symbol_, decimals_) {
         uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
+        assembly {chainId := chainid()}
+        deploymentChainId = chainId;
+        _DOMAIN_SEPARATOR = _calculateDomainSeparator(chainId);
+    }
 
-        DOMAIN_SEPARATOR = keccak256(
+    /// @dev Calculate the DOMAIN_SEPARATOR.
+    function _calculateDomainSeparator(uint256 chainId) private view returns (bytes32) {
+        return keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256(bytes(name_)),
+                keccak256(bytes(name)),
                 keccak256(bytes(version())),
                 chainId,
                 address(this)
             )
         );
+    }
+
+    /// @dev Return the DOMAIN_SEPARATOR.
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
+        uint256 chainId;
+        assembly {chainId := chainid()}
+        return chainId == deploymentChainId ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId);
     }
 
     /// @dev Setting the version as a function so that it can be overriden
@@ -47,6 +58,9 @@ abstract contract ERC20Permit is ERC20, IERC2612 {
      */
     function permit(address owner, address spender, uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external virtual override {
         require(deadline >= block.timestamp, "ERC20Permit: expired deadline");
+
+        uint256 chainId;
+        assembly {chainId := chainid()}
 
         bytes32 hashStruct = keccak256(
             abi.encode(
@@ -62,7 +76,7 @@ abstract contract ERC20Permit is ERC20, IERC2612 {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 "\x19\x01",
-                DOMAIN_SEPARATOR,
+                chainId == deploymentChainId ? _DOMAIN_SEPARATOR : _calculateDomainSeparator(chainId),
                 hashStruct
             )
         );
