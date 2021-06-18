@@ -131,7 +131,7 @@ contract AccessControl {
     }
 
     /**
-     * @dev Grants `role` to `account`.
+     * @dev Grants `role` (other than root) to `account`.
      *
      * If `account` had not been already granted `role`, emits a {RoleGranted}
      * event.
@@ -141,9 +141,23 @@ contract AccessControl {
      * - the caller must have ``role``'s admin role.
      */
     function grantRole(bytes4 role, address account) external virtual admin(role) {
+        require(role != ROOT, "Not ROOT role");
         _grantRole(role, account);
     }
 
+    /**
+     * @dev Grants root role to `account`.
+     *
+     * If `account` is not already granted root, emits a {RoleGranted}
+     * event.
+     *
+     * Requirements:
+     *
+     * - the caller must have root role.
+     */
+    function grantRoot(address account) external virtual admin(ROOT) {
+        _grantRole(ROOT, account);
+    }
     
     /**
      * @dev Grants all of `role` in `roles` to `account`.
@@ -158,7 +172,7 @@ contract AccessControl {
     function grantRoles(bytes4[] memory roles, address account) external virtual {
         for (uint256 i = 0; i < roles.length; i++) {
             require (_hasRole(_getRoleAdmin(roles[i]), msg.sender), "Only admin");
-            _grantRole(roles[i], account);
+            grantRole(roles[i], account);
         }
     }
 
