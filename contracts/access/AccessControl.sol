@@ -160,7 +160,7 @@ contract AccessControl {
     }
     
     /**
-     * @dev Grants all of `role` in `roles` to `account`.
+     * @dev Grants all of `role` (other than root) in `roles` to `account`.
      *
      * If `account` had not been already granted `role`, emits a {RoleGranted}
      * event.
@@ -172,7 +172,8 @@ contract AccessControl {
     function grantRoles(bytes4[] memory roles, address account) external virtual {
         for (uint256 i = 0; i < roles.length; i++) {
             require (_hasRole(_getRoleAdmin(roles[i]), msg.sender), "Only admin");
-            grantRole(roles[i], account);
+            require(roles[i]!= ROOT, "Not ROOT role");
+            _grantRole(roles[i], account);
         }
     }
 
