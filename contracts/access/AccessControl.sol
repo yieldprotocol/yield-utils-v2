@@ -127,6 +127,7 @@ contract AccessControl {
      * - the caller must have ``role``'s admin role.
      */
     function setRoleAdmin(bytes4 role, bytes4 adminRole) external virtual admin(role) {
+        require(role != LOCK, "Use `lockRole`");
         _setRoleAdmin(role, adminRole);
     }
 
