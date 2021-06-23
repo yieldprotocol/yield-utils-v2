@@ -71,13 +71,10 @@ describe("Access Control", function () {
     );
   });
 
-  it("cannot grant or set admin for the LOCK role", async () => {
-    await expect(restricted.grantRole(LOCK, owner)).to.be.revertedWith(
-      "Only admin"
-    );
+  it("cannot set LOCK role as admin", async () => {
     await expect(
-      restricted.connect(ownerAcc).setRoleAdmin(LOCK, role)
-    ).to.be.revertedWith("Only admin");
+      restricted.connect(ownerAcc).setRoleAdmin(role, LOCK)
+    ).to.be.revertedWith("Use `lockRole`");
   });
 
   it("multiple roles can be granted", async () => {
