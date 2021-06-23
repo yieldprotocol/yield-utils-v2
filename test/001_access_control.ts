@@ -21,6 +21,7 @@ describe("Access Control", function () {
 
   const role = id("mint(address,uint256)");
   const role2 = id("burn(address,uint256)");
+  let LOCK: string;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -37,6 +38,7 @@ describe("Access Control", function () {
       "AUTH",
     ])) as Restricted;
     restrictedFromOther = restricted.connect(otherAcc);
+    LOCK = await restricted.LOCK();
   });
 
   // access is denied if not granted
@@ -67,6 +69,15 @@ describe("Access Control", function () {
     await expect(restrictedFromOther.mint(owner, 1)).to.be.revertedWith(
       "Access denied"
     );
+  });
+
+  it("cannot grant or set admin for the LOCK role", async () => {
+    await expect(restricted.grantRole(LOCK, owner)).to.be.revertedWith(
+      "Only admin"
+    );
+    await expect(
+      restricted.connect(ownerAcc).setRoleAdmin(LOCK, role)
+    ).to.be.revertedWith("Only admin");
   });
 
   it("multiple roles can be granted", async () => {
