@@ -21,7 +21,7 @@ task(TASK_COMPILE_GET_COMPILER_INPUT).setAction(async (_, bre, runSuper) => {
   return input
 }) */
 
-task("check-collisions", "Checks all contracts for function signatures collisions with ROOT (0x00000000) and LOCK (0xffffffff)",
+task("lint:collisions", "Checks all contracts for function signatures collisions with ROOT (0x00000000) and LOCK (0xffffffff)",
   async (taskArguments, hre, runSuper) => {
     let ROOT = "0x00000000"
     let LOCK = "0xffffffff"
