@@ -2,7 +2,8 @@
 
 pragma solidity >=0.5.0;
 
-import '../utils/AddressStringUtil.sol';
+import "../token/IERC20Metadata.sol";
+import "../utils/AddressStringUtil.sol";
 
 // produces token descriptors from inconsistent or absent ERC20 symbol implementations that can return string or bytes32
 // this library will always produce a string symbol to represent the token
@@ -58,7 +59,7 @@ library SafeERC20Namer {
         (bool success, bytes memory data) = token.staticcall(abi.encodeWithSelector(selector));
         // if not implemented, or returns empty data, return empty string
         if (!success || data.length == 0) {
-            return '';
+            return "";
         }
         // bytes32 data always has length 32
         if (data.length == 32) {
@@ -67,13 +68,12 @@ library SafeERC20Namer {
         } else if (data.length > 64) {
             return abi.decode(data, (string));
         }
-        return '';
+        return "";
     }
 
     // attempts to extract the token symbol. if it does not implement symbol, returns a symbol derived from the address
     function tokenSymbol(address token) public view returns (string memory) {
-        // 0x95d89b41 = bytes4(keccak256("symbol()"))
-        string memory symbol = callAndParseStringReturn(token, 0x95d89b41);
+        string memory symbol = callAndParseStringReturn(token, IERC20Metadata.symbol.selector);
         if (bytes(symbol).length == 0) {
             // fallback to 6 uppercase hex of address
             return addressToSymbol(token);
@@ -83,8 +83,7 @@ library SafeERC20Namer {
 
     // attempts to extract the token name. if it does not implement name, returns a name derived from the address
     function tokenName(address token) public view returns (string memory) {
-        // 0x06fdde03 = bytes4(keccak256("name()"))
-        string memory name = callAndParseStringReturn(token, 0x06fdde03);
+        string memory name = callAndParseStringReturn(token, IERC20Metadata.name.selector);
         if (bytes(name).length == 0) {
             // fallback to full hex of address
             return addressToName(token);
@@ -96,8 +95,7 @@ library SafeERC20Namer {
     /// @param token The address of the ERC-20 token contract.
     /// @return (uint8) Token decimals.
     function tokenDecimals(address token) internal view returns (uint8) {
-        // 0x313ce567 = bytes4(keccak256("decimals()"))
-        (bool success, bytes memory data) = token.staticcall(abi.encodeWithSelector(0x313ce567));
+        (bool success, bytes memory data) = token.staticcall(abi.encodeWithSelector(IERC20Metadata.decimals.selector));
         return success && data.length == 32 ? abi.decode(data, (uint8)) : 18;
     }
 }
