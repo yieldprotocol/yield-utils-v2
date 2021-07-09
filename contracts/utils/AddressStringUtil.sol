@@ -4,20 +4,14 @@ pragma solidity >=0.5.0;
 
 library AddressStringUtil {
     // converts an address to the uppercase hex string, extracting only len bytes (up to 20, multiple of 2)
-    function toAsciiString(address addr, uint256 len) internal pure returns (string memory) {
-        require(len % 2 == 0 && len > 0 && len <= 40, 'AddressStringUtil: INVALID_LEN');
-
+    function toAsciiString(address addr, uint256 len) public pure returns (string memory) {
+        require(len % 2 == 0 && len > 0 && len <= 40, "AddressStringUtil: INVALID_LEN");
         bytes memory s = new bytes(len);
         uint256 addrNum = uint256(uint160(addr));
-        for (uint256 i = 0; i < len / 2; i++) {
-            // shift right and truncate all but the least significant byte to extract the byte at position 19-i
-            uint8 b = uint8(addrNum >> (8 * (19 - i)));
-            // first hex character is the most significant 4 bits
-            uint8 hi = b >> 4;
-            // second hex character is the least significant 4 bits
-            uint8 lo = b - (hi << 4);
-            s[2 * i] = char(hi);
-            s[2 * i + 1] = char(lo);
+        for (uint256 ii = 0; ii < len ; ii +=2) {
+            uint8 b = uint8(addrNum >> (4 * (38 - ii)));
+            s[ii] = char(b >> 4);
+            s[ii + 1] = char(b & 0x0f);
         }
         return string(s);
     }
