@@ -82,6 +82,13 @@ describe('TimeLock', async function () {
     await expect(timelock.schedule(targets, data, eta)).to.be.revertedWith('Must satisfy delay')
   })
 
+  it('doesn\'t allow to cancel if not scheduled', async () => {
+    const targets = [target1.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp
+    await expect(timelock.cancel(targets, data, eta)).to.be.revertedWith('Transaction hasn\'t been scheduled.')
+  })
+
   it('doesn\'t allow to execute before eta', async () => {
     const targets = [target1.address]
     const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
@@ -96,11 +103,11 @@ describe('TimeLock', async function () {
     await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction is stale')
   })
 
-  it('doesn\'t allow to execute if not transactions', async () => {
+  it('doesn\'t allow to execute if not scheduled', async () => {
     const targets = [target1.address]
     const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
     const eta = timestamp
-    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction hasn\'t been transactions.')
+    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction hasn\'t been scheduled.')
   })
 
   it('queues a transaction', async () => {
@@ -115,7 +122,7 @@ describe('TimeLock', async function () {
     expect(await timelock.transactions(txHash)).to.equal(state.SCHEDULED)
   })
 
-  describe('with a transactions transaction', async () => {
+  describe('with a scheduled transaction', async () => {
     let snapshotId: string
     let timestamp: number
     let targets: string[]

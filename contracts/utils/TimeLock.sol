@@ -58,8 +58,8 @@ contract TimeLock is ITimeLock, AccessControl {
     {
         require(targets.length == data.length, "Mismatched inputs");
         require(eta >= uint32(block.timestamp) + delay, "Must satisfy delay.");
-        
         txHash = keccak256(abi.encode(targets, data, eta));
+        require(transactions[txHash] == State.UNKNOWN, "Transaction not unknown.");
         transactions[txHash] = State.SCHEDULED;
         emit Scheduled(txHash, targets, data, eta);
     }
@@ -70,6 +70,7 @@ contract TimeLock is ITimeLock, AccessControl {
     {
         require(targets.length == data.length, "Mismatched inputs");
         bytes32 txHash = keccak256(abi.encode(targets, data, eta));
+        require(transactions[txHash] == State.SCHEDULED, "Transaction hasn't been scheduled.");
         transactions[txHash] = State.CANCELLED;
         emit Cancelled(txHash, targets, data, eta);
     }
@@ -82,7 +83,7 @@ contract TimeLock is ITimeLock, AccessControl {
         require(uint32(block.timestamp) >= eta, "ETA not reached.");
         require(uint32(block.timestamp) <= eta + GRACE_PERIOD, "Transaction is stale.");
         bytes32 txHash = keccak256(abi.encode(targets, data, eta));
-        require(transactions[txHash] == State.SCHEDULED, "Transaction hasn't been transactions.");
+        require(transactions[txHash] == State.SCHEDULED, "Transaction hasn't been scheduled.");
         transactions[txHash] = State.EXECUTED;
 
         results = new bytes[](targets.length);
