@@ -27,13 +27,13 @@ contract TimeLock is ITimeLock, AccessControl {
     uint32 public delay;
     mapping (bytes32 => State) public transactions;
 
-    constructor() AccessControl() {
+    constructor(address governor) AccessControl() {
         delay = MINIMUM_DELAY;
 
         // msg.sender can schedule, cancel, and execute transactions
-        _grantRole(ITimeLock.schedule.selector, msg.sender); // bytes4(keccak256("schedule(address[],bytes[],uint32)"))
-        _grantRole(ITimeLock.cancel.selector, msg.sender); // bytes4(keccak256("cancel(address[],bytes[],uint32)"))
-        _grantRole(ITimeLock.execute.selector, msg.sender); // bytes4(keccak256("execute(address[],bytes[],uint32)"))
+        _grantRole(ITimeLock.schedule.selector, governor); // bytes4(keccak256("schedule(address[],bytes[],uint32)"))
+        _grantRole(ITimeLock.cancel.selector, governor); // bytes4(keccak256("cancel(address[],bytes[],uint32)"))
+        _grantRole(ITimeLock.execute.selector, governor); // bytes4(keccak256("execute(address[],bytes[],uint32)"))
 
         // Changing the delay must now be executed through this TimeLock contract
         _grantRole(ITimeLock.setDelay.selector, address(this)); // bytes4(keccak256("setDelay(uint32)"))
