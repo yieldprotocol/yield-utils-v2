@@ -12,9 +12,9 @@ contract TimeLock is AccessControl {
     uint32 public constant MAXIMUM_DELAY = 30 days;
 
     event DelaySet(uint32 indexed delay);
-    event TransactionCancelled(bytes32 indexed txHash, address indexed target, bytes data, uint256 index, uint256 length, uint32 eta);
-    event TransactionExecuted(bytes32 indexed txHash, address indexed target, bytes data, uint256 index, uint256 length, uint32 eta);
-    event TransactionQueued(bytes32 indexed txHash, address indexed target, bytes data, uint256 index, uint256 length, uint32 eta);
+    event Cancelled(bytes32 indexed hash, address[] indexed targets, bytes[] data, uint32 eta);
+    event Executed(bytes32 indexed hash, address[] indexed targets, bytes[] data, uint32 eta);
+    event Queued(bytes32 indexed hash, address[] indexed targets, bytes[] data, uint32 eta);
 
     uint32 public delay;
     mapping (bytes32 => bool) public queued;
@@ -46,17 +46,14 @@ contract TimeLock is AccessControl {
 
     /// @dev Schedule a transaction batch for execution between `eta` and `eta + GRACE_PERIOD`
     function queue(address[] memory targets, bytes[] memory data, uint32 eta)
-        external auth returns (bytes32[] memory txHashes)
+        external auth returns (bytes32 hash)
     {
         require(targets.length == data.length, "Mismatched inputs");
         require(eta >= uint32(block.timestamp) + delay, "Must satisfy delay.");
-
-        txHashes = new bytes32[](targets.length);
-        for (uint256 i = 0; i < targets.length; i++){
-            bytes32 txHash = keccak256(abi.encode(targets[i], data[i], i, targets.length, eta));
-            queued[txHash] = true;
-            emit TransactionQueued(txHash, targets[i], data[i], i, targets.length, eta);
-        }
+        
+        hash = keccak256(abi.encode(targets, data, eta));
+        queued[hash] = true;
+        emit Queued(hash, targets, data, eta);
     }
 
     /// @dev Cancel a scheduled  transaction batch
@@ -64,11 +61,9 @@ contract TimeLock is AccessControl {
         external auth
     {
         require(targets.length == data.length, "Mismatched inputs");
-        for (uint256 i = 0; i < targets.length; i++){
-            bytes32 txHash = keccak256(abi.encode(targets[i], data[i], i, targets.length, eta));
-            queued[txHash] = false;
-            emit TransactionCancelled(txHash, targets[i], data[i], i, targets.length, eta);
-        }
+        bytes32 hash = keccak256(abi.encode(targets, data, eta));
+        queued[hash] = false;
+        emit Cancelled(hash, targets, data, eta);
     }
 
     /// @dev Execute a transaction batch
@@ -78,16 +73,16 @@ contract TimeLock is AccessControl {
         require(targets.length == data.length, "Mismatched inputs");
         require(uint32(block.timestamp) >= eta, "Time lock not reached.");
         require(uint32(block.timestamp) <= eta + GRACE_PERIOD, "Transaction is stale.");
+        bytes32 hash = keccak256(abi.encode(targets, data, eta));
+        require(queued[hash] == true, "Transaction hasn't been queued.");
+        queued[hash] = false;
 
         results = new bytes[](targets.length);
         for (uint256 i = 0; i < targets.length; i++){
-            bytes32 txHash = keccak256(abi.encode(targets[i], data[i], i, targets.length, eta));
-            require(queued[txHash] == true, "Transaction hasn't been queued.");
             (bool success, bytes memory result) = targets[i].call(data[i]);
             if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
             results[i] = result;
-            queued[txHash] = false;
-            emit TransactionExecuted(txHash, targets[i], data[i], i, targets.length, eta);
+            emit Executed(hash, targets, data, eta);
         }
     }
 }
