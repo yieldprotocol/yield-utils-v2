@@ -30,6 +30,13 @@ describe('TimeLock', async function () {
   let timestamp: number
   let resetChain: number
 
+  const state = {
+    UNKNOWN: 0,
+    SCHEDULED: 1,
+    CANCELLED: 2, 
+    EXECUTED: 3,
+  }
+
   before(async () => {
     resetChain = await ethers.provider.send('evm_snapshot', [])
     const signers = await ethers.getSigners()
@@ -55,24 +62,24 @@ describe('TimeLock', async function () {
   it('doesn\'t allow governance changes to owner', async () => {
     await expect(timelock.setDelay(0)).to.be.revertedWith('Access denied')
     await expect(timelock.grantRole('0x00000000', owner)).to.be.revertedWith('Only admin')
-    await expect(timelock.grantRole(id('queue(address[],bytes[],uint32)'), user1)).to.be.revertedWith('Only admin')
-    await expect(timelock.revokeRole(id('queue(address[],bytes[],uint32)'), owner)).to.be.revertedWith('Only admin')
+    await expect(timelock.grantRole(id('schedule(address[],bytes[],uint32)'), user1)).to.be.revertedWith('Only admin')
+    await expect(timelock.revokeRole(id('schedule(address[],bytes[],uint32)'), owner)).to.be.revertedWith('Only admin')
   })
 
   it('doesn\'t allow mismatched inputs', async () => {
     const targets = [target1.address, target2.address]
     const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
     const eta = timestamp + await timelock.delay()
-    await expect(timelock.queue(targets, data, eta)).to.be.revertedWith('Mismatched inputs')
+    await expect(timelock.schedule(targets, data, eta)).to.be.revertedWith('Mismatched inputs')
     await expect(timelock.cancel(targets, data, eta)).to.be.revertedWith('Mismatched inputs')
     await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Mismatched inputs')
   })
 
-  it('doesn\'t allow to queue for execution before `delay()`', async () => {
+  it('doesn\'t allow to schedule for execution before `delay()`', async () => {
     const targets = [target1.address]
     const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
     const eta = timestamp
-    await expect(timelock.queue(targets, data, eta)).to.be.revertedWith('Must satisfy delay')
+    await expect(timelock.schedule(targets, data, eta)).to.be.revertedWith('Must satisfy delay')
   })
 
   it('doesn\'t allow to execute before eta', async () => {
@@ -89,26 +96,26 @@ describe('TimeLock', async function () {
     await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction is stale')
   })
 
-  it('doesn\'t allow to execute if not queued', async () => {
+  it('doesn\'t allow to execute if not transactions', async () => {
     const targets = [target1.address]
     const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
     const eta = timestamp
-    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction hasn\'t been queued.')
+    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction hasn\'t been transactions.')
   })
 
   it('queues a transaction', async () => {
     const targets = [target1.address]
     const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
     const eta = timestamp + await timelock.delay() + 100
-    const txHash = await timelock.callStatic.queue(targets, data, eta)
+    const txHash = await timelock.callStatic.schedule(targets, data, eta)
 
-    await expect(await timelock.queue(targets, data, eta))
-      .to.emit(timelock, 'Queued')
+    await expect(await timelock.schedule(targets, data, eta))
+      .to.emit(timelock, 'Scheduled')
 //      .withArgs(txHash, targets, data, eta)
-    expect(await timelock.queued(txHash)).to.be.true
+    expect(await timelock.transactions(txHash)).to.equal(state.SCHEDULED)
   })
 
-  describe('with a queued transaction', async () => {
+  describe('with a transactions transaction', async () => {
     let snapshotId: string
     let timestamp: number
     let targets: string[]
@@ -127,15 +134,15 @@ describe('TimeLock', async function () {
         target2.interface.encodeFunctionData('approve', [owner, 1]),
       ]
       eta = timestamp + await timelock.delay() + 100
-      txHash = await timelock.callStatic.queue(targets, data, eta)
-      await timelock.queue(targets, data, eta)
+      txHash = await timelock.callStatic.schedule(targets, data, eta)
+      await timelock.schedule(targets, data, eta)
     })
 
     it('cancels a transaction', async () => {
       await expect(await timelock.cancel(targets, data, eta))
         .to.emit(timelock, 'Cancelled')
 //        .withArgs(txHash, targets, data, eta)
-      expect(await timelock.queued(txHash)).to.be.false
+      expect(await timelock.transactions(txHash)).to.equal(state.CANCELLED)
     })
 
     describe('once the eta arrives', async () => {
@@ -156,7 +163,7 @@ describe('TimeLock', async function () {
 //          .withArgs(null, owner, 1)
           .to.emit(target2, 'Approval')
 //          .withArgs(owner, owner, 1)
-        expect(await timelock.queued(txHash)).to.be.false
+        expect(await timelock.transactions(txHash)).to.equal(state.EXECUTED)
         expect(await target1.balanceOf(owner)).to.equal(1)
         expect(await target2.allowance(timelock.address, owner)).to.equal(1)
       })
