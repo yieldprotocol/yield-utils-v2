@@ -55,7 +55,7 @@ describe('TimeLock', async function () {
   beforeEach(async () => {
     target1 = (await deployContract(ownerAcc, ERC20MockArtifact, ['Target1', 'TG1'])) as ERC20
     target2 = (await deployContract(ownerAcc, ERC20MockArtifact, ['Target2', 'TG2'])) as ERC20
-    timelock = (await deployContract(ownerAcc, TimeLockArtifact, [owner])) as TimeLock
+    timelock = (await deployContract(ownerAcc, TimeLockArtifact, [owner, owner])) as TimeLock
     ;({ timestamp } = await ethers.provider.getBlock('latest'))
   })
 
