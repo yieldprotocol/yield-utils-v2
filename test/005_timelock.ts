@@ -49,146 +49,82 @@ describe("TimeLock", async function () {
   });
 
   beforeEach(async () => {
-    target1 = (await deployContract(schedulerAcc, ERC20MockArtifact, [
-      "Target1",
-      "TG1",
-    ])) as ERC20;
-    target2 = (await deployContract(schedulerAcc, ERC20MockArtifact, [
-      "Target2",
-      "TG2",
-    ])) as ERC20;
-    timelock = (await deployContract(schedulerAcc, TimeLockArtifact, [
-      scheduler,
-      executor,
-    ])) as TimeLock;
-    ({ timestamp } = await ethers.provider.getBlock("latest"));
-  });
+    target1 = (await deployContract(ownerAcc, ERC20MockArtifact, ['Target1', 'TG1'])) as ERC20
+    target2 = (await deployContract(ownerAcc, ERC20MockArtifact, ['Target2', 'TG2'])) as ERC20
+    timelock = (await deployContract(ownerAcc, TimeLockArtifact, [owner, owner])) as TimeLock
+    ;({ timestamp } = await ethers.provider.getBlock('latest'))
+  })
 
-  it("doesn't allow governance changes to scheduler", async () => {
-    await expect(timelock.setDelay(0)).to.be.revertedWith("Access denied");
-    await expect(
-      timelock.grantRole("0x00000000", scheduler)
-    ).to.be.revertedWith("Only admin");
-    await expect(
-      timelock.grantRole(id("schedule(address[],bytes[],uint32)"), executor)
-    ).to.be.revertedWith("Only admin");
-    await expect(
-      timelock.revokeRole(id("schedule(address[],bytes[],uint32)"), scheduler)
-    ).to.be.revertedWith("Only admin");
-  });
+  it('doesn\'t allow governance changes to owner', async () => {
+    await expect(timelock.setDelay(0)).to.be.revertedWith('Access denied')
+    await expect(timelock.grantRole('0x00000000', owner)).to.be.revertedWith('Only admin')
+    await expect(timelock.grantRole(id('schedule(address[],bytes[],uint32)'), user1)).to.be.revertedWith('Only admin')
+    await expect(timelock.revokeRole(id('schedule(address[],bytes[],uint32)'), owner)).to.be.revertedWith('Only admin')
+  })
 
-  it("doesn't allow mismatched inputs", async () => {
-    const targets = [target1.address, target2.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp + (await timelock.delay());
-    await expect(
-      timelock.connect(schedulerAcc).schedule(targets, data, eta)
-    ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      timelock.connect(schedulerAcc).cancel(targets, data, eta)
-    ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
-    ).to.be.revertedWith("Mismatched inputs");
-  });
+  it('doesn\'t allow mismatched inputs', async () => {
+    const targets = [target1.address, target2.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp + await timelock.delay()
+    await expect(timelock.schedule(targets, data, eta)).to.be.revertedWith('Mismatched inputs')
+    await expect(timelock.cancel(targets, data, eta)).to.be.revertedWith('Mismatched inputs')
+    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Mismatched inputs')
+  })
 
-  it("only the scheduler can schedule", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp;
-    await expect(
-      timelock.connect(executorAcc).schedule(targets, data, eta)
-    ).to.be.revertedWith("Access denied");
-  });
+  it('doesn\'t allow to schedule for execution before `delay()`', async () => {
+    const targets = [target1.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp
+    await expect(timelock.schedule(targets, data, eta)).to.be.revertedWith('Must satisfy delay')
+  })
 
-  it("doesn't allow to schedule for execution before `delay()`", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp;
-    await expect(
-      timelock.connect(schedulerAcc).schedule(targets, data, eta)
-    ).to.be.revertedWith("Must satisfy delay");
-  });
+  it('doesn\'t allow to cancel if not scheduled', async () => {
+    const targets = [target1.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp
+    await expect(timelock.cancel(targets, data, eta)).to.be.revertedWith('Transaction hasn\'t been scheduled.')
+  })
 
-  it("only the scheduler can cancel", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp;
-    await expect(
-      timelock.connect(executorAcc).cancel(targets, data, eta)
-    ).to.be.revertedWith("Access denied");
-  });
+  it('doesn\'t allow to execute before eta', async () => {
+    const targets = [target1.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp + 100
+    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('ETA not reached')
+  })
 
-  it("doesn't allow to cancel if not scheduled", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp;
-    await expect(
-      timelock.connect(schedulerAcc).cancel(targets, data, eta)
-    ).to.be.revertedWith("Transaction hasn't been scheduled.");
-  });
+  it('doesn\'t allow to execute after grace period', async () => {
+    const targets = [target1.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp - (await timelock.GRACE_PERIOD())
+    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction is stale')
+  })
 
-  it("only the executor can execute", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp;
-    await expect(
-      timelock
-        .connect(schedulerAcc)
-        .connect(schedulerAcc)
-        .execute(targets, data, eta)
-    ).to.be.revertedWith("Access denied");
-  });
+  it('doesn\'t allow to execute if not scheduled', async () => {
+    const targets = [target1.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp
+    await expect(timelock.execute(targets, data, eta)).to.be.revertedWith('Transaction hasn\'t been scheduled.')
+  })
 
-  it("doesn't allow to execute before eta", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp + 100;
-    await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
-    ).to.be.revertedWith("ETA not reached");
-  });
+  it('queues a transaction', async () => {
+    const targets = [target1.address]
+    const data = [target1.interface.encodeFunctionData('mint', [owner, 1])]
+    const eta = timestamp + await timelock.delay() + 100
+    const txHash = await timelock.callStatic.schedule(targets, data, eta)
 
-  it("doesn't allow to execute after grace period", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp - (await timelock.GRACE_PERIOD());
-    await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
-    ).to.be.revertedWith("Transaction is stale");
-  });
+    await expect(await timelock.schedule(targets, data, eta))
+      .to.emit(timelock, 'Scheduled')
+//      .withArgs(txHash, targets, data, eta)
+    expect(await timelock.transactions(txHash)).to.equal(state.SCHEDULED)
+  })
 
-  it("doesn't allow to execute if not scheduled", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp;
-    await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
-    ).to.be.revertedWith("Transaction hasn't been scheduled.");
-  });
-
-  it("queues a transaction", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = timestamp + (await timelock.delay()) + 100;
-    const txHash = await timelock
-      .connect(schedulerAcc)
-      .callStatic.schedule(targets, data, eta);
-
-    await expect(
-      await timelock.connect(schedulerAcc).schedule(targets, data, eta)
-    ).to.emit(timelock, "Scheduled");
-    //      .withArgs(txHash, targets, data, eta)
-    expect(await timelock.transactions(txHash)).to.equal(state.SCHEDULED);
-  });
-
-  describe("with a scheduled transaction", async () => {
-    let snapshotId: string;
-    let timestamp: number;
-    let targets: string[];
-    let data: string[];
-    let eta: number;
-    let txHash: string;
+  describe('with a scheduled transaction', async () => {
+    let snapshotId: string
+    let timestamp: number
+    let targets: string[]
+    let data: string[]
+    let eta: number
+    let txHash: string
 
     beforeEach(async () => {
       ({ timestamp } = await ethers.provider.getBlock("latest"));
