@@ -27,13 +27,13 @@ contract TimeLock is ITimeLock, AccessControl {
     uint32 public delay;
     mapping (bytes32 => State) public transactions;
 
-    constructor(address governor) AccessControl() {
+    constructor(address scheduler, address executor) AccessControl() {
         delay = MINIMUM_DELAY;
 
         // msg.sender can schedule, cancel, and execute transactions
-        _grantRole(ITimeLock.schedule.selector, governor); // bytes4(keccak256("schedule(address[],bytes[],uint32)"))
-        _grantRole(ITimeLock.cancel.selector, governor); // bytes4(keccak256("cancel(address[],bytes[],uint32)"))
-        _grantRole(ITimeLock.execute.selector, governor); // bytes4(keccak256("execute(address[],bytes[],uint32)"))
+        _grantRole(ITimeLock.schedule.selector, scheduler); // bytes4(keccak256("schedule(address[],bytes[],uint32)"))
+        _grantRole(ITimeLock.cancel.selector, scheduler); // bytes4(keccak256("cancel(address[],bytes[],uint32)"))
+        _grantRole(ITimeLock.execute.selector, executor); // bytes4(keccak256("execute(address[],bytes[],uint32)"))
 
         // Changing the delay must now be executed through this TimeLock contract
         _grantRole(ITimeLock.setDelay.selector, address(this)); // bytes4(keccak256("setDelay(uint32)"))
@@ -91,7 +91,7 @@ contract TimeLock is ITimeLock, AccessControl {
             (bool success, bytes memory result) = targets[i].call(data[i]);
             if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
             results[i] = result;
-            emit Executed(txHash, targets, data, eta);
         }
+        emit Executed(txHash, targets, data, eta);
     }
 }
