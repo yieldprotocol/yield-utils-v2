@@ -12,8 +12,8 @@ interface IEmergencyBrake {
     function terminate(address target, address[] memory contacts, bytes4[][] memory permissions) external;
 }
 
-/// @dev EmergencyBrake allows to plan for and execute isolation transactions that remove access permissions for
-/// a target contract from a series of contacts. In an permissioned environment can be used for pausing components.
+/// @dev EmergencyBrake allows to plan for and execute transactions that remove access permissions for a target
+/// contract. In an permissioned environment this can be used for pausing components.
 /// All contracts in scope of emergency plans must grant ROOT permissions to EmergencyBrake. To mitigate the risk
 /// of governance capture, EmergencyBrake has very limited functionality, being able only to revoke existing roles
 /// and to restore previously revoked roles. Thus EmergencyBrake cannot grant permissions that weren't there in the 
@@ -41,7 +41,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         // Granting roles (plan, cancel, execute, restore, terminate) is reserved to ROOT
     }
 
-    /// @dev Register an isolation transaction
+    /// @dev Register an access removal transaction
     function plan(address target, address[] memory contacts, bytes4[][] memory permissions)
         external override auth
         returns (bytes32 txHash)
@@ -62,7 +62,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         emit Planned(txHash, target, contacts, permissions);
     }
 
-    /// @dev Erase a planned isolation transaction
+    /// @dev Erase a planned access removal transaction
     function cancel(address target, address[] memory contacts, bytes4[][] memory permissions)
         external override auth
     {
@@ -73,7 +73,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         emit Cancelled(txHash, target, contacts, permissions);
     }
 
-    /// @dev Execute an isolation transaction
+    /// @dev Execute an access removal transaction
     function execute(address target, address[] memory contacts, bytes4[][] memory permissions)
         external override auth
     {
