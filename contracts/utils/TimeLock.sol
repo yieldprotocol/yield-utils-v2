@@ -7,9 +7,9 @@ import "./RevertMsgExtractor.sol";
 
 interface ITimeLock {
     function setDelay(uint256 delay_) external;
-    function schedule(address[] memory targets, bytes[] memory data, uint256 eta) external returns (bytes32 txHash);
-    function cancel(address[] memory targets, bytes[] memory data, uint256 eta) external;
-    function execute(address[] memory targets, bytes[] memory data, uint256 eta) external returns (bytes[] memory results);
+    function schedule(address[] calldata targets, bytes[] calldata data, uint256 eta) external returns (bytes32 txHash);
+    function cancel(address[] calldata targets, bytes[] calldata data, uint256 eta) external;
+    function execute(address[] calldata targets, bytes[] calldata data, uint256 eta) external returns (bytes[] calldata results);
 }
 
 contract TimeLock is ITimeLock, AccessControl {
@@ -53,7 +53,7 @@ contract TimeLock is ITimeLock, AccessControl {
     }
 
     /// @dev Schedule a transaction batch for execution between `eta` and `eta + GRACE_PERIOD`
-    function schedule(address[] memory targets, bytes[] memory data, uint256 eta)
+    function schedule(address[] calldata targets, bytes[] calldata data, uint256 eta)
         external override auth returns (bytes32 txHash)
     {
         require(targets.length == data.length, "Mismatched inputs");
@@ -65,7 +65,7 @@ contract TimeLock is ITimeLock, AccessControl {
     }
 
     /// @dev Cancel a scheduled transaction batch
-    function cancel(address[] memory targets, bytes[] memory data, uint256 eta)
+    function cancel(address[] calldata targets, bytes[] calldata data, uint256 eta)
         external override auth
     {
         require(targets.length == data.length, "Mismatched inputs");
@@ -76,7 +76,7 @@ contract TimeLock is ITimeLock, AccessControl {
     }
 
     /// @dev Execute a transaction batch
-    function execute(address[] memory targets, bytes[] memory data, uint256 eta)
+    function execute(address[] calldata targets, bytes[] calldata data, uint256 eta)
         external override auth returns (bytes[] memory results)
     {
         require(targets.length == data.length, "Mismatched inputs");
