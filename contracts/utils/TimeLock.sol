@@ -8,24 +8,23 @@ import "./RevertMsgExtractor.sol";
 interface ITimeLock {
     function setDelay(uint256 delay_) external;
     function schedule(address[] calldata targets, bytes[] calldata data, uint256 eta) external returns (bytes32 txHash);
-    function cancel(address[] calldata targets, bytes[] calldata data, uint256 eta) external;
-    function execute(address[] calldata targets, bytes[] calldata data, uint256 eta) external returns (bytes[] calldata results);
+    function cancel(address[] calldata targets, bytes[] calldata data) external;
+    function execute(address[] calldata targets, bytes[] calldata data) external returns (bytes[] calldata results);
 }
 
 contract TimeLock is ITimeLock, AccessControl {
-    enum State {UNKNOWN, SCHEDULED, CANCELLED, EXECUTED}
 
     uint256 public constant GRACE_PERIOD = 14 days;
     uint256 public constant MINIMUM_DELAY = 2 days;
     uint256 public constant MAXIMUM_DELAY = 30 days;
 
     event DelaySet(uint256 indexed delay);
-    event Cancelled(bytes32 indexed txHash, address[] indexed targets, bytes[] data, uint256 eta);
-    event Executed(bytes32 indexed txHash, address[] indexed targets, bytes[] data, uint256 eta);
+    event Cancelled(bytes32 indexed txHash, address[] indexed targets, bytes[] data);
+    event Executed(bytes32 indexed txHash, address[] indexed targets, bytes[] data);
     event Scheduled(bytes32 indexed txHash, address[] indexed targets, bytes[] data, uint256 eta);
 
     uint256 public delay;
-    mapping (bytes32 => State) public transactions;
+    mapping (bytes32 => uint256) public transactions;
 
     constructor(address scheduler, address executor) AccessControl() {
         delay = MINIMUM_DELAY;
@@ -57,34 +56,37 @@ contract TimeLock is ITimeLock, AccessControl {
         external override auth returns (bytes32 txHash)
     {
         require(targets.length == data.length, "Mismatched inputs");
-        require(eta >= block.timestamp + delay, "Must satisfy delay.");
-        txHash = keccak256(abi.encode(targets, data, eta));
-        require(transactions[txHash] == State.UNKNOWN, "Transaction not unknown.");
-        transactions[txHash] = State.SCHEDULED;
+        require(eta >= block.timestamp + delay, "Must satisfy delay."); // This also prevents setting eta = 0 and messing up the state
+        txHash = keccak256(abi.encode(targets, data));
+        require(transactions[txHash] == 0, "Transaction not unknown.");
+        transactions[txHash] = eta;
         emit Scheduled(txHash, targets, data, eta);
     }
 
     /// @dev Cancel a scheduled transaction batch
-    function cancel(address[] calldata targets, bytes[] calldata data, uint256 eta)
+    function cancel(address[] calldata targets, bytes[] calldata data)
         external override auth
     {
         require(targets.length == data.length, "Mismatched inputs");
-        bytes32 txHash = keccak256(abi.encode(targets, data, eta));
-        require(transactions[txHash] == State.SCHEDULED, "Transaction hasn't been scheduled.");
-        transactions[txHash] = State.CANCELLED;
-        emit Cancelled(txHash, targets, data, eta);
+        bytes32 txHash = keccak256(abi.encode(targets, data));
+        require(transactions[txHash] != 0, "Transaction hasn't been scheduled.");
+        delete transactions[txHash];
+        emit Cancelled(txHash, targets, data);
     }
 
     /// @dev Execute a transaction batch
-    function execute(address[] calldata targets, bytes[] calldata data, uint256 eta)
+    function execute(address[] calldata targets, bytes[] calldata data)
         external override auth returns (bytes[] memory results)
     {
         require(targets.length == data.length, "Mismatched inputs");
+        bytes32 txHash = keccak256(abi.encode(targets, data));
+        uint256 eta = transactions[txHash];
+
+        require(eta != 0, "Transaction hasn't been scheduled.");
         require(block.timestamp >= eta, "ETA not reached.");
         require(block.timestamp <= eta + GRACE_PERIOD, "Transaction is stale.");
-        bytes32 txHash = keccak256(abi.encode(targets, data, eta));
-        require(transactions[txHash] == State.SCHEDULED, "Transaction hasn't been scheduled.");
-        transactions[txHash] = State.EXECUTED;
+
+        delete transactions[txHash];
 
         results = new bytes[](targets.length);
         for (uint256 i = 0; i < targets.length; i++){
@@ -92,6 +94,6 @@ contract TimeLock is ITimeLock, AccessControl {
             if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
             results[i] = result;
         }
-        emit Executed(txHash, targets, data, eta);
+        emit Executed(txHash, targets, data);
     }
 }

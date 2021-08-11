@@ -29,13 +29,6 @@ describe("TimeLock", async function () {
   let resetChain: number;
   let now: BigNumber
 
-  const state = {
-    UNKNOWN: 0,
-    SCHEDULED: 1,
-    CANCELLED: 2,
-    EXECUTED: 3,
-  };
-
   before(async () => {
     resetChain = await ethers.provider.send("evm_snapshot", []);
     const signers = await ethers.getSigners();
@@ -87,10 +80,10 @@ describe("TimeLock", async function () {
       timelock.connect(schedulerAcc).schedule(targets, data, eta)
     ).to.be.revertedWith("Mismatched inputs");
     await expect(
-      timelock.connect(schedulerAcc).cancel(targets, data, eta)
+      timelock.connect(schedulerAcc).cancel(targets, data)
     ).to.be.revertedWith("Mismatched inputs");
     await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
+      timelock.connect(executorAcc).execute(targets, data)
     ).to.be.revertedWith("Mismatched inputs");
   });
 
@@ -115,61 +108,69 @@ describe("TimeLock", async function () {
   it("only the scheduler can cancel", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = now;
     await expect(
-      timelock.connect(executorAcc).cancel(targets, data, eta)
+      timelock.connect(executorAcc).cancel(targets, data)
     ).to.be.revertedWith("Access denied");
   });
 
   it("doesn't allow to cancel if not scheduled", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = now;
     await expect(
-      timelock.connect(schedulerAcc).cancel(targets, data, eta)
+      timelock.connect(schedulerAcc).cancel(targets, data)
     ).to.be.revertedWith("Transaction hasn't been scheduled.");
   });
 
   it("only the executor can execute", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = now;
     await expect(
       timelock
         .connect(schedulerAcc)
-        .connect(schedulerAcc)
-        .execute(targets, data, eta)
+        .execute(targets, data)
     ).to.be.revertedWith("Access denied");
   });
 
   it("doesn't allow to execute before eta", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = now.add(100);
+    const eta = now.add(await timelock.delay()).add(100);
+    await timelock
+      .connect(schedulerAcc)
+      .schedule(targets, data, eta);
     await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
+      timelock.connect(executorAcc).execute(targets, data)
     ).to.be.revertedWith("ETA not reached");
   });
 
   it("doesn't allow to execute after grace period", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = now.sub(await timelock.GRACE_PERIOD());
+    const eta = now.add(await timelock.delay()).add(100);
+
+    await timelock
+      .connect(schedulerAcc)
+      .schedule(targets, data, eta);
+    
+    const snapshotId = await ethers.provider.send("evm_snapshot", []);
+    await ethers.provider.send("evm_mine", [eta.add(await timelock.GRACE_PERIOD()).add(100).toNumber()]);
+    
     await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
+      timelock.connect(executorAcc).execute(targets, data)
     ).to.be.revertedWith("Transaction is stale");
+
+    await ethers.provider.send("evm_revert", [snapshotId]);
   });
 
   it("doesn't allow to execute if not scheduled", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
-    const eta = now;
     await expect(
-      timelock.connect(executorAcc).execute(targets, data, eta)
+      timelock.connect(executorAcc).execute(targets, data)
     ).to.be.revertedWith("Transaction hasn't been scheduled.");
   });
 
-  it("queues a transaction", async () => {
+  it("schedules a transaction", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
     const eta = now.add(await timelock.delay()).add(100);
@@ -181,7 +182,7 @@ describe("TimeLock", async function () {
       await timelock.connect(schedulerAcc).schedule(targets, data, eta)
     ).to.emit(timelock, "Scheduled");
     //      .withArgs(txHash, targets, data, eta)
-    expect(await timelock.transactions(txHash)).to.equal(state.SCHEDULED);
+    expect(await timelock.transactions(txHash)).to.equal(eta);
   });
 
   describe("with a scheduled transaction", async () => {
@@ -209,10 +210,10 @@ describe("TimeLock", async function () {
 
     it("cancels a transaction", async () => {
       await expect(
-        await timelock.connect(schedulerAcc).cancel(targets, data, eta)
+        await timelock.connect(schedulerAcc).cancel(targets, data)
       ).to.emit(timelock, "Cancelled");
       //        .withArgs(txHash, targets, data, eta)
-      expect(await timelock.transactions(txHash)).to.equal(state.CANCELLED);
+      expect(await timelock.transactions(txHash)).to.equal(0);
     });
 
     describe("once the eta arrives", async () => {
@@ -227,7 +228,7 @@ describe("TimeLock", async function () {
 
       it("executes a transaction", async () => {
         await expect(
-          await timelock.connect(executorAcc).execute(targets, data, eta)
+          await timelock.connect(executorAcc).execute(targets, data)
         )
           .to.emit(timelock, "Executed")
           //          .withArgs(txHash, targets, data, eta)
@@ -235,7 +236,7 @@ describe("TimeLock", async function () {
           //          .withArgs(null, scheduler, 1)
           .to.emit(target2, "Approval");
         //          .withArgs(scheduler, scheduler, 1)
-        expect(await timelock.transactions(txHash)).to.equal(state.EXECUTED);
+        expect(await timelock.transactions(txHash)).to.equal(0);
         expect(await target1.balanceOf(scheduler)).to.equal(1);
         expect(await target2.allowance(timelock.address, scheduler)).to.equal(
           1
