@@ -5,23 +5,9 @@ import "./IERC20.sol";
 import "./ERC20Permit.sol";
 import "../access/AccessControl.sol";
 import "../utils/RevertMsgExtractor.sol";
+import "../cast/CastU256U128.sol";
+import "../cast/CastU256U32.sol";
 
-
-library CastU256U32 {
-    /// @dev Safely cast an uint256 to an uint32
-    function u32(uint256 x) internal pure returns (uint32 y) {
-        require (x <= type(uint32).max, "Cast overflow");
-        y = uint32(x);
-    }
-}
-
-library CastU256U128 {
-    /// @dev Safely cast an uint256 to an uint128
-    function u128(uint256 x) internal pure returns (uint128 y) {
-        require (x <= type(uint128).max, "Cast overflow");
-        y = uint128(x);
-    }
-}
 
 /// @dev A token inheriting from ERC20Rewards will reward token holders with a rewards token.
 /// The rewarded amount will be a fixed wei per second, distributed proportionally to token holders
