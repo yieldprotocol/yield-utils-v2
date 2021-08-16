@@ -6,10 +6,10 @@ import "../access/AccessControl.sol";
 
 interface IEmergencyBrake {
     function plan(address target, address[] memory contacts, bytes4[][] memory permissions) external returns (bytes32 txHash);
-    function cancel(address target, address[] memory contacts, bytes4[][] memory permissions) external;
+    function cancel(bytes32 txHash) external;
     function execute(address target, address[] memory contacts, bytes4[][] memory permissions) external;
     function restore(address target, address[] memory contacts, bytes4[][] memory permissions) external;
-    function terminate(address target, address[] memory contacts, bytes4[][] memory permissions) external;
+    function terminate(bytes32 txHash) external;
 }
 
 /// @dev EmergencyBrake allows to plan for and execute transactions that remove access permissions for a target
@@ -24,10 +24,10 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     enum State {UNKNOWN, PLANNED, EXECUTED, TERMINATED}
 
     event Planned(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
-    event Cancelled(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
+    event Cancelled(bytes32 indexed txHash);
     event Executed(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
     event Restored(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
-    event Terminated(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
+    event Terminated(bytes32 indexed txHash);
 
     mapping (bytes32 => State) public plans;
 
@@ -63,21 +63,18 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Erase a planned access removal transaction
-    function cancel(address target, address[] memory contacts, bytes4[][] memory permissions)
+    function cancel(bytes32 txHash)
         external override auth
     {
-        require(contacts.length == permissions.length, "Mismatched inputs");
-        bytes32 txHash = keccak256(abi.encode(target, contacts, permissions));
         require(plans[txHash] == State.PLANNED, "Emergency not planned for.");
         plans[txHash] = State.UNKNOWN;
-        emit Cancelled(txHash, target, contacts, permissions);
+        emit Cancelled(txHash);
     }
 
     /// @dev Execute an access removal transaction
     function execute(address target, address[] memory contacts, bytes4[][] memory permissions)
         external override auth
     {
-        require(contacts.length == permissions.length, "Mismatched inputs");
         bytes32 txHash = keccak256(abi.encode(target, contacts, permissions));
         require(plans[txHash] == State.PLANNED, "Emergency not planned for.");
         plans[txHash] = State.EXECUTED;
@@ -101,7 +98,6 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function restore(address target, address[] memory contacts, bytes4[][] memory permissions)
         external override auth
     {
-        require(contacts.length == permissions.length, "Mismatched inputs");
         bytes32 txHash = keccak256(abi.encode(target, contacts, permissions));
         require(plans[txHash] == State.EXECUTED, "Emergency plan not executed.");
         plans[txHash] = State.PLANNED;
@@ -113,13 +109,11 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Remove the restoring option from an isolated target
-    function terminate(address target, address[] memory contacts, bytes4[][] memory permissions)
+    function terminate(bytes32 txHash)
         external override auth
     {
-        require(contacts.length == permissions.length, "Mismatched inputs");
-        bytes32 txHash = keccak256(abi.encode(target, contacts, permissions));
         require(plans[txHash] == State.EXECUTED, "Emergency plan not executed.");
         plans[txHash] = State.TERMINATED;
-        emit Terminated(txHash, target, contacts, permissions);
+        emit Terminated(txHash);
     }
 }
