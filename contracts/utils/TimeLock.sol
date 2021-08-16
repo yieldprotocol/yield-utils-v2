@@ -4,6 +4,7 @@
 pragma solidity ^0.8.0;
 import "../access/AccessControl.sol";
 import "./RevertMsgExtractor.sol";
+import "./IsContract.sol";
 
 interface ITimeLock {
     function setDelay(uint256 delay_) external;
@@ -13,6 +14,7 @@ interface ITimeLock {
 }
 
 contract TimeLock is ITimeLock, AccessControl {
+    using IsContract for address;
 
     uint256 public constant GRACE_PERIOD = 14 days;
     uint256 public constant MINIMUM_DELAY = 2 days;
@@ -90,6 +92,7 @@ contract TimeLock is ITimeLock, AccessControl {
 
         results = new bytes[](targets.length);
         for (uint256 i = 0; i < targets.length; i++){
+            require(targets[i].isContract(), "Call to a non-contract");
             (bool success, bytes memory result) = targets[i].call(data[i]);
             if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
             results[i] = result;

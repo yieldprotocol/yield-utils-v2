@@ -162,6 +162,25 @@ describe("TimeLock", async function () {
     await ethers.provider.send("evm_revert", [snapshotId]);
   });
 
+  it("doesn't allow to execute to a non-contract", async () => {
+    const targets = [scheduler];
+    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
+    const eta = now.add(await timelock.delay()).add(100);
+
+    await timelock
+      .connect(schedulerAcc)
+      .schedule(targets, data, eta);
+    
+    const snapshotId = await ethers.provider.send("evm_snapshot", []);
+    await ethers.provider.send("evm_mine", [eta.add(100).toNumber()]);
+    
+    await expect(
+      timelock.connect(executorAcc).execute(targets, data)
+    ).to.be.revertedWith("Call to a non-contract");
+
+    await ethers.provider.send("evm_revert", [snapshotId]);
+  });
+
   it("doesn't allow to execute if not scheduled", async () => {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
