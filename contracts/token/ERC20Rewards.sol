@@ -92,7 +92,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         uint256 totalSupply_ = _totalSupply;
 
         // We skip the update if the program hasn't started
-        if (totalSupply_ == 0 || block.timestamp.u32() < rewardsPeriod_.start) return;
+        if (block.timestamp.u32() < rewardsPeriod_.start) return;
 
         // Find out the unaccounted time
         uint32 end = earliest(block.timestamp.u32(), rewardsPeriod_.end);
@@ -100,7 +100,8 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         if (unaccountedTime == 0) return; // We skip the storage changes if already updated in the same block
 
         // Calculate and update the new value of the accumulator. unaccountedTime casts it into uint256, which is desired.
-        rewardsPerToken_.accumulated = (rewardsPerToken_.accumulated + 1e18 * unaccountedTime * rewardsPerToken_.rate / totalSupply_).u128(); // The rewards per token are scaled up for precision
+        // If the first mint happens mid-program, we don't update the accumulator, no one gets the rewards for that period.
+        if (totalSupply_ != 0) rewardsPerToken_.accumulated = (rewardsPerToken_.accumulated + 1e18 * unaccountedTime * rewardsPerToken_.rate / totalSupply_).u128(); // The rewards per token are scaled up for precision
         rewardsPerToken_.lastUpdated = end;
         rewardsPerToken = rewardsPerToken_;
         
