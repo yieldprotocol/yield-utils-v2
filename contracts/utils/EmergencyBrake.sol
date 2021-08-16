@@ -5,10 +5,10 @@ import "../access/AccessControl.sol";
 
 
 interface IEmergencyBrake {
-    function plan(address target, address[] memory contacts, bytes4[][] memory permissions) external returns (bytes32 txHash);
+    function plan(address target, address[] calldata contacts, bytes4[][] calldata permissions) external returns (bytes32 txHash);
     function cancel(bytes32 txHash) external;
-    function execute(address target, address[] memory contacts, bytes4[][] memory permissions) external;
-    function restore(address target, address[] memory contacts, bytes4[][] memory permissions) external;
+    function execute(address target, address[] calldata contacts, bytes4[][] calldata permissions) external;
+    function restore(address target, address[] calldata contacts, bytes4[][] calldata permissions) external;
     function terminate(bytes32 txHash) external;
 }
 
@@ -42,7 +42,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Register an access removal transaction
-    function plan(address target, address[] memory contacts, bytes4[][] memory permissions)
+    function plan(address target, address[] calldata contacts, bytes4[][] calldata permissions)
         external override auth
         returns (bytes32 txHash)
     {
@@ -72,7 +72,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Execute an access removal transaction
-    function execute(address target, address[] memory contacts, bytes4[][] memory permissions)
+    function execute(address target, address[] calldata contacts, bytes4[][] calldata permissions)
         external override auth
     {
         bytes32 txHash = keccak256(abi.encode(target, contacts, permissions));
@@ -95,7 +95,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Restore the orchestration from an isolated target
-    function restore(address target, address[] memory contacts, bytes4[][] memory permissions)
+    function restore(address target, address[] calldata contacts, bytes4[][] calldata permissions)
         external override auth
     {
         bytes32 txHash = keccak256(abi.encode(target, contacts, permissions));
