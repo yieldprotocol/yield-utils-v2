@@ -61,10 +61,11 @@ describe("ERC20Rewards", async function () {
       "Token with rewards",
       "REW",
       18,
+      governance.address,
     ])) as ERC20Rewards;
 
     await rewards.grantRoles(
-      [id("setRewards(address,uint32,uint32,uint96)")],
+      [id("setRewards(uint32,uint32,uint96)")],
       owner
     );
   });
@@ -84,11 +85,10 @@ describe("ERC20Rewards", async function () {
   });
 
   it("sets a rewards token and program", async () => {
-    expect(await rewards.setRewards(governance.address, 1, 2, 3))
+    expect(await rewards.setRewards(1, 2, 3))
       .to.emit(rewards, "RewardsSet")
-      .withArgs(governance.address, 1, 2, 3);
+      .withArgs(1, 2, 3);
 
-    expect(await rewards.rewardsToken()).to.equal(governance.address);
     const rewardsPeriod = await rewards.rewardsPeriod();
     expect(rewardsPeriod.start).to.equal(1);
     expect(rewardsPeriod.end).to.equal(2);
@@ -114,16 +114,16 @@ describe("ERC20Rewards", async function () {
     });
 
     beforeEach(async () => {
-      await rewards.setRewards(governance.address, start, end, rate);
+      await rewards.setRewards(start, end, rate);
       await governance.mint(rewards.address, WAD);
       await rewards.mint(user1, WAD); // So that total supply is not zero
     });
 
     describe("before the program", async () => {
       it("allows to change the program", async () => {
-        expect(await rewards.setRewards(governance.address, 4, 5, 6))
+        expect(await rewards.setRewards(4, 5, 6))
           .to.emit(rewards, "RewardsSet")
-          .withArgs(governance.address, 4, 5, 6);
+          .withArgs(4, 5, 6);
       });
 
       it("doesn't update rewards per token", async () => {
@@ -151,7 +151,7 @@ describe("ERC20Rewards", async function () {
 
       it("doesn't allow to change the program", async () => {
         await expect(
-          rewards.setRewards(governance.address, 4, 5, 6)
+          rewards.setRewards(4, 5, 6)
         ).to.be.revertedWith("Ongoing rewards");
       });
 
@@ -242,9 +242,9 @@ describe("ERC20Rewards", async function () {
       });
 
       it("allows to change the program", async () => {
-        expect(await rewards.setRewards(governance.address, 4, 5, 6))
+        expect(await rewards.setRewards(4, 5, 6))
           .to.emit(rewards, "RewardsSet")
-          .withArgs(governance.address, 4, 5, 6);
+          .withArgs(4, 5, 6);
       });
 
       it("doesn't update rewards per token past the end date", async () => {

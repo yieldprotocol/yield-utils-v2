@@ -18,7 +18,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
     using CastU256U32 for uint256;
     using CastU256U128 for uint256;
 
-    event RewardsSet(IERC20 rewardsToken, uint32 start, uint32 end, uint256 rate);
+    event RewardsSet(uint32 start, uint32 end, uint256 rate);
     event RewardsPerTokenUpdated(uint256 accumulated);
     event UserRewardsUpdated(address user, uint256 userRewards, uint256 paidRewardPerToken);
     event Claimed(address receiver, uint256 claimed);
@@ -39,15 +39,17 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         uint128 checkpoint;                             // RewardsPerToken the last time the user rewards were updated
     }
 
-    IERC20 public rewardsToken;                         // Token used as rewards
+    IERC20 immutable public rewardsToken;               // Token used as rewards
     RewardsPeriod public rewardsPeriod;                 // Period in which rewards are accumulated by users
 
     RewardsPerToken public rewardsPerToken;             // Accumulator to track rewards per token               
     mapping (address => UserRewards) public rewards;    // Rewards accumulated by users
     
-    constructor(string memory name, string memory symbol, uint8 decimals)
+    constructor(string memory name, string memory symbol, uint8 decimals, IERC20 rewardsToken_)
         ERC20Permit(name, symbol, decimals)
-    { }
+    { 
+        rewardsToken = rewardsToken_;
+    }
 
     /// @dev Return the earliest of two timestamps
     function earliest(uint32 x, uint32 y) internal pure returns (uint32 z) {
@@ -60,7 +62,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
     }
 
     /// @dev Set a rewards schedule
-    function setRewards(IERC20 rewardsToken_, uint32 start, uint32 end, uint96 rate)
+    function setRewards(uint32 start, uint32 end, uint96 rate)
         external
         auth
     {
@@ -69,9 +71,6 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
             block.timestamp.u32() < rewardsPeriod.start || block.timestamp.u32() > rewardsPeriod.end,
             "Ongoing rewards"
         );
-
-        // If changed in a new rewards program, any unclaimed rewards from the last one will be served in the new token
-        rewardsToken = rewardsToken_;
 
         rewardsPeriod.start = start;
         rewardsPeriod.end = end;
@@ -83,7 +82,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         rewardsPerToken.lastUpdated = start;
         rewardsPerToken.rate = rate;
 
-        emit RewardsSet(rewardsToken, start, end, rate);
+        emit RewardsSet(start, end, rate);
     }
 
     /// @dev Update the rewards per token accumulator.
