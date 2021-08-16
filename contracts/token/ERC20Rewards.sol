@@ -86,13 +86,13 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
 
     /// @dev Update the rewards per token accumulator.
     /// @notice Needs to be called on each liquidity event
-    function _updateRewardsPerToken() internal returns (uint128) {
+    function _updateRewardsPerToken() internal {
         RewardsPerToken memory rewardsPerToken_ = rewardsPerToken;
         RewardsPeriod memory rewardsPeriod_ = rewardsPeriod;
 
         // We skip the calculations if we can
-        if (_totalSupply == 0 || block.timestamp.u32() < rewardsPeriod_.start) return 0;
-        if (rewardsPerToken_.lastUpdated >= rewardsPeriod_.end) return rewardsPerToken_.accumulated;
+        if (_totalSupply == 0 || block.timestamp.u32() < rewardsPeriod_.start) return;
+        if (rewardsPerToken_.lastUpdated >= rewardsPeriod_.end) return;
 
         // Find out the unaccounted period
         uint32 end = earliest(block.timestamp.u32(), rewardsPeriod_.end);
@@ -104,8 +104,6 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         rewardsPerToken = rewardsPerToken_;
         
         emit RewardsPerTokenUpdated(rewardsPerToken_.accumulated);
-
-        return rewardsPerToken_.accumulated;
     }
 
     /// @dev Accumulate rewards for an user.

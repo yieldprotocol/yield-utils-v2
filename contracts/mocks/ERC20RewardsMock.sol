@@ -23,7 +23,8 @@ contract ERC20RewardsMock is ERC20Rewards  {
 
     /// @dev Update the rewards per token accumulator.
     function updateRewardsPerToken() public returns (uint128) {
-        return _updateRewardsPerToken();
+        _updateRewardsPerToken();
+        return rewardsPerToken.accumulated;
     }
 
     /// @dev Accumulate rewards for an user.
