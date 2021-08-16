@@ -59,7 +59,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
 
     /// @dev Set a rewards schedule
     function setRewards(IERC20 rewardsToken_, uint32 start, uint32 end, uint96 rate)
-        public
+        external
         auth
     {
         // A new rewards program can be set if one is not running
