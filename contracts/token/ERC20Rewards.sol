@@ -5,6 +5,7 @@ import "./IERC20.sol";
 import "./ERC20Permit.sol";
 import "../access/AccessControl.sol";
 import "../utils/RevertMsgExtractor.sol";
+import "../token/MinimalTransferHelper.sol";
 import "../cast/CastU256U128.sol";
 import "../cast/CastU256U32.sol";
 
@@ -13,10 +14,11 @@ import "../cast/CastU256U32.sol";
 /// The rewarded amount will be a fixed wei per second, distributed proportionally to token holders
 /// by the size of their holdings.
 contract ERC20Rewards is AccessControl, ERC20Permit {
+    using MinimalTransferHelper for IERC20;
     using CastU256U32 for uint256;
     using CastU256U128 for uint256;
 
-    event RewardsSet(IERC20 rewardsToken, uint32 start, uint32 end, uint256 rate);
+    event RewardsSet(uint32 start, uint32 end, uint256 rate);
     event RewardsPerTokenUpdated(uint256 accumulated);
     event UserRewardsUpdated(address user, uint256 userRewards, uint256 paidRewardPerToken);
     event Claimed(address receiver, uint256 claimed);
@@ -37,39 +39,37 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         uint128 checkpoint;                             // RewardsPerToken the last time the user rewards were updated
     }
 
-    IERC20 public rewardsToken;                         // Token used as rewards
+    IERC20 immutable public rewardsToken;               // Token used as rewards
     RewardsPeriod public rewardsPeriod;                 // Period in which rewards are accumulated by users
 
     RewardsPerToken public rewardsPerToken;             // Accumulator to track rewards per token               
     mapping (address => UserRewards) public rewards;    // Rewards accumulated by users
     
-    constructor(string memory name, string memory symbol, uint8 decimals)
+    constructor(string memory name, string memory symbol, uint8 decimals, IERC20 rewardsToken_)
         ERC20Permit(name, symbol, decimals)
-    { }
+    { 
+        rewardsToken = rewardsToken_;
+    }
 
     /// @dev Return the earliest of two timestamps
     function earliest(uint32 x, uint32 y) internal pure returns (uint32 z) {
         z = (x < y) ? x : y;
     }
 
-    /// @dev Return the latest of two timestamps
-    function latest(uint32 x, uint32 y) internal pure returns (uint32 z) {
-        z = (x > y) ? x : y;
-    }
-
     /// @dev Set a rewards schedule
-    function setRewards(IERC20 rewardsToken_, uint32 start, uint32 end, uint96 rate)
-        public
+    function setRewards(uint32 start, uint32 end, uint96 rate)
+        external
         auth
     {
+        require(
+            start <= end,
+            "Incorrect input"
+        );
         // A new rewards program can be set if one is not running
         require(
             block.timestamp.u32() < rewardsPeriod.start || block.timestamp.u32() > rewardsPeriod.end,
             "Ongoing rewards"
         );
-
-        // If changed in a new rewards program, any unclaimed rewards from the last one will be served in the new token
-        rewardsToken = rewardsToken_;
 
         rewardsPeriod.start = start;
         rewardsPeriod.end = end;
@@ -81,31 +81,31 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         rewardsPerToken.lastUpdated = start;
         rewardsPerToken.rate = rate;
 
-        emit RewardsSet(rewardsToken, start, end, rate);
+        emit RewardsSet(start, end, rate);
     }
 
     /// @dev Update the rewards per token accumulator.
     /// @notice Needs to be called on each liquidity event
-    function _updateRewardsPerToken() internal returns (uint128) {
+    function _updateRewardsPerToken() internal {
         RewardsPerToken memory rewardsPerToken_ = rewardsPerToken;
         RewardsPeriod memory rewardsPeriod_ = rewardsPeriod;
+        uint256 totalSupply_ = _totalSupply;
 
-        // We skip the calculations if we can
-        if (_totalSupply == 0 || block.timestamp.u32() < rewardsPeriod_.start) return 0;
-        if (rewardsPerToken_.lastUpdated >= rewardsPeriod_.end) return rewardsPerToken_.accumulated;
+        // We skip the update if the program hasn't started
+        if (block.timestamp.u32() < rewardsPeriod_.start) return;
 
-        // Find out the unaccounted period
+        // Find out the unaccounted time
         uint32 end = earliest(block.timestamp.u32(), rewardsPeriod_.end);
-        uint256 timeSinceLastUpdated = end - rewardsPerToken_.lastUpdated; // Cast to uint256 to avoid overflows later on
+        uint256 unaccountedTime = end - rewardsPerToken_.lastUpdated; // Cast to uint256 to avoid overflows later on
+        if (unaccountedTime == 0) return; // We skip the storage changes if already updated in the same block
 
-        // Calculate and update the new value of the accumulator. timeSinceLastUpdated casts it into uint256, which is desired.
-        rewardsPerToken_.accumulated = (rewardsPerToken_.accumulated + 1e18 * timeSinceLastUpdated * rewardsPerToken_.rate / _totalSupply).u128(); // The rewards per token are scaled up for precision
+        // Calculate and update the new value of the accumulator. unaccountedTime casts it into uint256, which is desired.
+        // If the first mint happens mid-program, we don't update the accumulator, no one gets the rewards for that period.
+        if (totalSupply_ != 0) rewardsPerToken_.accumulated = (rewardsPerToken_.accumulated + 1e18 * unaccountedTime * rewardsPerToken_.rate / totalSupply_).u128(); // The rewards per token are scaled up for precision
         rewardsPerToken_.lastUpdated = end;
         rewardsPerToken = rewardsPerToken_;
         
         emit RewardsPerTokenUpdated(rewardsPerToken_.accumulated);
-
-        return rewardsPerToken_.accumulated;
     }
 
     /// @dev Accumulate rewards for an user.
@@ -159,7 +159,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         _updateRewardsPerToken();
         claiming = _updateUserRewards(msg.sender);
         rewards[msg.sender].accumulated = 0; // A Claimed event implies the rewards were set to zero
-        rewardsToken.transfer(to, claiming);
+        rewardsToken.safeTransfer(to, claiming);
         emit Claimed(to, claiming);
     }
 }

@@ -27,7 +27,7 @@ describe("TimeLock", async function () {
 
   let timestamp: number;
   let resetChain: number;
-  let now: BigNumber
+  let now: BigNumber;
 
   before(async () => {
     resetChain = await ethers.provider.send("evm_snapshot", []);
@@ -56,7 +56,7 @@ describe("TimeLock", async function () {
       executor,
     ])) as TimeLock;
     ({ timestamp } = await ethers.provider.getBlock("latest"));
-    now = BigNumber.from(timestamp)
+    now = BigNumber.from(timestamp);
   });
 
   it("doesn't allow governance changes to scheduler", async () => {
@@ -117,9 +117,7 @@ describe("TimeLock", async function () {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
     await expect(
-      timelock
-        .connect(schedulerAcc)
-        .execute(targets, data)
+      timelock.connect(schedulerAcc).execute(targets, data)
     ).to.be.revertedWith("Access denied");
   });
 
@@ -127,9 +125,7 @@ describe("TimeLock", async function () {
     const targets = [target1.address];
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
     const eta = now.add(await timelock.delay()).add(100);
-    await timelock
-      .connect(schedulerAcc)
-      .schedule(targets, data, eta);
+    await timelock.connect(schedulerAcc).schedule(targets, data, eta);
     await expect(
       timelock.connect(executorAcc).execute(targets, data)
     ).to.be.revertedWith("ETA not reached");
@@ -140,13 +136,16 @@ describe("TimeLock", async function () {
     const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
     const eta = now.add(await timelock.delay()).add(100);
 
-    await timelock
-      .connect(schedulerAcc)
-      .schedule(targets, data, eta);
-    
+    await timelock.connect(schedulerAcc).schedule(targets, data, eta);
+
     const snapshotId = await ethers.provider.send("evm_snapshot", []);
-    await ethers.provider.send("evm_mine", [eta.add(await timelock.GRACE_PERIOD()).add(100).toNumber()]);
-    
+    await ethers.provider.send("evm_mine", [
+      eta
+        .add(await timelock.GRACE_PERIOD())
+        .add(100)
+        .toNumber(),
+    ]);
+
     await expect(
       timelock.connect(executorAcc).execute(targets, data)
     ).to.be.revertedWith("Transaction is stale");
@@ -206,7 +205,7 @@ describe("TimeLock", async function () {
 
     beforeEach(async () => {
       ({ timestamp } = await ethers.provider.getBlock("latest"));
-      now = BigNumber.from(timestamp)
+      now = BigNumber.from(timestamp);
       targets = [target1.address, target2.address];
       data = [
         target1.interface.encodeFunctionData("mint", [scheduler, 1]),
@@ -246,9 +245,7 @@ describe("TimeLock", async function () {
       });
 
       it("executes a transaction", async () => {
-        await expect(
-          await timelock.connect(executorAcc).execute(targets, data)
-        )
+        await expect(await timelock.connect(executorAcc).execute(targets, data))
           .to.emit(timelock, "Executed")
           //          .withArgs(txHash, targets, data, eta)
           .to.emit(target1, "Transfer")

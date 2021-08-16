@@ -28,10 +28,9 @@ describe("EmergencyBrake", async function () {
   let brake: EmergencyBrake;
 
   const state = {
-    UNKNOWN: 0,
+    UNPLANNED: 0,
     PLANNED: 1,
     EXECUTED: 2,
-    TERMINATED: 3,
   };
 
   const MINT = id("mint(address,uint256)");
@@ -84,24 +83,14 @@ describe("EmergencyBrake", async function () {
     await expect(
       brake.connect(plannerAcc).plan(target, contacts, mismatch)
     ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      brake.connect(plannerAcc).cancel(target, contacts, mismatch)
-    ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      brake.connect(executorAcc).execute(target, contacts, mismatch)
-    ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      brake.connect(plannerAcc).restore(target, contacts, mismatch)
-    ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      brake.connect(plannerAcc).terminate(target, contacts, mismatch)
-    ).to.be.revertedWith("Mismatched inputs");
   });
 
   it("doesn't allow to cancel, execute, restore or terminate an unknown plan", async () => {
-    await expect(
-      brake.connect(plannerAcc).cancel(target, contacts, signatures)
-    ).to.be.revertedWith("Emergency not planned for.");
+    const txHash =
+      "0x18bba675edad0493c96b6415ff7457b8f2e9eee0a4a61bcca0b59a58b2abd4e5";
+    await expect(brake.connect(plannerAcc).cancel(txHash)).to.be.revertedWith(
+      "Emergency not planned for."
+    );
     await expect(
       brake.connect(executorAcc).execute(target, contacts, signatures)
     ).to.be.revertedWith("Emergency not planned for.");
@@ -109,7 +98,7 @@ describe("EmergencyBrake", async function () {
       brake.connect(plannerAcc).restore(target, contacts, signatures)
     ).to.be.revertedWith("Emergency plan not executed.");
     await expect(
-      brake.connect(plannerAcc).terminate(target, contacts, signatures)
+      brake.connect(plannerAcc).terminate(txHash)
     ).to.be.revertedWith("Emergency plan not executed.");
   });
 
@@ -157,16 +146,17 @@ describe("EmergencyBrake", async function () {
 
     it("only the planner can cancel", async () => {
       await expect(
-        brake.connect(executorAcc).cancel(target, contacts, signatures)
+        brake.connect(executorAcc).cancel(txHash)
       ).to.be.revertedWith("Access denied");
     });
 
     it("cancels a plan", async () => {
-      await expect(
-        await brake.connect(plannerAcc).cancel(target, contacts, signatures)
-      ).to.emit(brake, "Cancelled");
+      await expect(await brake.connect(plannerAcc).cancel(txHash)).to.emit(
+        brake,
+        "Cancelled"
+      );
       //        .withArgs(txHash, target, contacts, signatures)
-      expect(await brake.plans(txHash)).to.equal(state.UNKNOWN);
+      expect(await brake.plans(txHash)).to.equal(state.UNPLANNED);
     });
 
     it("cant't restore or terminate a plan that hasn't been executed", async () => {
@@ -174,7 +164,7 @@ describe("EmergencyBrake", async function () {
         brake.connect(plannerAcc).restore(target, contacts, signatures)
       ).to.be.revertedWith("Emergency plan not executed.");
       await expect(
-        brake.connect(plannerAcc).terminate(target, contacts, signatures)
+        brake.connect(plannerAcc).terminate(txHash)
       ).to.be.revertedWith("Emergency plan not executed.");
     });
 
@@ -224,7 +214,7 @@ describe("EmergencyBrake", async function () {
           brake.connect(executorAcc).restore(target, contacts, signatures)
         ).to.be.revertedWith("Access denied");
         await expect(
-          brake.connect(executorAcc).terminate(target, contacts, signatures)
+          brake.connect(executorAcc).terminate(txHash)
         ).to.be.revertedWith("Access denied");
       });
 
@@ -242,13 +232,12 @@ describe("EmergencyBrake", async function () {
       });
 
       it("target can be terminated", async () => {
-        expect(
-          await brake
-            .connect(plannerAcc)
-            .terminate(target, contacts, signatures)
-        ).to.emit(brake, "Terminated");
+        expect(await brake.connect(plannerAcc).terminate(txHash)).to.emit(
+          brake,
+          "Terminated"
+        );
 
-        expect(await brake.plans(txHash)).to.equal(state.TERMINATED);
+        expect(await brake.plans(txHash)).to.equal(state.UNPLANNED);
       });
     });
   });
