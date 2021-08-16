@@ -89,9 +89,10 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
     function _updateRewardsPerToken() internal {
         RewardsPerToken memory rewardsPerToken_ = rewardsPerToken;
         RewardsPeriod memory rewardsPeriod_ = rewardsPeriod;
+        uint256 totalSupply_ = _totalSupply;
 
         // We skip the calculations if we can
-        if (_totalSupply == 0 || block.timestamp.u32() < rewardsPeriod_.start) return;
+        if (totalSupply_ == 0 || block.timestamp.u32() < rewardsPeriod_.start) return;
         if (rewardsPerToken_.lastUpdated >= rewardsPeriod_.end) return;
 
         // Find out the unaccounted period
@@ -99,7 +100,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         uint256 timeSinceLastUpdated = end - rewardsPerToken_.lastUpdated; // Cast to uint256 to avoid overflows later on
 
         // Calculate and update the new value of the accumulator. timeSinceLastUpdated casts it into uint256, which is desired.
-        rewardsPerToken_.accumulated = (rewardsPerToken_.accumulated + 1e18 * timeSinceLastUpdated * rewardsPerToken_.rate / _totalSupply).u128(); // The rewards per token are scaled up for precision
+        rewardsPerToken_.accumulated = (rewardsPerToken_.accumulated + 1e18 * timeSinceLastUpdated * rewardsPerToken_.rate / totalSupply_).u128(); // The rewards per token are scaled up for precision
         rewardsPerToken_.lastUpdated = end;
         rewardsPerToken = rewardsPerToken_;
         
