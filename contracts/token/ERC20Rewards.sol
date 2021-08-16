@@ -5,6 +5,7 @@ import "./IERC20.sol";
 import "./ERC20Permit.sol";
 import "../access/AccessControl.sol";
 import "../utils/RevertMsgExtractor.sol";
+import "../token/MinimalTransferHelper.sol";
 import "../cast/CastU256U128.sol";
 import "../cast/CastU256U32.sol";
 
@@ -13,6 +14,7 @@ import "../cast/CastU256U32.sol";
 /// The rewarded amount will be a fixed wei per second, distributed proportionally to token holders
 /// by the size of their holdings.
 contract ERC20Rewards is AccessControl, ERC20Permit {
+    using MinimalTransferHelper for IERC20;
     using CastU256U32 for uint256;
     using CastU256U128 for uint256;
 
@@ -157,7 +159,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         _updateRewardsPerToken();
         claiming = _updateUserRewards(msg.sender);
         rewards[msg.sender].accumulated = 0; // A Claimed event implies the rewards were set to zero
-        rewardsToken.transfer(to, claiming);
+        rewardsToken.safeTransfer(to, claiming);
         emit Claimed(to, claiming);
     }
 }
