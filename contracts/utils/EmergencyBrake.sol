@@ -21,7 +21,7 @@ interface IEmergencyBrake {
 /// In addition, there is a separation of concerns between the planner and the executor accounts, so that both of them
 /// must be compromised simultaneously to execute non-approved emergency plans, and then only creating a denial of service.
 contract EmergencyBrake is AccessControl, IEmergencyBrake {
-    enum State {UNKNOWN, PLANNED, EXECUTED, TERMINATED}
+    enum State {UNPLANNED, PLANNED, EXECUTED}
 
     event Planned(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
     event Cancelled(bytes32 indexed txHash);
@@ -57,7 +57,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             }
         }
         txHash = keccak256(abi.encode(target, contacts, permissions));
-        require(plans[txHash] == State.UNKNOWN, "Emergency already planned for.");
+        require(plans[txHash] == State.UNPLANNED, "Emergency already planned for.");
         plans[txHash] = State.PLANNED;
         emit Planned(txHash, target, contacts, permissions);
     }
@@ -67,7 +67,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {
         require(plans[txHash] == State.PLANNED, "Emergency not planned for.");
-        plans[txHash] = State.UNKNOWN;
+        plans[txHash] = State.UNPLANNED;
         emit Cancelled(txHash);
     }
 
@@ -113,7 +113,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {
         require(plans[txHash] == State.EXECUTED, "Emergency plan not executed.");
-        plans[txHash] = State.TERMINATED;
+        plans[txHash] = State.UNPLANNED;
         emit Terminated(txHash);
     }
 }

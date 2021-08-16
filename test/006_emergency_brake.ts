@@ -28,10 +28,9 @@ describe("EmergencyBrake", async function () {
   let brake: EmergencyBrake;
 
   const state = {
-    UNKNOWN: 0,
+    UNPLANNED: 0,
     PLANNED: 1,
     EXECUTED: 2,
-    TERMINATED: 3,
   };
 
   const MINT = id("mint(address,uint256)");
@@ -155,7 +154,7 @@ describe("EmergencyBrake", async function () {
         await brake.connect(plannerAcc).cancel(txHash)
       ).to.emit(brake, "Cancelled");
       //        .withArgs(txHash, target, contacts, signatures)
-      expect(await brake.plans(txHash)).to.equal(state.UNKNOWN);
+      expect(await brake.plans(txHash)).to.equal(state.UNPLANNED);
     });
 
     it("cant't restore or terminate a plan that hasn't been executed", async () => {
@@ -237,7 +236,7 @@ describe("EmergencyBrake", async function () {
             .terminate(txHash)
         ).to.emit(brake, "Terminated");
 
-        expect(await brake.plans(txHash)).to.equal(state.TERMINATED);
+        expect(await brake.plans(txHash)).to.equal(state.UNPLANNED);
       });
     });
   });
