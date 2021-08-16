@@ -79,12 +79,6 @@ describe("TimeLock", async function () {
     await expect(
       timelock.connect(schedulerAcc).schedule(targets, data, eta)
     ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      timelock.connect(schedulerAcc).cancel(targets, data)
-    ).to.be.revertedWith("Mismatched inputs");
-    await expect(
-      timelock.connect(executorAcc).execute(targets, data)
-    ).to.be.revertedWith("Mismatched inputs");
   });
 
   it("only the scheduler can schedule", async () => {

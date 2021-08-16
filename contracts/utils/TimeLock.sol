@@ -69,7 +69,6 @@ contract TimeLock is ITimeLock, AccessControl {
     function cancel(address[] calldata targets, bytes[] calldata data)
         external override auth
     {
-        require(targets.length == data.length, "Mismatched inputs");
         bytes32 txHash = keccak256(abi.encode(targets, data));
         require(transactions[txHash] != 0, "Transaction hasn't been scheduled.");
         delete transactions[txHash];
@@ -80,7 +79,6 @@ contract TimeLock is ITimeLock, AccessControl {
     function execute(address[] calldata targets, bytes[] calldata data)
         external override auth returns (bytes[] memory results)
     {
-        require(targets.length == data.length, "Mismatched inputs");
         bytes32 txHash = keccak256(abi.encode(targets, data));
         uint256 eta = transactions[txHash];
 
