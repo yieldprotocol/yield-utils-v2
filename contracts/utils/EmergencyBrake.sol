@@ -23,11 +23,11 @@ interface IEmergencyBrake {
 contract EmergencyBrake is AccessControl, IEmergencyBrake {
     enum State {UNKNOWN, PLANNED, EXECUTED, TERMINATED}
 
-    event Planned(bytes32 indexed txHash, address indexed target, address[] indexed contacts, bytes4[][] permissions);
-    event Cancelled(bytes32 indexed txHash, address indexed target, address[] indexed contacts, bytes4[][] permissions);
-    event Executed(bytes32 indexed txHash, address indexed target, address[] indexed contacts, bytes4[][] permissions);
-    event Restored(bytes32 indexed txHash, address indexed target, address[] indexed contacts, bytes4[][] permissions);
-    event Terminated(bytes32 indexed txHash, address indexed target, address[] indexed contacts, bytes4[][] permissions);
+    event Planned(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
+    event Cancelled(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
+    event Executed(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
+    event Restored(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
+    event Terminated(bytes32 indexed txHash, address target, address[] contacts, bytes4[][] permissions);
 
     mapping (bytes32 => State) public plans;
 
