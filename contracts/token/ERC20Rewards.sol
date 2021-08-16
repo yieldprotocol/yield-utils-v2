@@ -56,11 +56,6 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         z = (x < y) ? x : y;
     }
 
-    /// @dev Return the latest of two timestamps
-    function latest(uint32 x, uint32 y) internal pure returns (uint32 z) {
-        z = (x > y) ? x : y;
-    }
-
     /// @dev Set a rewards schedule
     function setRewards(uint32 start, uint32 end, uint96 rate)
         external
