@@ -84,8 +84,12 @@ describe("ERC20Rewards", async function () {
       .withArgs(user2, ZERO_ADDRESS, 1);
   });
 
+  it("doesn't set a period where end < start", async () => {
+    await expect(rewards.setRewards(2, 1, 3)).to.be.revertedWith("Incorrect input")
+  });
+
   it("sets a rewards token and program", async () => {
-    expect(await rewards.setRewards(1, 2, 3))
+    await expect(rewards.setRewards(1, 2, 3))
       .to.emit(rewards, "RewardsSet")
       .withArgs(1, 2, 3);
 

@@ -61,6 +61,10 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         external
         auth
     {
+        require(
+            start <= end,
+            "Incorrect input"
+        );
         // A new rewards program can be set if one is not running
         require(
             block.timestamp.u32() < rewardsPeriod.start || block.timestamp.u32() > rewardsPeriod.end,
