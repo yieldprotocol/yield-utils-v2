@@ -9,7 +9,7 @@ import "./IsContract.sol";
 interface ITimeLock {
     function setDelay(uint256 delay_) external;
     function schedule(address[] calldata targets, bytes[] calldata data, uint256 eta) external returns (bytes32 txHash);
-    function cancel(address[] calldata targets, bytes[] calldata data) external;
+    function cancel(bytes32 txHash) external;
     function execute(address[] calldata targets, bytes[] calldata data) external returns (bytes[] calldata results);
 }
 
@@ -21,7 +21,7 @@ contract TimeLock is ITimeLock, AccessControl {
     uint256 public constant MAXIMUM_DELAY = 30 days;
 
     event DelaySet(uint256 indexed delay);
-    event Cancelled(bytes32 indexed txHash, address[] targets, bytes[] data);
+    event Cancelled(bytes32 indexed txHash);
     event Executed(bytes32 indexed txHash, address[] targets, bytes[] data);
     event Scheduled(bytes32 indexed txHash, address[] targets, bytes[] data, uint256 eta);
 
@@ -66,13 +66,12 @@ contract TimeLock is ITimeLock, AccessControl {
     }
 
     /// @dev Cancel a scheduled transaction batch
-    function cancel(address[] calldata targets, bytes[] calldata data)
+    function cancel(bytes32 txHash)
         external override auth
     {
-        bytes32 txHash = keccak256(abi.encode(targets, data));
         require(transactions[txHash] != 0, "Transaction hasn't been scheduled.");
         delete transactions[txHash];
-        emit Cancelled(txHash, targets, data);
+        emit Cancelled(txHash);
     }
 
     /// @dev Execute a transaction batch

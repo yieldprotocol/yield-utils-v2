@@ -100,18 +100,16 @@ describe("TimeLock", async function () {
   });
 
   it("only the scheduler can cancel", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
+    const txHash = '0x33fd4732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed'
     await expect(
-      timelock.connect(executorAcc).cancel(targets, data)
+      timelock.connect(executorAcc).cancel(txHash)
     ).to.be.revertedWith("Access denied");
   });
 
   it("doesn't allow to cancel if not scheduled", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
+    const txHash = '0x33fd4732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed'
     await expect(
-      timelock.connect(schedulerAcc).cancel(targets, data)
+      timelock.connect(schedulerAcc).cancel(txHash)
     ).to.be.revertedWith("Transaction hasn't been scheduled.");
   });
 
@@ -223,7 +221,7 @@ describe("TimeLock", async function () {
 
     it("cancels a transaction", async () => {
       await expect(
-        await timelock.connect(schedulerAcc).cancel(targets, data)
+        await timelock.connect(schedulerAcc).cancel(txHash)
       ).to.emit(timelock, "Cancelled");
       //        .withArgs(txHash, targets, data, eta)
       expect(await timelock.transactions(txHash)).to.equal(0);
