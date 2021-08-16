@@ -19,9 +19,9 @@ contract TimeLock is ITimeLock, AccessControl {
     uint256 public constant MAXIMUM_DELAY = 30 days;
 
     event DelaySet(uint256 indexed delay);
-    event Cancelled(bytes32 indexed txHash, address[] indexed targets, bytes[] data);
-    event Executed(bytes32 indexed txHash, address[] indexed targets, bytes[] data);
-    event Scheduled(bytes32 indexed txHash, address[] indexed targets, bytes[] data, uint256 eta);
+    event Cancelled(bytes32 indexed txHash, address[] targets, bytes[] data);
+    event Executed(bytes32 indexed txHash, address[] targets, bytes[] data);
+    event Scheduled(bytes32 indexed txHash, address[] targets, bytes[] data, uint256 eta);
 
     uint256 public delay;
     mapping (bytes32 => uint256) public transactions;
