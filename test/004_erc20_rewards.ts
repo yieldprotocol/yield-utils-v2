@@ -64,10 +64,7 @@ describe("ERC20Rewards", async function () {
       governance.address,
     ])) as ERC20Rewards;
 
-    await rewards.grantRoles(
-      [id("setRewards(uint32,uint32,uint96)")],
-      owner
-    );
+    await rewards.grantRoles([id("setRewards(uint32,uint32,uint96)")], owner);
   });
 
   it("mints, transfers, burns", async () => {
@@ -85,7 +82,9 @@ describe("ERC20Rewards", async function () {
   });
 
   it("doesn't set a period where end < start", async () => {
-    await expect(rewards.setRewards(2, 1, 3)).to.be.revertedWith("Incorrect input")
+    await expect(rewards.setRewards(2, 1, 3)).to.be.revertedWith(
+      "Incorrect input"
+    );
   });
 
   it("sets a rewards token and program", async () => {
@@ -154,9 +153,9 @@ describe("ERC20Rewards", async function () {
       });
 
       it("doesn't allow to change the program", async () => {
-        await expect(
-          rewards.setRewards(4, 5, 6)
-        ).to.be.revertedWith("Ongoing rewards");
+        await expect(rewards.setRewards(4, 5, 6)).to.be.revertedWith(
+          "Ongoing rewards"
+        );
       });
 
       it("updates rewards per token on mint", async () => {
