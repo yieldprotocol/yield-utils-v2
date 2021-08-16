@@ -60,7 +60,7 @@ contract TimeLock is ITimeLock, AccessControl {
         require(targets.length == data.length, "Mismatched inputs");
         require(eta >= block.timestamp + delay, "Must satisfy delay."); // This also prevents setting eta = 0 and messing up the state
         txHash = keccak256(abi.encode(targets, data));
-        require(transactions[txHash] == 0, "Transaction not unknown.");
+        require(transactions[txHash] == 0, "Transaction already scheduled.");
         transactions[txHash] = eta;
         emit Scheduled(txHash, targets, data, eta);
     }

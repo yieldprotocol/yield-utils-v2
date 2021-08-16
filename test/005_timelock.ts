@@ -219,6 +219,14 @@ describe("TimeLock", async function () {
       await timelock.connect(schedulerAcc).schedule(targets, data, eta);
     });
 
+    it("doesn't allow to schedule the same transaction twice", async () => {
+      const targets = [target1.address];
+      const data = [target1.interface.encodeFunctionData("mint", [scheduler, 1])];
+      await expect(
+        timelock.connect(schedulerAcc).schedule(targets, data, eta)
+      ).to.be.revertedWith("Transaction already scheduled.");
+    });
+
     it("cancels a transaction", async () => {
       await expect(
         await timelock.connect(schedulerAcc).cancel(txHash)
