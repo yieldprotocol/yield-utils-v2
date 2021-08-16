@@ -8,8 +8,9 @@ contract ERC20RewardsMock is ERC20Rewards  {
     constructor(
         string memory name,
         string memory symbol,
-        uint8 decimals
-    ) ERC20Rewards(name, symbol, decimals) { }
+        uint8 decimals,
+        IERC20 rewardsToken
+    ) ERC20Rewards(name, symbol, decimals, rewardsToken) { }
 
     /// @dev Give tokens to anyone.
     function mint(address to, uint256 amount) public {
@@ -23,7 +24,8 @@ contract ERC20RewardsMock is ERC20Rewards  {
 
     /// @dev Update the rewards per token accumulator.
     function updateRewardsPerToken() public returns (uint128) {
-        return _updateRewardsPerToken();
+        _updateRewardsPerToken();
+        return rewardsPerToken.accumulated;
     }
 
     /// @dev Accumulate rewards for an user.
