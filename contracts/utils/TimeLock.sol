@@ -48,7 +48,7 @@ contract TimeLock is ITimeLock, AccessControl {
         require(delay_ <= MAXIMUM_DELAY, "Must not exceed maximum delay.");
         delay = delay_;
 
-        emit DelaySet(delay);
+        emit DelaySet(delay_);
     }
 
     /// @dev Schedule a transaction batch for execution between `eta` and `eta + GRACE_PERIOD`
