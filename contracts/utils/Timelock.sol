@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Inspired on Timelock.sol from Compound.
-// Special thanks to BoringSolidity for his feedback.
+// Special thanks to BoringCrypto for his feedback.
 
 pragma solidity ^0.8.0;
 import "../access/AccessControl.sol";
@@ -51,12 +51,12 @@ contract Timelock is ITimelock, AccessControl {
         // Changing the delay must now be executed through this Timelock contract
         _grantRole(ITimelock.setDelay.selector, address(this)); // bytes4(keccak256("setDelay(uint256)"))
 
-        // Granting roles (propose, cancel, execute, setDelay) must now be executed through this Timelock contract
+        // Granting roles (propose, approve, execute, setDelay) must now be executed through this Timelock contract
         _grantRole(ROOT, address(this));
         _revokeRole(ROOT, msg.sender);
     }
 
-    /// @dev Change the delay for queueing and executing proposals
+    /// @dev Change the delay for approved proposals
     function setDelay(uint32 delay_) external override auth {
         require(delay_ >= MINIMUM_DELAY, "Must exceed minimum delay.");
         require(delay_ <= MAXIMUM_DELAY, "Must not exceed maximum delay.");
@@ -65,14 +65,14 @@ contract Timelock is ITimelock, AccessControl {
         emit DelaySet(delay_);
     }
 
-    /// @dev Propose a transaction batch for execution between `eta` and `eta + GRACE_PERIOD`
+    /// @dev Propose a transaction batch for execution
     function propose(address[] calldata targets, bytes[] calldata data)
         external override auth returns (bytes32 txHash)
     {
         return _propose(targets, data, 0);
     }
 
-    /// @dev Propose a transaction batch for execution between `eta` and `eta + GRACE_PERIOD`
+    /// @dev Propose a transaction batch for execution, with other identical proposals existing
     /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
     function proposeRepeated(address[] calldata targets, bytes[] calldata data, uint256 salt)
         external override auth returns (bytes32 txHash)
@@ -80,7 +80,7 @@ contract Timelock is ITimelock, AccessControl {
         return _propose(targets, data, salt);
     }
 
-    /// @dev Propose a transaction batch for execution between `eta` and `eta + GRACE_PERIOD`
+    /// @dev Propose a transaction batch for execution
     function _propose(address[] calldata targets, bytes[] calldata data, uint256 salt)
         private auth returns (bytes32 txHash)
     {
@@ -91,7 +91,7 @@ contract Timelock is ITimelock, AccessControl {
         emit Proposed(txHash, targets, data);
     }
 
-    /// @dev Cancel a proposed transaction batch
+    /// @dev Approve a proposal and set its eta
     function approve(bytes32 txHash)
         external override auth returns (uint32 eta)
     {
@@ -104,14 +104,14 @@ contract Timelock is ITimelock, AccessControl {
         emit Approved(txHash, eta);
     }
 
-    /// @dev Execute a transaction batch
+    /// @dev Execute a proposal
     function execute(address[] calldata targets, bytes[] calldata data)
         external override auth returns (bytes[] memory results)
     {
         return _execute(targets, data, 0);
     }
     
-    /// @dev Execute a transaction batch
+    /// @dev Execute a proposal, among several identical ones
     /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
     function executeRepeated(address[] calldata targets, bytes[] calldata data, uint256 salt)
         external override auth returns (bytes[] memory results)
@@ -119,7 +119,7 @@ contract Timelock is ITimelock, AccessControl {
         return _execute(targets, data, salt);
     }
 
-    /// @dev Execute a transaction batch
+    /// @dev Execute a proposal
     function _execute(address[] calldata targets, bytes[] calldata data, uint256 salt)
         private auth returns (bytes[] memory results)
     {
