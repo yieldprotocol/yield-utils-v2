@@ -1,273 +1,270 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address"
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 
-import { id } from "../src/index"
+import { id } from "../src/index";
 
-import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json"
-import TimelockArtifact from "../artifacts/contracts/utils/Timelock.sol/Timelock.json"
-import { ERC20Mock as ERC20 } from "../typechain/ERC20Mock"
-import { Timelock } from "../typechain/Timelock"
+import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json";
+import TimelockArtifact from "../artifacts/contracts/utils/Timelock.sol/Timelock.json";
+import { ERC20Mock as ERC20 } from "../typechain/ERC20Mock";
+import { Timelock } from "../typechain/Timelock";
 
-import { BigNumber } from "ethers"
+import { BigNumber } from "ethers";
 
-import { ethers, waffle } from "hardhat"
-import { expect } from "chai"
-const { deployContract, loadFixture } = waffle
+import { ethers, waffle } from "hardhat";
+import { expect } from "chai";
+const { deployContract, loadFixture } = waffle;
 
 describe("Timelock", async function () {
   const STATE = {
     UNKNOWN: 0,
     PROPOSED: 1,
     APPROVED: 2,
-  }
+  };
 
-  let governorAcc: SignerWithAddress
-  let governor: string
-  let otherAcc: SignerWithAddress
-  let other: string
+  let governorAcc: SignerWithAddress;
+  let governor: string;
+  let otherAcc: SignerWithAddress;
+  let other: string;
 
-  let target1: ERC20
-  let target2: ERC20
-  let timelock: Timelock
+  let target1: ERC20;
+  let target2: ERC20;
+  let timelock: Timelock;
 
-  let timestamp: number
-  let resetChain: number
-  let now: BigNumber
+  let timestamp: number;
+  let resetChain: number;
+  let now: BigNumber;
 
   before(async () => {
-    resetChain = await ethers.provider.send("evm_snapshot", [])
-    const signers = await ethers.getSigners()
-    governorAcc = signers[0]
-    governor = governorAcc.address
-    otherAcc = signers[1]
-    other = otherAcc.address
-  })
+    resetChain = await ethers.provider.send("evm_snapshot", []);
+    const signers = await ethers.getSigners();
+    governorAcc = signers[0];
+    governor = governorAcc.address;
+    otherAcc = signers[1];
+    other = otherAcc.address;
+  });
 
   after(async () => {
-    await ethers.provider.send("evm_revert", [resetChain])
-  })
+    await ethers.provider.send("evm_revert", [resetChain]);
+  });
 
   beforeEach(async () => {
     target1 = (await deployContract(governorAcc, ERC20MockArtifact, [
       "Target1",
       "TG1",
-    ])) as ERC20
+    ])) as ERC20;
     target2 = (await deployContract(governorAcc, ERC20MockArtifact, [
       "Target2",
       "TG2",
-    ])) as ERC20
+    ])) as ERC20;
     timelock = (await deployContract(governorAcc, TimelockArtifact, [
       governor,
-    ])) as Timelock
-    ({ timestamp } = await ethers.provider.getBlock("latest"))
-    now = BigNumber.from(timestamp)
+    ])) as Timelock;
+    ({ timestamp } = await ethers.provider.getBlock("latest"));
+    now = BigNumber.from(timestamp);
 
-    const targets = [timelock.address]
-    const data = [timelock.interface.encodeFunctionData("setDelay", [2 * 24 * 60 * 60])]
-    const txHash = await timelock
-      
-      .callStatic.propose(targets, data)
-    await timelock
-      
-      .propose(targets, data)
-    await timelock.approve(txHash)
-    await timelock
-      
-      .execute(targets, data)
-  })
+    const targets = [timelock.address];
+    const data = [
+      timelock.interface.encodeFunctionData("setDelay", [2 * 24 * 60 * 60]),
+    ];
+    const txHash = await timelock.callStatic.propose(targets, data);
+    await timelock.propose(targets, data);
+    await timelock.approve(txHash);
+    await timelock.execute(targets, data);
+  });
 
   it("doesn't allow governance changes to governor", async () => {
-    await expect(timelock.setDelay(0)).to.be.revertedWith("Access denied")
-    await expect(
-      timelock.grantRole("0x00000000", governor)
-    ).to.be.revertedWith("Only admin")
+    await expect(timelock.setDelay(0)).to.be.revertedWith("Access denied");
+    await expect(timelock.grantRole("0x00000000", governor)).to.be.revertedWith(
+      "Only admin"
+    );
     await expect(
       timelock.grantRole(id("propose(address[],bytes[])"), governor)
-    ).to.be.revertedWith("Only admin")
+    ).to.be.revertedWith("Only admin");
     await expect(
       timelock.revokeRole(id("propose(address[],bytes[])"), governor)
-    ).to.be.revertedWith("Only admin")
-  })
+    ).to.be.revertedWith("Only admin");
+  });
 
   it("doesn't allow mismatched inputs", async () => {
-    const targets = [target1.address, target2.address]
-    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])]
-    await expect(
-      timelock.propose(targets, data)
-    ).to.be.revertedWith("Mismatched inputs")
-  })
+    const targets = [target1.address, target2.address];
+    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])];
+    await expect(timelock.propose(targets, data)).to.be.revertedWith(
+      "Mismatched inputs"
+    );
+  });
 
   it("only the governor can propose", async () => {
-    const targets = [target1.address]
-    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])]
+    const targets = [target1.address];
+    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])];
     await expect(
       timelock.connect(otherAcc).propose(targets, data)
-    ).to.be.revertedWith("Access denied")
-  })
+    ).to.be.revertedWith("Access denied");
+  });
 
   it("proposes a transaction", async () => {
-    const targets = [target1.address]
-    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])]
-    const txHash = await timelock
-      
-      .callStatic.propose(targets, data)
+    const targets = [target1.address];
+    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])];
+    const txHash = await timelock.callStatic.propose(targets, data);
 
-    await expect(
-      await timelock.propose(targets, data)
-    ).to.emit(timelock, "Proposed")
+    await expect(await timelock.propose(targets, data)).to.emit(
+      timelock,
+      "Proposed"
+    );
     //      .withArgs(txHash, targets, data, eta)
-    const proposal = await timelock.proposals(txHash)
-    expect(proposal.state).to.equal(STATE.PROPOSED)
-  })
+    const proposal = await timelock.proposals(txHash);
+    expect(proposal.state).to.equal(STATE.PROPOSED);
+  });
 
   describe("with a proposed transaction", async () => {
-    let targets: string[]
-    let data: string[]
-    let txHash: string
+    let targets: string[];
+    let data: string[];
+    let txHash: string;
 
     beforeEach(async () => {
-      targets = [target1.address, target2.address]
+      targets = [target1.address, target2.address];
       data = [
         target1.interface.encodeFunctionData("mint", [governor, 1]),
         target2.interface.encodeFunctionData("approve", [governor, 1]),
-      ]
-      txHash = await timelock
-        
-        .callStatic.propose(targets, data)
-      await timelock.propose(targets, data)
-    })
+      ];
+      txHash = await timelock.callStatic.propose(targets, data);
+      await timelock.propose(targets, data);
+    });
 
     it("doesn't allow to propose the same transaction twice", async () => {
-      await expect(
-        timelock.propose(targets, data)
-      ).to.be.revertedWith("Already proposed.")
-    })
+      await expect(timelock.propose(targets, data)).to.be.revertedWith(
+        "Already proposed."
+      );
+    });
 
     it("allows proposing repeated transactions", async () => {
-      const txHash2 = await timelock
-        
-        .callStatic.proposeRepeated(targets, data, 1)
-  
-      await expect(
-        await timelock.proposeRepeated(targets, data, 1)
-      ).to.emit(timelock, "Proposed")
+      const txHash2 = await timelock.callStatic.proposeRepeated(
+        targets,
+        data,
+        1
+      );
+
+      await expect(await timelock.proposeRepeated(targets, data, 1)).to.emit(
+        timelock,
+        "Proposed"
+      );
       //      .withArgs(txHash, targets, data, eta)
-      const proposal = await timelock.proposals(txHash2)
-      expect(proposal.state).to.equal(STATE.PROPOSED)
-    })
-  
+      const proposal = await timelock.proposals(txHash2);
+      expect(proposal.state).to.equal(STATE.PROPOSED);
+    });
+
     it("only the governor can approve", async () => {
       await expect(
         timelock.connect(otherAcc).approve(txHash)
-      ).to.be.revertedWith("Access denied")
-    })
-  
+      ).to.be.revertedWith("Access denied");
+    });
+
     it("doesn't allow to approve if not proposed", async () => {
-      const txHash = '0x00004732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed'
-      await expect(
-        timelock.approve(txHash)
-      ).to.be.revertedWith("Not proposed.")
-    })  
+      const txHash =
+        "0x00004732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed";
+      await expect(timelock.approve(txHash)).to.be.revertedWith(
+        "Not proposed."
+      );
+    });
 
     it("approves a transaction", async () => {
-      await expect(
-        await timelock.approve(txHash)
-      ).to.emit(timelock, "Approved")
+      await expect(await timelock.approve(txHash)).to.emit(
+        timelock,
+        "Approved"
+      );
       //        .withArgs(txHash, targets, data, eta)
-      expect(await timelock.proposals(txHash)).not.equal(0)
-    })
+      expect(await timelock.proposals(txHash)).not.equal(0);
+    });
 
     describe("with an approved transaction", async () => {
-      let snapshotId: string
-      let timestamp: number
-      let now: BigNumber
-      let eta: BigNumber
-      let txHash2: string
-      let txHash3: string
-  
-      beforeEach(async () => {
-        ({ timestamp } = await ethers.provider.getBlock("latest"))
-        now = BigNumber.from(timestamp)
-        eta = now.add(await timelock.delay()).add(100)
-        await timelock.approve(txHash)
-        
-        txHash2 = await timelock
-          .callStatic.proposeRepeated(targets, data, 1)
-        await timelock.proposeRepeated(targets, data, 1)
-        await timelock.approve(txHash2)
+      let snapshotId: string;
+      let timestamp: number;
+      let now: BigNumber;
+      let eta: BigNumber;
+      let txHash2: string;
+      let txHash3: string;
 
-        txHash3 = await timelock
-          .callStatic.proposeRepeated(targets, data, 2)
-        await timelock.proposeRepeated(targets, data, 2)
-      })
+      beforeEach(async () => {
+        ({ timestamp } = await ethers.provider.getBlock("latest"));
+        now = BigNumber.from(timestamp);
+        eta = now.add(await timelock.delay()).add(100);
+        await timelock.approve(txHash);
+
+        txHash2 = await timelock.callStatic.proposeRepeated(targets, data, 1);
+        await timelock.proposeRepeated(targets, data, 1);
+        await timelock.approve(txHash2);
+
+        txHash3 = await timelock.callStatic.proposeRepeated(targets, data, 2);
+        await timelock.proposeRepeated(targets, data, 2);
+      });
 
       it("only the governor can execute", async () => {
         await expect(
           timelock.connect(otherAcc).execute(targets, data)
-        ).to.be.revertedWith("Access denied")
-      })
+        ).to.be.revertedWith("Access denied");
+      });
 
       it("doesn't allow to execute before eta", async () => {
-        await expect(
-          timelock.execute(targets, data)
-        ).to.be.revertedWith("ETA not reached")
-      })
+        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+          "ETA not reached"
+        );
+      });
 
       it("doesn't allow to execute if not approved", async () => {
-        const targets = [target1.address]
-        const data = [target1.interface.encodeFunctionData("mint", [governor, 1])]
-        await expect(
-          timelock.execute(targets, data)
-        ).to.be.revertedWith("Not approved.")
-      })
+        const targets = [target1.address];
+        const data = [
+          target1.interface.encodeFunctionData("mint", [governor, 1]),
+        ];
+        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+          "Not approved."
+        );
+      });
 
       it("doesn't allow to execute after grace period", async () => {
-        const eta = now.add(await timelock.delay()).add(100)
+        const eta = now.add(await timelock.delay()).add(100);
 
-        const snapshotId = await ethers.provider.send("evm_snapshot", [])
+        const snapshotId = await ethers.provider.send("evm_snapshot", []);
         await ethers.provider.send("evm_mine", [
           eta
             .add(await timelock.GRACE_PERIOD())
             .add(100)
             .toNumber(),
-        ])
+        ]);
 
-        await expect(
-          timelock.execute(targets, data)
-        ).to.be.revertedWith("Proposal is stale")
+        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+          "Proposal is stale"
+        );
 
-        await ethers.provider.send("evm_revert", [snapshotId])
-      })
+        await ethers.provider.send("evm_revert", [snapshotId]);
+      });
 
       it("doesn't allow to execute to a non-contract", async () => {
-        const targets = [governor]
-        const data = [target1.interface.encodeFunctionData("mint", [governor, 1])]
+        const targets = [governor];
+        const data = [
+          target1.interface.encodeFunctionData("mint", [governor, 1]),
+        ];
 
-        const tmpTxHash = await timelock
-          .callStatic.propose(targets, data)
-        await timelock
-          .propose(targets, data)
-        await timelock
-          .approve(tmpTxHash)
+        const tmpTxHash = await timelock.callStatic.propose(targets, data);
+        await timelock.propose(targets, data);
+        await timelock.approve(tmpTxHash);
 
-        const snapshotId = await ethers.provider.send("evm_snapshot", [])
-        await ethers.provider.send("evm_mine", [eta.add(100).toNumber()])
-        
-        await expect(
-          timelock.execute(targets, data)
-        ).to.be.revertedWith("Call to a non-contract")
+        const snapshotId = await ethers.provider.send("evm_snapshot", []);
+        await ethers.provider.send("evm_mine", [eta.add(100).toNumber()]);
 
-        await ethers.provider.send("evm_revert", [snapshotId])
-      })
+        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+          "Call to a non-contract"
+        );
+
+        await ethers.provider.send("evm_revert", [snapshotId]);
+      });
 
       describe("once the eta arrives", async () => {
         beforeEach(async () => {
-          snapshotId = await ethers.provider.send("evm_snapshot", [])
-          await ethers.provider.send("evm_mine", [eta.toNumber()])
-        })
+          snapshotId = await ethers.provider.send("evm_snapshot", []);
+          await ethers.provider.send("evm_mine", [eta.toNumber()]);
+        });
 
         afterEach(async () => {
-          await ethers.provider.send("evm_revert", [snapshotId])
-        })
+          await ethers.provider.send("evm_revert", [snapshotId]);
+        });
 
         it("executes a transaction", async () => {
           await expect(await timelock.execute(targets, data))
@@ -275,14 +272,16 @@ describe("Timelock", async function () {
             //          .withArgs(txHash, targets, data, eta)
             .to.emit(target1, "Transfer")
             //          .withArgs(null, governor, 1)
-            .to.emit(target2, "Approval")
+            .to.emit(target2, "Approval");
           //          .withArgs(governor, governor, 1)
-          expect((await timelock.proposals(txHash)).state).to.equal(STATE.UNKNOWN)
-          expect(await target1.balanceOf(governor)).to.equal(1)
+          expect((await timelock.proposals(txHash)).state).to.equal(
+            STATE.UNKNOWN
+          );
+          expect(await target1.balanceOf(governor)).to.equal(1);
           expect(await target2.allowance(timelock.address, governor)).to.equal(
             1
-          )
-        })
+          );
+        });
 
         it("executes a repeated transaction", async () => {
           await expect(await timelock.executeRepeated(targets, data, 1))
@@ -290,15 +289,17 @@ describe("Timelock", async function () {
             //          .withArgs(txHash, targets, data, eta)
             .to.emit(target1, "Transfer")
             //          .withArgs(null, governor, 1)
-            .to.emit(target2, "Approval")
+            .to.emit(target2, "Approval");
           //          .withArgs(governor, governor, 1)
-          expect((await timelock.proposals(txHash2)).state).to.equal(STATE.UNKNOWN)
-          expect(await target1.balanceOf(governor)).to.equal(1)
+          expect((await timelock.proposals(txHash2)).state).to.equal(
+            STATE.UNKNOWN
+          );
+          expect(await target1.balanceOf(governor)).to.equal(1);
           expect(await target2.allowance(timelock.address, governor)).to.equal(
             1
-          )
-        })
-      })
-    })
-  })
-})
+          );
+        });
+      });
+    });
+  });
+});
