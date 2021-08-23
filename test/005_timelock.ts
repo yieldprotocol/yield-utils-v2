@@ -61,14 +61,14 @@ describe("Timelock", async function () {
     ({ timestamp } = await ethers.provider.getBlock("latest"));
     now = BigNumber.from(timestamp);
 
-    const targets = [timelock.address];
-    const data = [
-      timelock.interface.encodeFunctionData("setDelay", [2 * 24 * 60 * 60]),
-    ];
-    const txHash = await timelock.callStatic.propose(targets, data);
-    await timelock.propose(targets, data);
+    const setDelayCall = [
+      { target: timelock.address, data: timelock.interface.encodeFunctionData("setDelay", [2 * 24 * 60 * 60])},
+    ]
+
+    const txHash = await timelock.callStatic.propose(setDelayCall);
+    await timelock.propose(setDelayCall);
     await timelock.approve(txHash);
-    await timelock.execute(targets, data);
+    await timelock.execute(setDelayCall);
   });
 
   it("doesn't allow governance changes to governor", async () => {
@@ -84,28 +84,22 @@ describe("Timelock", async function () {
     ).to.be.revertedWith("Only admin");
   });
 
-  it("doesn't allow mismatched inputs", async () => {
-    const targets = [target1.address, target2.address];
-    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])];
-    await expect(timelock.propose(targets, data)).to.be.revertedWith(
-      "Mismatched inputs"
-    );
-  });
-
   it("only the governor can propose", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])];
+    const functionCalls = [
+      { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
+    ]
     await expect(
-      timelock.connect(otherAcc).propose(targets, data)
+      timelock.connect(otherAcc).propose(functionCalls)
     ).to.be.revertedWith("Access denied");
   });
 
   it("proposes a transaction", async () => {
-    const targets = [target1.address];
-    const data = [target1.interface.encodeFunctionData("mint", [governor, 1])];
-    const txHash = await timelock.callStatic.propose(targets, data);
+    const functionCalls = [
+      { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
+    ]
+    const txHash = await timelock.callStatic.propose(functionCalls);
 
-    await expect(await timelock.propose(targets, data)).to.emit(
+    await expect(await timelock.propose(functionCalls)).to.emit(
       timelock,
       "Proposed"
     );
@@ -115,34 +109,28 @@ describe("Timelock", async function () {
   });
 
   describe("with a proposed transaction", async () => {
-    let targets: string[];
-    let data: string[];
+    let functionCalls: { target: string; data: string; }[];
     let txHash: string;
 
     beforeEach(async () => {
-      targets = [target1.address, target2.address];
-      data = [
-        target1.interface.encodeFunctionData("mint", [governor, 1]),
-        target2.interface.encodeFunctionData("approve", [governor, 1]),
-      ];
-      txHash = await timelock.callStatic.propose(targets, data);
-      await timelock.propose(targets, data);
+      functionCalls = [
+        { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
+        { target: target2.address, data: target1.interface.encodeFunctionData("approve", [governor, 1])},
+      ]
+      txHash = await timelock.callStatic.propose(functionCalls);
+      await timelock.propose(functionCalls);
     });
 
     it("doesn't allow to propose the same transaction twice", async () => {
-      await expect(timelock.propose(targets, data)).to.be.revertedWith(
+      await expect(timelock.propose(functionCalls)).to.be.revertedWith(
         "Already proposed."
       );
     });
 
     it("allows proposing repeated transactions", async () => {
-      const txHash2 = await timelock.callStatic.proposeRepeated(
-        targets,
-        data,
-        1
-      );
+      const txHash2 = await timelock.callStatic.proposeRepeated(functionCalls, 1);
 
-      await expect(await timelock.proposeRepeated(targets, data, 1)).to.emit(
+      await expect(await timelock.proposeRepeated(functionCalls, 1)).to.emit(
         timelock,
         "Proposed"
       );
@@ -188,32 +176,31 @@ describe("Timelock", async function () {
         eta = now.add(await timelock.delay()).add(100);
         await timelock.approve(txHash);
 
-        txHash2 = await timelock.callStatic.proposeRepeated(targets, data, 1);
-        await timelock.proposeRepeated(targets, data, 1);
+        txHash2 = await timelock.callStatic.proposeRepeated(functionCalls, 1);
+        await timelock.proposeRepeated(functionCalls, 1);
         await timelock.approve(txHash2);
 
-        txHash3 = await timelock.callStatic.proposeRepeated(targets, data, 2);
-        await timelock.proposeRepeated(targets, data, 2);
+        txHash3 = await timelock.callStatic.proposeRepeated(functionCalls, 2);
+        await timelock.proposeRepeated(functionCalls, 2);
       });
 
       it("only the governor can execute", async () => {
         await expect(
-          timelock.connect(otherAcc).execute(targets, data)
+          timelock.connect(otherAcc).execute(functionCalls)
         ).to.be.revertedWith("Access denied");
       });
 
       it("doesn't allow to execute before eta", async () => {
-        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+        await expect(timelock.execute(functionCalls)).to.be.revertedWith(
           "ETA not reached"
         );
       });
 
       it("doesn't allow to execute if not approved", async () => {
-        const targets = [target1.address];
-        const data = [
-          target1.interface.encodeFunctionData("mint", [governor, 1]),
-        ];
-        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+        const functionCalls = [
+          { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
+        ]
+        await expect(timelock.execute(functionCalls)).to.be.revertedWith(
           "Not approved."
         );
       });
@@ -229,7 +216,7 @@ describe("Timelock", async function () {
             .toNumber(),
         ]);
 
-        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+        await expect(timelock.execute(functionCalls)).to.be.revertedWith(
           "Proposal is stale"
         );
 
@@ -237,19 +224,18 @@ describe("Timelock", async function () {
       });
 
       it("doesn't allow to execute to a non-contract", async () => {
-        const targets = [governor];
-        const data = [
-          target1.interface.encodeFunctionData("mint", [governor, 1]),
-        ];
+        const functionCalls = [
+          { target: governor, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
+        ]
 
-        const tmpTxHash = await timelock.callStatic.propose(targets, data);
-        await timelock.propose(targets, data);
+        const tmpTxHash = await timelock.callStatic.propose(functionCalls);
+        await timelock.propose(functionCalls);
         await timelock.approve(tmpTxHash);
 
         const snapshotId = await ethers.provider.send("evm_snapshot", []);
         await ethers.provider.send("evm_mine", [eta.add(100).toNumber()]);
 
-        await expect(timelock.execute(targets, data)).to.be.revertedWith(
+        await expect(timelock.execute(functionCalls)).to.be.revertedWith(
           "Call to a non-contract"
         );
 
@@ -267,7 +253,7 @@ describe("Timelock", async function () {
         });
 
         it("executes a transaction", async () => {
-          await expect(await timelock.execute(targets, data))
+          await expect(await timelock.execute(functionCalls))
             .to.emit(timelock, "Executed")
             //          .withArgs(txHash, targets, data, eta)
             .to.emit(target1, "Transfer")
@@ -284,7 +270,7 @@ describe("Timelock", async function () {
         });
 
         it("executes a repeated transaction", async () => {
-          await expect(await timelock.executeRepeated(targets, data, 1))
+          await expect(await timelock.executeRepeated(functionCalls, 1))
             .to.emit(timelock, "Executed")
             //          .withArgs(txHash, targets, data, eta)
             .to.emit(target1, "Transfer")
