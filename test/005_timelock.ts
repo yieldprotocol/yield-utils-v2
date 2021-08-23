@@ -62,8 +62,13 @@ describe("Timelock", async function () {
     now = BigNumber.from(timestamp);
 
     const setDelayCall = [
-      { target: timelock.address, data: timelock.interface.encodeFunctionData("setDelay", [2 * 24 * 60 * 60])},
-    ]
+      {
+        target: timelock.address,
+        data: timelock.interface.encodeFunctionData("setDelay", [
+          2 * 24 * 60 * 60,
+        ]),
+      },
+    ];
 
     const txHash = await timelock.callStatic.propose(setDelayCall);
     await timelock.propose(setDelayCall);
@@ -86,8 +91,11 @@ describe("Timelock", async function () {
 
   it("only the governor can propose", async () => {
     const functionCalls = [
-      { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
-    ]
+      {
+        target: target1.address,
+        data: target1.interface.encodeFunctionData("mint", [governor, 1]),
+      },
+    ];
     await expect(
       timelock.connect(otherAcc).propose(functionCalls)
     ).to.be.revertedWith("Access denied");
@@ -95,8 +103,11 @@ describe("Timelock", async function () {
 
   it("proposes a transaction", async () => {
     const functionCalls = [
-      { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
-    ]
+      {
+        target: target1.address,
+        data: target1.interface.encodeFunctionData("mint", [governor, 1]),
+      },
+    ];
     const txHash = await timelock.callStatic.propose(functionCalls);
 
     await expect(await timelock.propose(functionCalls)).to.emit(
@@ -109,14 +120,20 @@ describe("Timelock", async function () {
   });
 
   describe("with a proposed transaction", async () => {
-    let functionCalls: { target: string; data: string; }[];
+    let functionCalls: { target: string; data: string }[];
     let txHash: string;
 
     beforeEach(async () => {
       functionCalls = [
-        { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
-        { target: target2.address, data: target1.interface.encodeFunctionData("approve", [governor, 1])},
-      ]
+        {
+          target: target1.address,
+          data: target1.interface.encodeFunctionData("mint", [governor, 1]),
+        },
+        {
+          target: target2.address,
+          data: target1.interface.encodeFunctionData("approve", [governor, 1]),
+        },
+      ];
       txHash = await timelock.callStatic.propose(functionCalls);
       await timelock.propose(functionCalls);
     });
@@ -128,7 +145,10 @@ describe("Timelock", async function () {
     });
 
     it("allows proposing repeated transactions", async () => {
-      const txHash2 = await timelock.callStatic.proposeRepeated(functionCalls, 1);
+      const txHash2 = await timelock.callStatic.proposeRepeated(
+        functionCalls,
+        1
+      );
 
       await expect(await timelock.proposeRepeated(functionCalls, 1)).to.emit(
         timelock,
@@ -198,8 +218,11 @@ describe("Timelock", async function () {
 
       it("doesn't allow to execute if not approved", async () => {
         const functionCalls = [
-          { target: target1.address, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
-        ]
+          {
+            target: target1.address,
+            data: target1.interface.encodeFunctionData("mint", [governor, 1]),
+          },
+        ];
         await expect(timelock.execute(functionCalls)).to.be.revertedWith(
           "Not approved."
         );
@@ -225,8 +248,11 @@ describe("Timelock", async function () {
 
       it("doesn't allow to execute to a non-contract", async () => {
         const functionCalls = [
-          { target: governor, data: target1.interface.encodeFunctionData("mint", [governor, 1])},
-        ]
+          {
+            target: governor,
+            data: target1.interface.encodeFunctionData("mint", [governor, 1]),
+          },
+        ];
 
         const tmpTxHash = await timelock.callStatic.propose(functionCalls);
         await timelock.propose(functionCalls);
