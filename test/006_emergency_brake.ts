@@ -33,11 +33,11 @@ describe("EmergencyBrake", async function () {
     EXECUTED: 2,
   };
 
-  const MINT = id("mint(address,uint256)");
-  const BURN = id("burn(address,uint256)");
-  const APPROVE = id("approve(address,uint256)");
-  const TRANSFER = id("transfer(address,uint256)");
-  const ROOT = "0x00000000";
+  let MINT: string
+  let BURN: string
+  let APPROVE: string
+  let TRANSFER: string
+  const ROOT = "0x00000000"
 
   let permissions: { contact: string; signatures: string[] }[];
 
@@ -62,6 +62,11 @@ describe("EmergencyBrake", async function () {
       planner,
       executor,
     ])) as EmergencyBrake;
+
+    MINT = id(contact1.interface, "mint(address,uint256)");
+    BURN = id(contact1.interface, "burn(address,uint256)");
+    APPROVE = id(contact1.interface, "approve(address,uint256)");
+    TRANSFER = id(contact1.interface, "transfer(address,uint256)");  
 
     await contact1.grantRoles([MINT, BURN], target);
     await contact2.grantRoles([TRANSFER, APPROVE], target);

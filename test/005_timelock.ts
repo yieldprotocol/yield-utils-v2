@@ -82,10 +82,10 @@ describe("Timelock", async function () {
       "Only admin"
     );
     await expect(
-      timelock.grantRole(id("propose(address[],bytes[])"), governor)
+      timelock.grantRole(id(timelock.interface, "setDelay(uint32)"), governor)
     ).to.be.revertedWith("Only admin");
     await expect(
-      timelock.revokeRole(id("propose(address[],bytes[])"), governor)
+      timelock.revokeRole(id(timelock.interface, "setDelay(uint32)"), governor)
     ).to.be.revertedWith("Only admin");
   });
 
