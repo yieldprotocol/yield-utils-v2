@@ -19,8 +19,8 @@ describe("Access Control", function () {
   let restricted: Restricted;
   let restrictedFromOther: Restricted;
 
-  const role = id("mint(address,uint256)");
-  const role2 = id("burn(address,uint256)");
+  let role: string
+  let role2: string
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -36,6 +36,8 @@ describe("Access Control", function () {
       "Restricted ERC20",
       "AUTH",
     ])) as Restricted;
+    role = id(restricted.interface, "mint(address,uint256)")
+    role2 = id(restricted.interface, "burn(address,uint256)")
     restrictedFromOther = restricted.connect(otherAcc);
   });
 
