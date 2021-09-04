@@ -64,7 +64,10 @@ describe("ERC20Rewards", async function () {
     ])) as ERC20Rewards;
 
     await rewards.grantRoles(
-      [id(rewards.interface, "setRewardsToken(address)"), id(rewards.interface, "setRewards(uint32,uint32,uint96)")],
+      [
+        id(rewards.interface, "setRewardsToken(address)"),
+        id(rewards.interface, "setRewards(uint32,uint32,uint96)"),
+      ],
       owner
     );
   });

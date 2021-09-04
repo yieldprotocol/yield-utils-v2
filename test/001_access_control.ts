@@ -19,8 +19,8 @@ describe("Access Control", function () {
   let restricted: Restricted;
   let restrictedFromOther: Restricted;
 
-  let role: string
-  let role2: string
+  let role: string;
+  let role2: string;
 
   before(async () => {
     const signers = await ethers.getSigners();
@@ -34,10 +34,10 @@ describe("Access Control", function () {
   beforeEach(async () => {
     restricted = (await deployContract(ownerAcc, RestrictedERC20MockArtifact, [
       "Restricted ERC20",
-      "AUTH"
+      "AUTH",
     ])) as Restricted;
-    role = id(restricted.interface, "mint(address,uint256)")
-    role2 = id(restricted.interface, "burn(address,uint256)")
+    role = id(restricted.interface, "mint(address,uint256)");
+    role2 = id(restricted.interface, "burn(address,uint256)");
     restrictedFromOther = restricted.connect(otherAcc);
   });
 

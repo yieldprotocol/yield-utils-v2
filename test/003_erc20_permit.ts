@@ -5,7 +5,7 @@ import {
   getPermitDigest,
   getDomainSeparator,
   sign,
-  privateKey0
+  privateKey0,
 } from "../src/signatures";
 
 import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json";
@@ -42,7 +42,7 @@ describe("ERC20Permit", function () {
   beforeEach(async () => {
     erc20 = (await deployContract(ownerAcc, ERC20MockArtifact, [
       "Test",
-      "TST"
+      "TST",
     ])) as ERC20;
     name = await erc20.name();
   });
@@ -59,7 +59,7 @@ describe("ERC20Permit", function () {
     const approve = {
       owner: owner,
       spender: user,
-      value: 100
+      value: 100,
     };
 
     // deadline as much as you want in the future

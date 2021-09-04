@@ -38,7 +38,7 @@ describe("ERC20", function () {
   beforeEach(async () => {
     erc20 = (await deployContract(deployerAcc, ERC20MockArtifact, [
       "Test",
-      "TST"
+      "TST",
     ])) as ERC20;
   });
 
