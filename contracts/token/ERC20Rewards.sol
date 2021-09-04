@@ -18,6 +18,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
     using CastU256U32 for uint256;
     using CastU256U128 for uint256;
 
+    event RewardsTokenSet(IERC20 token);
     event RewardsSet(uint32 start, uint32 end, uint256 rate);
     event RewardsPerTokenUpdated(uint256 accumulated);
     event UserRewardsUpdated(address user, uint256 userRewards, uint256 paidRewardPerToken);
@@ -39,21 +40,30 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         uint128 checkpoint;                             // RewardsPerToken the last time the user rewards were updated
     }
 
-    IERC20 immutable public rewardsToken;               // Token used as rewards
+    IERC20 public rewardsToken;                         // Token used as rewards
     RewardsPeriod public rewardsPeriod;                 // Period in which rewards are accumulated by users
 
     RewardsPerToken public rewardsPerToken;             // Accumulator to track rewards per token               
     mapping (address => UserRewards) public rewards;    // Rewards accumulated by users
     
-    constructor(string memory name, string memory symbol, uint8 decimals, IERC20 rewardsToken_)
+    constructor(string memory name, string memory symbol, uint8 decimals)
         ERC20Permit(name, symbol, decimals)
-    { 
-        rewardsToken = rewardsToken_;
-    }
+    { }
 
     /// @dev Return the earliest of two timestamps
     function earliest(uint32 x, uint32 y) internal pure returns (uint32 z) {
         z = (x < y) ? x : y;
+    }
+
+    /// @dev Set a rewards token.
+    /// @notice Careful, this can only be done once.
+    function setRewardsToken(IERC20 rewardsToken_)
+        external
+        auth
+    {
+        require(rewardsToken == IERC20(address(0)), "Rewards token already set");
+        rewardsToken = rewardsToken_;
+        emit RewardsTokenSet(rewardsToken_);
     }
 
     /// @dev Set a rewards schedule
@@ -64,6 +74,10 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         require(
             start <= end,
             "Incorrect input"
+        );
+        require(
+            rewardsToken != IERC20(address(0)),
+            "Rewards token not set"
         );
         // A new rewards program can be set if one is not running
         require(
