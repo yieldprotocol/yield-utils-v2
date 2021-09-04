@@ -55,16 +55,18 @@ describe("ERC20Rewards", async function () {
   beforeEach(async () => {
     governance = (await deployContract(ownerAcc, ERC20MockArtifact, [
       "Governance Token",
-      "GOV"
+      "GOV",
     ])) as ERC20;
     rewards = (await deployContract(ownerAcc, ERC20RewardsMockArtifact, [
       "Token with rewards",
       "REW",
       18,
-      governance.address
     ])) as ERC20Rewards;
 
-    await rewards.grantRoles([id("setRewards(uint32,uint32,uint96)")], owner);
+    await rewards.grantRoles(
+      [id(rewards.interface, "setRewardsToken(address)"), id(rewards.interface, "setRewards(uint32,uint32,uint96)")],
+      owner
+    );
   });
 
   it("mints, transfers, burns", async () => {
@@ -88,6 +90,18 @@ describe("ERC20Rewards", async function () {
   });
 
   it("sets a rewards token and program", async () => {
+    await expect(rewards.setRewards(1, 2, 3)).to.be.revertedWith(
+      "Rewards token not set"
+    );
+
+    await expect(rewards.setRewardsToken(governance.address))
+      .to.emit(rewards, "RewardsTokenSet")
+      .withArgs(governance.address);
+
+    await expect(rewards.setRewardsToken(rewards.address)).to.be.revertedWith(
+      "Rewards token already set"
+    );
+
     await expect(rewards.setRewards(1, 2, 3))
       .to.emit(rewards, "RewardsSet")
       .withArgs(1, 2, 3);
@@ -117,6 +131,7 @@ describe("ERC20Rewards", async function () {
     });
 
     beforeEach(async () => {
+      await rewards.setRewardsToken(governance.address);
       await rewards.setRewards(start, end, rate);
       await governance.mint(rewards.address, WAD);
       await rewards.mint(user1, WAD); // So that total supply is not zero
