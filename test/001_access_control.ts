@@ -34,7 +34,7 @@ describe("Access Control", function () {
   beforeEach(async () => {
     restricted = (await deployContract(ownerAcc, RestrictedERC20MockArtifact, [
       "Restricted ERC20",
-      "AUTH",
+      "AUTH"
     ])) as Restricted;
     restrictedFromOther = restricted.connect(otherAcc);
   });

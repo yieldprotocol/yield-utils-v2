@@ -55,13 +55,13 @@ describe("ERC20Rewards", async function () {
   beforeEach(async () => {
     governance = (await deployContract(ownerAcc, ERC20MockArtifact, [
       "Governance Token",
-      "GOV",
+      "GOV"
     ])) as ERC20;
     rewards = (await deployContract(ownerAcc, ERC20RewardsMockArtifact, [
       "Token with rewards",
       "REW",
       18,
-      governance.address,
+      governance.address
     ])) as ERC20Rewards;
 
     await rewards.grantRoles([id("setRewards(uint32,uint32,uint96)")], owner);
