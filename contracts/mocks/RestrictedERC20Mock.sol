@@ -19,4 +19,9 @@ contract RestrictedERC20Mock is AccessControl(), ERC20Permit  {
     function burn(address from, uint256 amount) public virtual auth {
         _burn(from, amount);
     }
+
+    // Uncomment this function to see collision protection for ROOT
+    function anzevipy() public view {
+        console.logBytes4(msg.sig);
+    }
 }

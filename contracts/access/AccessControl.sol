@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
-
+import "hardhat/console.sol";
 
 /**
  * @dev Contract module that allows children to implement role-based access
@@ -45,7 +45,8 @@ contract AccessControl {
     mapping (bytes4 => RoleData) private _roles;
 
     bytes4 public constant ROOT = 0x00000000;
-    bytes4 public constant LOCK = 0xFFFFFFFF; // Used to disable further permissioning of a function
+    bytes4 public constant ROOT4146650865 = 0x00000000; // Collision protection for ROOT, test with adfepixw()
+    bytes4 public constant LOCK = 0xFFFFFFFF;           // Used to disable further permissioning of a function
 
     /**
      * @dev Emitted when `newAdminRole` is set as ``role``'s admin role
