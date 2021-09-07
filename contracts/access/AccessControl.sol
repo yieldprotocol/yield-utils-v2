@@ -45,8 +45,9 @@ contract AccessControl {
     mapping (bytes4 => RoleData) private _roles;
 
     bytes4 public constant ROOT = 0x00000000;
-    bytes4 public constant ROOT4146650865 = 0x00000000; // Collision protection for ROOT, test with adfepixw()
+    bytes4 public constant ROOT4146650865 = 0x00000000; // Collision protection for ROOT, test with ROOT12007226833()
     bytes4 public constant LOCK = 0xFFFFFFFF;           // Used to disable further permissioning of a function
+    bytes4 public constant LOCK8605463013 = 0xFFFFFFFF; // Collision protection for LOCK, test with LOCK10462387368()
 
     /**
      * @dev Emitted when `newAdminRole` is set as ``role``'s admin role

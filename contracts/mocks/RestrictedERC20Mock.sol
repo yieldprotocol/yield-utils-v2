@@ -21,7 +21,12 @@ contract RestrictedERC20Mock is AccessControl(), ERC20Permit  {
     }
 
     // Uncomment this function to see collision protection for ROOT
-    function anzevipy() public view {
+    /* function ROOT12007226833() public view {
         console.logBytes4(msg.sig);
-    }
+    } */
+
+    // Uncomment this function to see collision protection for LOCK
+    /* function LOCK10462387368() public view {
+        console.logBytes4(msg.sig);
+    } */
 }
