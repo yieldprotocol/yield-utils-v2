@@ -88,13 +88,14 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             // AccessControl.sol doesn't revert if revoking permissions that haven't been granted
             // If we don't check, planner and executor can collude to gain access to contacts
             for (uint256 j = 0; j < permissions[i].signatures.length; j++){
+                AccessControl contact = AccessControl(permissions[i].contact);
+                bytes4 permission = permissions[i].signatures[j];
                 require(
-                    AccessControl(permissions[i].contact).hasRole(permissions[i].signatures[j], target),
+                    contact.hasRole(permission, target),
                     "Permission not found"
                 );
+                contact.revokeRole(permission, target);
             }
-            // Now revoke the permissions
-            AccessControl(permissions[i].contact).revokeRoles(permissions[i].signatures, target);
         }
         emit Executed(txHash, target);
     }
@@ -108,7 +109,11 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         plans[txHash] = State.PLANNED;
 
         for (uint256 i = 0; i < permissions.length; i++){
-            AccessControl(permissions[i].contact).grantRoles(permissions[i].signatures, target);
+            for (uint256 j = 0; j < permissions[i].signatures.length; j++){
+                AccessControl contact = AccessControl(permissions[i].contact);
+                bytes4 permission = permissions[i].signatures[j];
+                contact.grantRole(permission, target);
+            }
         }
         emit Restored(txHash, target);
     }
