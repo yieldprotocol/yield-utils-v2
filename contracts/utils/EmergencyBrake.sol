@@ -12,8 +12,8 @@ interface IEmergencyBrake {
 
     function plan(address target, Permission[] calldata permissions) external returns (bytes32 txHash);
     function cancel(bytes32 txHash) external;
-    function execute(address target, Permission[] calldata permissions) external;
-    function restore(address target, Permission[] calldata permissions) external;
+    function execute(bytes32 txHash) external;
+    function restore(bytes32 txHash) external;
     function terminate(bytes32 txHash) external;
 }
 
@@ -28,13 +28,19 @@ interface IEmergencyBrake {
 contract EmergencyBrake is AccessControl, IEmergencyBrake {
     enum State {UNPLANNED, PLANNED, EXECUTED}
 
+    struct Plan {
+        State state;
+        address target;
+        bytes permissions;
+    }
+
     event Planned(bytes32 indexed txHash, address indexed target);
     event Cancelled(bytes32 indexed txHash);
     event Executed(bytes32 indexed txHash, address indexed target);
     event Restored(bytes32 indexed txHash, address indexed target);
     event Terminated(bytes32 indexed txHash);
 
-    mapping (bytes32 => State) public plans;
+    mapping (bytes32 => Plan) public plans;
 
     constructor(address planner, address executor) AccessControl() {
         _grantRole(IEmergencyBrake.plan.selector, planner);
@@ -51,6 +57,8 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
         returns (bytes32 txHash)
     {
+        txHash = keccak256(abi.encode(target, permissions));
+        require(plans[txHash].state == State.UNPLANNED, "Emergency already planned for.");
 
         // Removing or granting ROOT permissions is out of bounds for EmergencyBrake
         for (uint256 i = 0; i < permissions.length; i++){
@@ -61,9 +69,12 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
                 );
             }
         }
-        txHash = keccak256(abi.encode(target, permissions));
-        require(plans[txHash] == State.UNPLANNED, "Emergency already planned for.");
-        plans[txHash] = State.PLANNED;
+
+        plans[txHash] = Plan({
+            state: State.PLANNED,
+            target: target,
+            permissions: abi.encode(permissions)
+        });
         emit Planned(txHash, target);
     }
 
@@ -71,59 +82,65 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function cancel(bytes32 txHash)
         external override auth
     {
-        require(plans[txHash] == State.PLANNED, "Emergency not planned for.");
-        plans[txHash] = State.UNPLANNED;
+        require(plans[txHash].state == State.PLANNED, "Emergency not planned for.");
+        delete plans[txHash];
         emit Cancelled(txHash);
     }
 
     /// @dev Execute an access removal transaction
-    function execute(address target, Permission[] calldata permissions)
+    function execute(bytes32 txHash)
         external override auth
     {
-        bytes32 txHash = keccak256(abi.encode(target, permissions));
-        require(plans[txHash] == State.PLANNED, "Emergency not planned for.");
-        plans[txHash] = State.EXECUTED;
+        Plan memory plan_ = plans[txHash];
+        require(plan_.state == State.PLANNED, "Emergency not planned for.");
+        plans[txHash].state = State.EXECUTED;
 
-        for (uint256 i = 0; i < permissions.length; i++){
+        Permission[] memory permissions_ = abi.decode(plan_.permissions, (Permission[]));
+
+        for (uint256 i = 0; i < permissions_.length; i++){
             // AccessControl.sol doesn't revert if revoking permissions that haven't been granted
             // If we don't check, planner and executor can collude to gain access to contacts
-            for (uint256 j = 0; j < permissions[i].signatures.length; j++){
-                AccessControl contact = AccessControl(permissions[i].contact);
-                bytes4 permission = permissions[i].signatures[j];
+            Permission memory permission_ = permissions_[i]; 
+            for (uint256 j = 0; j < permission_.signatures.length; j++){
+                AccessControl contact = AccessControl(permission_.contact);
+                bytes4 signature_ = permission_.signatures[j];
                 require(
-                    contact.hasRole(permission, target),
+                    contact.hasRole(signature_, plan_.target),
                     "Permission not found"
                 );
-                contact.revokeRole(permission, target);
+                contact.revokeRole(signature_, plan_.target);
             }
         }
-        emit Executed(txHash, target);
+        emit Executed(txHash, plan_.target);
     }
 
     /// @dev Restore the orchestration from an isolated target
-    function restore(address target, Permission[] calldata permissions)
+    function restore(bytes32 txHash)
         external override auth
     {
-        bytes32 txHash = keccak256(abi.encode(target, permissions));
-        require(plans[txHash] == State.EXECUTED, "Emergency plan not executed.");
-        plans[txHash] = State.PLANNED;
+        Plan memory plan_ = plans[txHash];
+        require(plan_.state == State.EXECUTED, "Emergency plan not executed.");
+        plans[txHash].state = State.PLANNED;
 
-        for (uint256 i = 0; i < permissions.length; i++){
-            for (uint256 j = 0; j < permissions[i].signatures.length; j++){
-                AccessControl contact = AccessControl(permissions[i].contact);
-                bytes4 permission = permissions[i].signatures[j];
-                contact.grantRole(permission, target);
+        Permission[] memory permissions_ = abi.decode(plan_.permissions, (Permission[]));
+
+        for (uint256 i = 0; i < permissions_.length; i++){
+            Permission memory permission_ = permissions_[i]; 
+            for (uint256 j = 0; j < permission_.signatures.length; j++){
+                AccessControl contact = AccessControl(permission_.contact);
+                bytes4 signature_ = permission_.signatures[j];
+                contact.grantRole(signature_, plan_.target);
             }
         }
-        emit Restored(txHash, target);
+        emit Restored(txHash, plan_.target);
     }
 
     /// @dev Remove the restoring option from an isolated target
     function terminate(bytes32 txHash)
         external override auth
     {
-        require(plans[txHash] == State.EXECUTED, "Emergency plan not executed.");
-        plans[txHash] = State.UNPLANNED;
+        require(plans[txHash].state == State.EXECUTED, "Emergency plan not executed.");
+        delete plans[txHash];
         emit Terminated(txHash);
     }
 }
