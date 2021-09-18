@@ -52,6 +52,14 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         // Granting roles (plan, cancel, execute, restore, terminate) is reserved to ROOT
     }
 
+    /// @dev Compute the hash of a plan
+    function hash(address target, Permission[] calldata permissions)
+        external pure
+        returns (bytes32 txHash)
+    {
+        txHash = keccak256(abi.encode(target, permissions));
+    }
+
     /// @dev Register an access removal transaction
     function plan(address target, Permission[] calldata permissions)
         external override auth

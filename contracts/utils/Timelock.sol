@@ -73,6 +73,28 @@ contract Timelock is ITimelock, AccessControl {
         emit DelaySet(delay_);
     }
 
+    /// @dev Compute the hash for a proposal
+    function hash(Call[] calldata functionCalls)
+        external pure returns (bytes32 txHash)
+    {
+        return _hash(functionCalls, 0);
+    }
+
+    /// @dev Compute the hash for a proposal, with other identical proposals existing
+    /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
+    function hashRepeated(Call[] calldata functionCalls, uint256 salt)
+        external pure returns (bytes32 txHash)
+    {
+        return _hash(functionCalls, salt);
+    }
+
+    /// @dev Compute the hash for a proposal
+    function _hash(Call[] calldata functionCalls, uint256 salt)
+        private pure returns (bytes32 txHash)
+    {
+        txHash = keccak256(abi.encode(functionCalls, salt));
+    }
+
     /// @dev Propose a transaction batch for execution
     function propose(Call[] calldata functionCalls)
         external override auth returns (bytes32 txHash)
