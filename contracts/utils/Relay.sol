@@ -14,7 +14,7 @@ contract Relay is Ownable() {
         bytes data;
     }
 
-    /// @dev Execute a series of fuction calls
+    /// @dev Execute a series of function calls
     function execute(Call[] calldata functionCalls)
         external onlyOwner returns (bytes[] memory results)
     {
