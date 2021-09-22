@@ -44,7 +44,7 @@ contract Timelock is ITimelock, AccessControl {
     uint32 public delay;
     mapping (bytes32 => Proposal) public proposals;
 
-    constructor(address governor) AccessControl() {
+    constructor(address governor, address executor) AccessControl() {
         delay = 0; // delay is set to zero initially to allow testing and configuration. Set to a different value to go live.
 
         // Each role in AccessControl.sol is a 1-of-n multisig. It is recommended that trusted individual accounts get `propose`
@@ -55,6 +55,11 @@ contract Timelock is ITimelock, AccessControl {
         _grantRole(ITimelock.approve.selector, governor);
         _grantRole(ITimelock.execute.selector, governor);
         _grantRole(ITimelock.executeRepeated.selector, governor);
+
+        _grantRole(ITimelock.propose.selector, executor);
+        _grantRole(ITimelock.proposeRepeated.selector, executor);
+        _grantRole(ITimelock.execute.selector, executor);
+        _grantRole(ITimelock.executeRepeated.selector, executor);
 
         // Changing the delay must now be executed through this Timelock contract
         _grantRole(ITimelock.setDelay.selector, address(this)); // bytes4(keccak256("setDelay(uint256)"))

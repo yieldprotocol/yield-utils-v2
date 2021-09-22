@@ -22,6 +22,8 @@ describe("Timelock", async function () {
 
   let governorAcc: SignerWithAddress;
   let governor: string;
+  let executorAcc: SignerWithAddress;
+  let executor: string;
   let otherAcc: SignerWithAddress;
   let other: string;
 
@@ -38,7 +40,9 @@ describe("Timelock", async function () {
     const signers = await ethers.getSigners();
     governorAcc = signers[0];
     governor = governorAcc.address;
-    otherAcc = signers[1];
+    executorAcc = signers[1];
+    executor = executorAcc.address;
+    otherAcc = signers[2];
     other = otherAcc.address;
   });
 
@@ -56,7 +60,7 @@ describe("Timelock", async function () {
       "TG2",
     ])) as ERC20;
     timelock = (await deployContract(governorAcc, TimelockArtifact, [
-      governor,
+      governor, executor
     ])) as Timelock;
     ({ timestamp } = await ethers.provider.getBlock("latest"));
     now = BigNumber.from(timestamp);
