@@ -19,7 +19,6 @@ describe("AuthEtherFaucet", async function () {
 
   let faucet: AuthEtherFaucet;
 
-
   beforeEach(async () => {
     const signers = await ethers.getSigners();
     ownerAcc = signers[0];
@@ -30,21 +29,24 @@ describe("AuthEtherFaucet", async function () {
     user = userAcc.address;
 
     faucet = (await deployContract(ownerAcc, AuthEtherFaucetArtifact, [
-      [operator]
+      [operator],
     ])) as AuthEtherFaucet;
 
-    await ownerAcc.sendTransaction({ to: faucet.address, value: '0x1000000000000000000' });
+    await ownerAcc.sendTransaction({
+      to: faucet.address,
+      value: "0x1000000000000000000",
+    });
   });
 
   it("allows to drip", async () => {
-    const userBalance = await ethers.provider.getBalance(user)
-    await faucet.connect(operatorAcc).drip(user, 1)
-    expect(await ethers.provider.getBalance(user)).to.equal(userBalance.add(1))
+    const userBalance = await ethers.provider.getBalance(user);
+    await faucet.connect(operatorAcc).drip(user, 1);
+    expect(await ethers.provider.getBalance(user)).to.equal(userBalance.add(1));
   });
 
   it("allows to drip only to operators", async () => {
-    await expect(
-      faucet.connect(userAcc).drip(user, 1)
-    ).to.be.revertedWith("Access denied");
+    await expect(faucet.connect(userAcc).drip(user, 1)).to.be.revertedWith(
+      "Access denied"
+    );
   });
 });

@@ -10,7 +10,7 @@ contract AuthEtherFaucet is AccessControl {
 
     constructor(address[] memory operators) AccessControl() {
         for (uint256 i = 0; i < operators.length; i++)
-            _grantRole(AuthEtherFaucet.drip.selector, operators[i]);
+            _grantRole(AuthEtherFaucet.drip.selector, operators[i]); // 0x9e353a1e
     }
 
     receive() external payable {}
