@@ -16,7 +16,7 @@ contract Relay is Ownable() {
 
     /// @dev Execute a series of function calls
     function execute(Call[] calldata functionCalls)
-        external onlyOwner returns (bytes[] memory results)
+        external virtual onlyOwner returns (bytes[] memory results)
     {
         results = new bytes[](functionCalls.length);
         for (uint256 i = 0; i < functionCalls.length; i++){

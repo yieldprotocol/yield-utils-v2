@@ -58,7 +58,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
     /// @dev Set a rewards token.
     /// @notice Careful, this can only be done once.
     function setRewardsToken(IERC20 rewardsToken_)
-        external
+        external virtual
         auth
     {
         require(rewardsToken == IERC20(address(0)), "Rewards token already set");
@@ -68,7 +68,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
 
     /// @dev Set a rewards schedule
     function setRewards(uint32 start, uint32 end, uint96 rate)
-        external
+        external virtual
         auth
     {
         require(
@@ -167,7 +167,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
 
     /// @dev Claim all rewards from caller into a given address
     function claim(address to)
-        external
+        external virtual
         returns (uint256 claiming)
     {
         _updateRewardsPerToken();
