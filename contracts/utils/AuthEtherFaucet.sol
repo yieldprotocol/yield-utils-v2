@@ -16,7 +16,7 @@ contract AuthEtherFaucet is AccessControl {
     receive() external payable {}
 
     function drip(address payable to, uint256 amount)
-        external
+        external virtual
         auth
     {
         (bool sent,) = to.call{value: amount}("");

@@ -102,7 +102,7 @@ contract Timelock is ITimelock, AccessControl {
 
     /// @dev Propose a transaction batch for execution
     function propose(Call[] calldata functionCalls)
-        external override auth returns (bytes32 txHash)
+        external override virtual auth returns (bytes32 txHash)
     {
         return _propose(functionCalls, 0);
     }
@@ -110,7 +110,7 @@ contract Timelock is ITimelock, AccessControl {
     /// @dev Propose a transaction batch for execution, with other identical proposals existing
     /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
     function proposeRepeated(Call[] calldata functionCalls, uint256 salt)
-        external override auth returns (bytes32 txHash)
+        external override virtual auth returns (bytes32 txHash)
     {
         return _propose(functionCalls, salt);
     }
@@ -127,7 +127,7 @@ contract Timelock is ITimelock, AccessControl {
 
     /// @dev Approve a proposal and set its eta
     function approve(bytes32 txHash)
-        external override auth returns (uint32 eta)
+        external override virtual auth returns (uint32 eta)
     {
         Proposal memory proposal = proposals[txHash];
         require(proposal.state == STATE.PROPOSED, "Not proposed.");
@@ -140,7 +140,7 @@ contract Timelock is ITimelock, AccessControl {
 
     /// @dev Execute a proposal
     function execute(Call[] calldata functionCalls)
-        external override auth returns (bytes[] memory results)
+        external override virtual auth returns (bytes[] memory results)
     {
         return _execute(functionCalls, 0);
     }
@@ -148,7 +148,7 @@ contract Timelock is ITimelock, AccessControl {
     /// @dev Execute a proposal, among several identical ones
     /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
     function executeRepeated(Call[] calldata functionCalls, uint256 salt)
-        external override auth returns (bytes[] memory results)
+        external override virtual auth returns (bytes[] memory results)
     {
         return _execute(functionCalls, salt);
     }

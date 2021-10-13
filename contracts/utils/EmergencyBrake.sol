@@ -62,7 +62,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     /// @dev Register an access removal transaction
     function plan(address target, Permission[] calldata permissions)
-        external override auth
+        external override virtual auth
         returns (bytes32 txHash)
     {
         txHash = keccak256(abi.encode(target, permissions));
@@ -88,7 +88,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     /// @dev Erase a planned access removal transaction
     function cancel(bytes32 txHash)
-        external override auth
+        external override virtual auth
     {
         require(plans[txHash].state == State.PLANNED, "Emergency not planned for.");
         delete plans[txHash];
@@ -97,7 +97,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     /// @dev Execute an access removal transaction
     function execute(bytes32 txHash)
-        external override auth
+        external override virtual auth
     {
         Plan memory plan_ = plans[txHash];
         require(plan_.state == State.PLANNED, "Emergency not planned for.");
@@ -124,7 +124,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     /// @dev Restore the orchestration from an isolated target
     function restore(bytes32 txHash)
-        external override auth
+        external override virtual auth
     {
         Plan memory plan_ = plans[txHash];
         require(plan_.state == State.EXECUTED, "Emergency plan not executed.");
@@ -145,7 +145,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     /// @dev Remove the restoring option from an isolated target
     function terminate(bytes32 txHash)
-        external override auth
+        external override virtual auth
     {
         require(plans[txHash].state == State.EXECUTED, "Emergency plan not executed.");
         delete plans[txHash];
