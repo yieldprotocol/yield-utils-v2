@@ -86,12 +86,12 @@ describe("EmergencyBrake", async function () {
     await expect(brake.connect(plannerAcc).cancel(txHash)).to.be.revertedWith(
       "Emergency not planned for."
     );
-    await expect(
-      brake.connect(executorAcc).execute(txHash)
-    ).to.be.revertedWith("Emergency not planned for.");
-    await expect(
-      brake.connect(plannerAcc).restore(txHash)
-    ).to.be.revertedWith("Emergency plan not executed.");
+    await expect(brake.connect(executorAcc).execute(txHash)).to.be.revertedWith(
+      "Emergency not planned for."
+    );
+    await expect(brake.connect(plannerAcc).restore(txHash)).to.be.revertedWith(
+      "Emergency plan not executed."
+    );
     await expect(
       brake.connect(plannerAcc).terminate(txHash)
     ).to.be.revertedWith("Emergency plan not executed.");
@@ -178,7 +178,9 @@ describe("EmergencyBrake", async function () {
         { contact: contact1.address, signatures: [MINT, BURN] },
         { contact: contact2.address, signatures: [MINT, BURN] },
       ];
-      const txHash = await brake.connect(plannerAcc).callStatic.plan(target, permissions); // GEt the txHash
+      const txHash = await brake
+        .connect(plannerAcc)
+        .callStatic.plan(target, permissions); // GEt the txHash
       await brake.connect(plannerAcc).plan(target, permissions); // It can be planned, because permissions could be different at execution time
       await expect(
         brake.connect(executorAcc).execute(txHash)
@@ -186,9 +188,10 @@ describe("EmergencyBrake", async function () {
     });
 
     it("plans can be executed", async () => {
-      expect(
-        await brake.connect(executorAcc).execute(txHash)
-      ).to.emit(brake, "Executed");
+      expect(await brake.connect(executorAcc).execute(txHash)).to.emit(
+        brake,
+        "Executed"
+      );
 
       expect(await contact1.hasRole(MINT, target)).to.be.false;
       expect(await contact1.hasRole(BURN, target)).to.be.false;
@@ -219,9 +222,10 @@ describe("EmergencyBrake", async function () {
       });
 
       it("state can be restored", async () => {
-        expect(
-          await brake.connect(plannerAcc).restore(txHash)
-        ).to.emit(brake, "Restored");
+        expect(await brake.connect(plannerAcc).restore(txHash)).to.emit(
+          brake,
+          "Restored"
+        );
 
         expect(await contact1.hasRole(MINT, target)).to.be.true;
         expect(await contact1.hasRole(BURN, target)).to.be.true;
