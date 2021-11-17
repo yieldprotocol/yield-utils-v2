@@ -8,7 +8,7 @@ set -euxo pipefail
 # Fortunately, it easy to make it work if you have dapptools installed
 
 # Step 1: prepare a temporary directory
-TMP=$(mktemp -d -t math)
+TMP=$(mktemp -d -t math.XXXX)
 # (don't forget to clena after yourself)
 trap "rm -rf $TMP" EXIT
 
