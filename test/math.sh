@@ -9,7 +9,7 @@ set -euxo pipefail
 
 # Step 1: prepare a temporary directory
 TMP=$(mktemp -d -t math.XXXX)
-# (don't forget to clena after yourself)
+# (don't forget to clean after yourself)
 trap "rm -rf $TMP" EXIT
 
 PROJECT_ROOT=$(dirname $0)/../
