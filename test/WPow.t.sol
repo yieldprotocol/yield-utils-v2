@@ -71,16 +71,10 @@ contract FixedPointMathLibTest is DSTest {
     // check that wpow(x, y) is roughly the same as manual x * x * ... * x (n times)
     // 'roughly the same': the diff is smaller than result * 1e-15
     //
-    // NOTE: delta_x and n have weird types to reduce the fuzzying space.
-    // With delta_x being unit64, chances of `delta_x < 1e18` is ~5% - we're already wasting 95% of fuzzying attempts
-    // If delta_x was uint256, the chances of `delta_x < 1e18` is 8e-58 %, which is sad
     function testWPowBetween0and2(uint64 delta_x, uint16 n) public {
-        if (delta_x > 1e18) {
-            return;
-        }
-        if (n > 1000) {
-            return;
-        }
+        delta_x = delta_x % 1e18;
+        n = n % 1000; // only test up to n=1k - it's too slow to go beyond that
+        // see the `ffi` note above on how to test above 1k
         testWPowImpl(1e18 + delta_x, n);
         testWPowImpl(1e18 - delta_x, n);
     }
