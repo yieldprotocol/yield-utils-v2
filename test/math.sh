@@ -23,5 +23,5 @@ cp $PROJECT_ROOT/test/*.t.sol $TMP/src
 pushd $TMP
     git init -q .
     dapp install ds-test
-    dapp test --fuzz-runs 100000 -v 5 "$@"
+    dapp test --fuzz-runs 1000 -v 5 "$@"
 popd
