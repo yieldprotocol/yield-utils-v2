@@ -13,48 +13,80 @@ library WPow {
             case 0 {
                 switch n
                 case 0 {
+                    // 0 ** 0 = 1
                     z := baseUnit
                 }
                 default {
+                    // 0 ** n = 0
                     z := 0
                 }
             }
             default {
                 switch mod(n, 2)
                 case 0 {
+                    // If n is even, store baseUnit in z for now.
                     z := baseUnit
                 }
                 default {
+                    // If n is odd, store x in z for now.
                     z := x
                 }
-                let half := div(baseUnit, 2)
+
+                // Shifting right by 1 is like dividing by 2.
+                let half := shr(1, baseUnit)
+
                 for {
-                    n := div(n, 2)
+                    // Shift n right by 1 before looping to halve it.
+                    n := shr(1, n)
                 } n {
-                    n := div(n, 2)
+                    // Shift n right by 1 each iteration to halve it.
+                    n := shr(1, n)
                 } {
-                    let xx := mul(x, x)
-                    if iszero(eq(div(xx, x), x)) {
+                    // Revert immediately if x ** 2 would overflow.
+                    // Equivalent to iszero(eq(div(xx, x), x)) here.
+                    if shr(128, x) {
                         revert(0, 0)
                     }
+
+                    // Store x squared.
+                    let xx := mul(x, x)
+
+                    // Round to the nearest number.
                     let xxRound := add(xx, half)
+
+                    // Revert if xx + half overflowed.
                     if lt(xxRound, xx) {
                         revert(0, 0)
                     }
+
+                    // Set x to scaled xxRound.
                     x := div(xxRound, baseUnit)
+
+                    // If n is even:
                     if mod(n, 2) {
+                        // Compute z * x.
                         let zx := mul(z, x)
-                        if and(iszero(iszero(x)), iszero(eq(div(zx, x), z))) {
-                            revert(0, 0)
+
+                        // If z * x overflowed:
+                        if iszero(eq(div(zx, x), z)) {
+                            // Revert if x is non-zero.
+                            if iszero(iszero(x)) {
+                                revert(0, 0)
+                            }
                         }
+
+                        // Round to the nearest number.
                         let zxRound := add(zx, half)
+
+                        // Revert if zx + half overflowed.
                         if lt(zxRound, zx) {
                             revert(0, 0)
                         }
+
+                        // Return properly scaled zxRound.
                         z := div(zxRound, baseUnit)
                     }
                 }
             }
         }
-    }
 }
