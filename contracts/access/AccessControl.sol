@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
-import "hardhat/console.sol";
 
 /**
  * @dev Contract module that allows children to implement role-based access
