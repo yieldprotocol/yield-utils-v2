@@ -20,6 +20,7 @@ contract OnChainTest {
     ) public {
         (, bytes memory value1) = address1.call{value: 0}(data1);
         (, bytes memory value2) = address2.call{value: 0}(data2);
+
         require(keccak256(value1) == keccak256(value2), "Mismatched value");
     }
 
@@ -30,6 +31,7 @@ contract OnChainTest {
         bytes calldata value2
     ) public {
         (, bytes memory value1) = address1.call{value: 0}(data1);
+
         require(keccak256(value1) == keccak256(value2), "Mismatched value");
     }
 }
