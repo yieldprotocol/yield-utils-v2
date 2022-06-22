@@ -47,4 +47,40 @@ library TransferHelper {
         (bool success, bytes memory data) = to.call{value: value}(new bytes(0));
         if (!success) revert(RevertMsgExtractor.getRevertMsg(data));
     }
+
+    /// @notice Increase the allowance for this token. Prefer this over
+    ///     `approve` to prevent frontrunning.
+    /// @param token The token to increase allowance on.
+    /// @param spender The spender of the tokens.
+    /// @param value The additional allowance to provide to the spender.
+    /// @dev Based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/7c75b8aa89073376fb67d78a40f6d69331092c94/contracts/token/ERC20/utils/SafeERC20.sol
+    function safeIncreaseAllowance(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
+        uint256 newAllowance = token.allowance(address(this), spender) + value;
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
+        if (!(success && (data.length == 0 || abi.decode(data, (bool))))) revert(RevertMsgExtractor.getRevertMsg(data));
+    }
+
+    /// @notice Decrease the allowance for this token.  Prefer this over
+    ///     `approve` to prevent frontrunning.
+    /// @param token The token to decrease allowance on.
+    /// @param spender The spender of the tokens.
+    /// @param value The allowance to remove from the spender.
+    /// @dev Based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/7c75b8aa89073376fb67d78a40f6d69331092c94/contracts/token/ERC20/utils/SafeERC20.sol
+    function safeDecreaseAllowance(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
+        unchecked {
+            uint256 oldAllowance = token.allowance(address(this), spender);
+            require(oldAllowance >= value, "SafeERC20: decreased allowance below zero");
+            uint256 newAllowance = oldAllowance - value;
+            (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
+            if (!(success && (data.length == 0 || abi.decode(data, (bool))))) revert(RevertMsgExtractor.getRevertMsg(data));
+        }
+    }
 }
