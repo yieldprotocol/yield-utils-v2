@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.13;
 
-import '@yield-protocol/utils-v2/access/AccessControl.sol';
+import "@yield-protocol/utils-v2/access/AccessControl.sol";
 
 /**
  * @dev Contract module which allows children to implement an emergency stop
@@ -14,45 +14,38 @@ import '@yield-protocol/utils-v2/access/AccessControl.sol';
  */
 
 contract Pausable is AccessControl {
-
-    /// @dev Emitted when contract's pause state is modified
-    event PausedState(address indexed account, bool indexed state);
-
-    bool public _paused;
-
     
-    /// @dev Initializes the contract in unpaused state.
-    constructor() {
-        _paused = false;
-    }
+  /// @dev Emitted when contract's pause state is modified
+  event PausedState(address indexed account, bool indexed state);
 
-    /// @dev Returns true if the contract is paused, and false otherwise
-    function paused() external view returns (bool) {
-        return _paused;
-    }
+  bool public paused;
 
-    /// @dev Triggers paused state. Requires: contract must not be paused
-    function _pause() internal virtual auth whenNotPaused {
-        _paused = true;
-        emit PausedState(msg.sender, _paused);
-    }
+  /// @dev Initializes the contract in unpaused state.
+  constructor() {
+    paused = false;
+  }
 
-    /// @dev Returns to active state. Requires: contract must be paused
-    function _unpause() internal virtual auth whenPaused {
-        _paused = false;
-        emit PausedState(msg.sender, _paused);
-    }
+  /// @dev Triggers paused state. Requires: contract must not be paused
+  function pause() external auth whenNotPaused {
+    paused = true;
+    emit PausedState(msg.sender, paused);
+  }
 
+  /// @dev Returns to active state. Requires: contract must be paused
+  function unpause() external auth whenPaused {
+    paused = false;
+    emit PausedState(msg.sender, paused);
+  }
 
-    /// @dev Modifier to make a function callable only when the contract is not paused
-    modifier whenNotPaused() {
-        require(_paused == false, "Pausable: paused");
-        _;
-    }
+  /// @dev Modifier to make a function callable only when the contract is not paused
+  modifier whenNotPaused() {
+    require(paused == false, "Pausable: paused");
+    _;
+  }
 
-    /// @dev Modifier to make a function callable only when the contract is paused
-    modifier whenPaused() {
-        require(_paused == true, "Pausable: not paused");
-        _;
-    }
+  /// @dev Modifier to make a function callable only when the contract is paused
+  modifier whenPaused() {
+    require(paused == true, "Pausable: not paused");
+    _;
+  }
 }

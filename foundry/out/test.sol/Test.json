@@ -441,7 +441,7 @@
         1786
       ],
       "Script": [
-        21813
+        22438
       ],
       "StdStorage": [
         3266
@@ -450,13 +450,13 @@
         3168
       ],
       "Vm": [
-        22397
+        23022
       ],
       "console": [
-        30461
+        31086
       ],
       "console2": [
-        38525
+        12571
       ],
       "stdError": [
         3238
@@ -493,7 +493,7 @@
         "file": "./Script.sol",
         "nameLocation": "-1:-1:-1",
         "scope": 4508,
-        "sourceUnit": 21814,
+        "sourceUnit": 22439,
         "symbolAliases": [],
         "unitAlias": ""
       },
@@ -1106,10 +1106,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1253:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -1120,7 +1120,7 @@
                       "lValueRequested": false,
                       "memberName": "warp",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 21827,
+                      "referencedDeclaration": 22452,
                       "src": "1253:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$returns$__$",
@@ -1279,10 +1279,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1350:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -1293,7 +1293,7 @@
                       "lValueRequested": false,
                       "memberName": "warp",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 21827,
+                      "referencedDeclaration": 22452,
                       "src": "1350:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_uint256_$returns$__$",
@@ -1462,10 +1462,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1502:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -1476,7 +1476,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "1502:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -1530,10 +1530,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1535:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -1544,7 +1544,7 @@
                       "lValueRequested": false,
                       "memberName": "prank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22033,
+                      "referencedDeclaration": 22658,
                       "src": "1535:8:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$__$",
@@ -1676,10 +1676,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1625:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -1690,7 +1690,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "1625:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -1744,10 +1744,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1654:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -1758,7 +1758,7 @@
                       "lValueRequested": false,
                       "memberName": "prank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22033,
+                      "referencedDeclaration": 22658,
                       "src": "1654:8:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$__$",
@@ -1955,10 +1955,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1746:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -1969,7 +1969,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "1746:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -2039,10 +2039,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1779:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -2053,7 +2053,7 @@
                       "lValueRequested": false,
                       "memberName": "prank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22045,
+                      "referencedDeclaration": 22670,
                       "src": "1779:8:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$returns$__$",
@@ -2213,10 +2213,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1893:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -2227,7 +2227,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "1893:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -2297,10 +2297,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "1922:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -2311,7 +2311,7 @@
                       "lValueRequested": false,
                       "memberName": "prank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22045,
+                      "referencedDeclaration": 22670,
                       "src": "1922:8:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$returns$__$",
@@ -2536,10 +2536,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2077:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -2550,7 +2550,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "2077:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -2604,10 +2604,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2110:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -2618,7 +2618,7 @@
                       "lValueRequested": false,
                       "memberName": "startPrank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22038,
+                      "referencedDeclaration": 22663,
                       "src": "2110:13:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$__$",
@@ -2750,10 +2750,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2210:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -2764,7 +2764,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "2210:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -2818,10 +2818,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2239:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -2832,7 +2832,7 @@
                       "lValueRequested": false,
                       "memberName": "startPrank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22038,
+                      "referencedDeclaration": 22663,
                       "src": "2239:13:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$__$",
@@ -3029,10 +3029,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2456:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -3043,7 +3043,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "2456:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -3113,10 +3113,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2489:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -3127,7 +3127,7 @@
                       "lValueRequested": false,
                       "memberName": "startPrank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22052,
+                      "referencedDeclaration": 22677,
                       "src": "2489:13:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$returns$__$",
@@ -3287,10 +3287,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2613:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -3301,7 +3301,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "2613:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -3371,10 +3371,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2642:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -3385,7 +3385,7 @@
                       "lValueRequested": false,
                       "memberName": "startPrank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22052,
+                      "referencedDeclaration": 22677,
                       "src": "2642:13:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_address_$returns$__$",
@@ -3538,10 +3538,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2738:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -3552,7 +3552,7 @@
                       "lValueRequested": false,
                       "memberName": "stopPrank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22055,
+                      "referencedDeclaration": 22680,
                       "src": "2738:12:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$__$returns$__$",
@@ -3606,10 +3606,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "2763:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -3620,7 +3620,7 @@
                       "lValueRequested": false,
                       "memberName": "startPrank",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22038,
+                      "referencedDeclaration": 22663,
                       "src": "2763:13:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$__$",
@@ -4171,10 +4171,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "3341:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -4185,7 +4185,7 @@
                       "lValueRequested": false,
                       "memberName": "deal",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22062,
+                      "referencedDeclaration": 22687,
                       "src": "3341:7:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -6789,10 +6789,10 @@
                             "name": "vm",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 21608,
+                            "referencedDeclaration": 22233,
                             "src": "5494:2:2",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_Vm_$22397",
+                              "typeIdentifier": "t_contract$_Vm_$23022",
                               "typeString": "contract Vm"
                             }
                           },
@@ -6803,7 +6803,7 @@
                           "lValueRequested": false,
                           "memberName": "getCode",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 22166,
+                          "referencedDeclaration": 22791,
                           "src": "5494:10:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_nonpayable$_t_string_memory_ptr_$returns$_t_bytes_memory_ptr_$",
@@ -7328,10 +7328,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "5937:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -7342,7 +7342,7 @@
                       "lValueRequested": false,
                       "memberName": "getCode",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22166,
+                      "referencedDeclaration": 22791,
                       "src": "5937:10:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_string_memory_ptr_$returns$_t_bytes_memory_ptr_$",
@@ -7778,10 +7778,10 @@
                             "name": "vm",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 21608,
+                            "referencedDeclaration": 22233,
                             "src": "6468:2:2",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_Vm_$22397",
+                              "typeIdentifier": "t_contract$_Vm_$23022",
                               "typeString": "contract Vm"
                             }
                           },
@@ -7792,7 +7792,7 @@
                           "lValueRequested": false,
                           "memberName": "getCode",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 22166,
+                          "referencedDeclaration": 22791,
                           "src": "6468:10:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_nonpayable$_t_string_memory_ptr_$returns$_t_bytes_memory_ptr_$",
@@ -8355,10 +8355,10 @@
                         "name": "vm",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 21608,
+                        "referencedDeclaration": 22233,
                         "src": "6934:2:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -8369,7 +8369,7 @@
                       "lValueRequested": false,
                       "memberName": "getCode",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22166,
+                      "referencedDeclaration": 22791,
                       "src": "6934:10:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_string_memory_ptr_$returns$_t_bytes_memory_ptr_$",
@@ -18981,7 +18981,7 @@
               "id": 1793,
               "name": "Script",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 21813,
+              "referencedDeclaration": 22438,
               "src": "205:6:2"
             },
             "id": 1794,
@@ -18995,7 +18995,7 @@
         "fullyImplemented": true,
         "linearizedBaseContracts": [
           3168,
-          21813,
+          22438,
           1786
         ],
         "name": "Test",
@@ -20767,7 +20767,7 @@
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_Vm_$22397",
+              "typeIdentifier": "t_contract$_Vm_$23022",
               "typeString": "contract Vm"
             },
             "typeName": {
@@ -20777,13 +20777,13 @@
                 "id": 3289,
                 "name": "Vm",
                 "nodeType": "IdentifierPath",
-                "referencedDeclaration": 22397,
+                "referencedDeclaration": 23022,
                 "src": "16834:2:2"
               },
-              "referencedDeclaration": 22397,
+              "referencedDeclaration": 23022,
               "src": "16834:2:2",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Vm_$22397",
+                "typeIdentifier": "t_contract$_Vm_$23022",
                 "typeString": "contract Vm"
               }
             },
@@ -20985,10 +20985,10 @@
                 "name": "Vm",
                 "nodeType": "Identifier",
                 "overloadedDeclarations": [],
-                "referencedDeclaration": 22397,
+                "referencedDeclaration": 23022,
                 "src": "16869:2:2",
                 "typeDescriptions": {
-                  "typeIdentifier": "t_type$_t_contract$_Vm_$22397_$",
+                  "typeIdentifier": "t_type$_t_contract$_Vm_$23022_$",
                   "typeString": "type(contract Vm)"
                 }
               },
@@ -21003,7 +21003,7 @@
               "src": "16869:59:2",
               "tryCall": false,
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Vm_$22397",
+                "typeIdentifier": "t_contract$_Vm_$23022",
                 "typeString": "contract Vm"
               }
             },
@@ -22105,7 +22105,7 @@
                         "referencedDeclaration": 3305,
                         "src": "18199:12:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -22116,7 +22116,7 @@
                       "lValueRequested": false,
                       "memberName": "record",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22085,
+                      "referencedDeclaration": 22710,
                       "src": "18199:19:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$__$returns$__$",
@@ -22535,7 +22535,7 @@
                         "referencedDeclaration": 3305,
                         "src": "18424:12:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -22546,7 +22546,7 @@
                       "lValueRequested": false,
                       "memberName": "accesses",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 22096,
+                      "referencedDeclaration": 22721,
                       "src": "18424:21:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$returns$_t_array$_t_bytes32_$dyn_memory_ptr_$_t_array$_t_bytes32_$dyn_memory_ptr_$",
@@ -22899,7 +22899,7 @@
                                       "referencedDeclaration": 3305,
                                       "src": "19304:12:2",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_contract$_Vm_$22397",
+                                        "typeIdentifier": "t_contract$_Vm_$23022",
                                         "typeString": "contract Vm"
                                       }
                                     },
@@ -22910,7 +22910,7 @@
                                     "lValueRequested": false,
                                     "memberName": "load",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 21851,
+                                    "referencedDeclaration": 22476,
                                     "src": "19304:17:2",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$returns$_t_bytes32_$",
@@ -23311,7 +23311,7 @@
                                       "referencedDeclaration": 3305,
                                       "src": "19515:12:2",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_contract$_Vm_$22397",
+                                        "typeIdentifier": "t_contract$_Vm_$23022",
                                         "typeString": "contract Vm"
                                       }
                                     },
@@ -23322,7 +23322,7 @@
                                     "lValueRequested": false,
                                     "memberName": "store",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 21860,
+                                    "referencedDeclaration": 22485,
                                     "src": "19515:18:2",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$_t_bytes32_$returns$__$",
@@ -24711,7 +24711,7 @@
                                             "referencedDeclaration": 3305,
                                             "src": "20280:12:2",
                                             "typeDescriptions": {
-                                              "typeIdentifier": "t_contract$_Vm_$22397",
+                                              "typeIdentifier": "t_contract$_Vm_$23022",
                                               "typeString": "contract Vm"
                                             }
                                           },
@@ -24722,7 +24722,7 @@
                                           "lValueRequested": false,
                                           "memberName": "store",
                                           "nodeType": "MemberAccess",
-                                          "referencedDeclaration": 21860,
+                                          "referencedDeclaration": 22485,
                                           "src": "20280:18:2",
                                           "typeDescriptions": {
                                             "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$_t_bytes32_$returns$__$",
@@ -24844,7 +24844,7 @@
                                       "referencedDeclaration": 3305,
                                       "src": "20385:12:2",
                                       "typeDescriptions": {
-                                        "typeIdentifier": "t_contract$_Vm_$22397",
+                                        "typeIdentifier": "t_contract$_Vm_$23022",
                                         "typeString": "contract Vm"
                                       }
                                     },
@@ -24855,7 +24855,7 @@
                                     "lValueRequested": false,
                                     "memberName": "store",
                                     "nodeType": "MemberAccess",
-                                    "referencedDeclaration": 21860,
+                                    "referencedDeclaration": 22485,
                                     "src": "20385:18:2",
                                     "typeDescriptions": {
                                       "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$_t_bytes32_$returns$__$",
@@ -25148,7 +25148,7 @@
                               "referencedDeclaration": 3305,
                               "src": "18523:12:2",
                               "typeDescriptions": {
-                                "typeIdentifier": "t_contract$_Vm_$22397",
+                                "typeIdentifier": "t_contract$_Vm_$23022",
                                 "typeString": "contract Vm"
                               }
                             },
@@ -25159,7 +25159,7 @@
                             "lValueRequested": false,
                             "memberName": "load",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 21851,
+                            "referencedDeclaration": 22476,
                             "src": "18523:17:2",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$returns$_t_bytes32_$",
@@ -30990,7 +30990,7 @@
                         "referencedDeclaration": 3305,
                         "src": "23353:12:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -31001,7 +31001,7 @@
                       "lValueRequested": false,
                       "memberName": "load",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 21851,
+                      "referencedDeclaration": 22476,
                       "src": "23353:17:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$returns$_t_bytes32_$",
@@ -31223,7 +31223,7 @@
                         "referencedDeclaration": 3305,
                         "src": "23578:12:2",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_Vm_$22397",
+                          "typeIdentifier": "t_contract$_Vm_$23022",
                           "typeString": "contract Vm"
                         }
                       },
@@ -31234,7 +31234,7 @@
                       "lValueRequested": false,
                       "memberName": "store",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 21860,
+                      "referencedDeclaration": 22485,
                       "src": "23578:18:2",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$_t_bytes32_$returns$__$",
@@ -31786,7 +31786,7 @@
                             "referencedDeclaration": 3305,
                             "src": "23909:12:2",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_Vm_$22397",
+                              "typeIdentifier": "t_contract$_Vm_$23022",
                               "typeString": "contract Vm"
                             }
                           },
@@ -31797,7 +31797,7 @@
                           "lValueRequested": false,
                           "memberName": "load",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 21851,
+                          "referencedDeclaration": 22476,
                           "src": "23909:17:2",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_nonpayable$_t_address_$_t_bytes32_$returns$_t_bytes32_$",

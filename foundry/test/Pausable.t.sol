@@ -8,61 +8,83 @@ import "src/Pausable.sol";
 import "test/DummyWand.sol";
 
 abstract contract StateZero is Test {
-    
-    event PausedState(address indexed account, bool indexed state);
+  event PausedState(address indexed account, bool indexed state);
 
-    Pausable public pausable;
-    DummyWand public dummyWand;
-    address deployer;
+  Pausable public pausable;
+  DummyWand public dummyWand;
+  address deployer;
 
-    function setUp() public virtual {
-        vm.startPrank(deployer);
+  function setUp() public virtual {
+    vm.startPrank(deployer);
 
-        deployer = address(1);
-        vm.label(deployer, "deployer");
+    deployer = address(1);
+    vm.label(deployer, "deployer");
 
-        pausable = new Pausable();
-        vm.label(address(pausable), "Pausable contract");
+    pausable = new Pausable();
+    vm.label(address(pausable), "Pausable contract");
 
-        dummyWand = new DummyWand();
-        vm.label(address(dummyWand), "DummmyWand contract");
+    dummyWand = new DummyWand();
+    vm.label(address(dummyWand), "DummmyWand contract");
 
-        //... Granting permissions ...
-        dummyWand.grantRole(DummyWand.actionWhenPaused.selector, deployer);
-        dummyWand.grantRole(DummyWand.actionWhenNotPaused.selector, deployer);
-        vm.stopPrank();
-    }   
+    //... Granting permissions ...
+    dummyWand.grantRole(DummyWand.actionWhenPaused.selector, deployer);
+    dummyWand.grantRole(DummyWand.actionWhenNotPaused.selector, deployer);
+    dummyWand.grantRole(Pausable.unpause.selector, deployer);
+    dummyWand.grantRole(Pausable.pause.selector, deployer);
+
+    vm.stopPrank();
+  }
 }
 
 contract StateZeroTest is StateZero {
+  function testNotPaused() public {
+    console2.log("On deployment, _paused == false. Wand active.");
+    vm.prank(deployer);
 
-    function testNotPaused() public {
-        console2.log("On deployment, _paused == false. Wand active.");
-        vm.prank(deployer);
+    vm.expectRevert("Pausable: not paused");
+    dummyWand.actionWhenPaused();
 
-        vm.expectRevert("Pausable: not paused");
-        dummyWand.actionWhenPaused();
+    assertTrue(dummyWand.paused() == false);
+  }
 
-        assertTrue(dummyWand.paused() == false);
-    }
+  function testActive() public {
+    console2.log("On deployment, _paused == false. Contract active.");
 
-    function testActive() public {
-        console2.log("On deployment, _paused == false. Contract active.");
+    vm.prank(deployer);
+    uint256 value = dummyWand.actionWhenNotPaused();
 
-        vm.prank(deployer);
-        uint256 value = dummyWand.actionWhenNotPaused();
-
-        assertTrue(value == 1);
-        assertTrue(dummyWand.paused() == false);
-    }
-
+    assertTrue(value == 2);
+    assertTrue(dummyWand.paused() == false);
+  }
 }
 
 abstract contract StatePaused is StateZero {
-    function setUp() public override virtual {
-        super.setUp();
+  function setUp() public virtual override {
+    super.setUp();
 
-        vm.prank(deployer);
-        dummyWand._unpause();
-    }
+    vm.prank(deployer);
+    // set paused == false
+    dummyWand.pause();
+    assertTrue(dummyWand.paused() == true);
+  }
+}
+
+contract StatePausedTest is StatePaused {
+  function testNotUnpaused() public {
+    console2.log("Set paused == true. whenNotPaused to fail");
+
+    vm.prank(deployer);
+    vm.expectRevert("Pausable: paused");
+    dummyWand.actionWhenNotPaused();
+  }
+
+  function testPaused() public {
+    console2.log("Set paused == true");
+
+    vm.prank(deployer);
+    uint256 value = dummyWand.actionWhenPaused();
+
+    assertTrue(value == 1);
+    assertTrue(dummyWand.paused() == true);
+  }
 }
