@@ -43,4 +43,4 @@ crytic-export/
 dist/
 
 # Foundry
-foundry/out
+foundry/out/
