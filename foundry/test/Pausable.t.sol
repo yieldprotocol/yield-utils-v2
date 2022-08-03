@@ -5,10 +5,10 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
 import "src/Pausable.sol";
-import "test/DummyWand.sol";
+import "test/mocks/DummyWand.sol";
 
 abstract contract StateZero is Test {
-  event PausedState(address indexed account, bool indexed state);
+  event Paused(address indexed account, bool indexed state);
 
   Pausable public pausable;
   DummyWand public dummyWand;
