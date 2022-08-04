@@ -30,6 +30,7 @@ contract Timelock is ITimelock, AccessControl {
 
     struct Proposal {
         STATE state;
+        uint128 value;
         uint32 eta;
     }
 
@@ -125,7 +126,7 @@ contract Timelock is ITimelock, AccessControl {
     {
         txHash = keccak256(abi.encode(functionCalls, salt));
         require(proposals[txHash].state == STATE.UNKNOWN, "Already proposed.");
-        proposals[txHash].state = STATE.PROPOSED;
+        proposals[txHash] = Proposal(STATE.PROPOSED, uint128(msg.value), 0); // Cast is safe, your size is not size
         emit Proposed(txHash);
     }
 
@@ -149,6 +150,8 @@ contract Timelock is ITimelock, AccessControl {
         Proposal memory proposal = proposals[txHash];
         require(proposal.state == STATE.PROPOSED || proposal.state == STATE.APPROVED, "Not found.");
 
+        (bool success, bytes memory result) = msg.sender.call{ value: proposal.value }("");
+        if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
         delete proposals[txHash];
         emit Cancelled(txHash);
     }
@@ -184,7 +187,7 @@ contract Timelock is ITimelock, AccessControl {
         results = new bytes[](functionCalls.length);
         for (uint256 i = 0; i < functionCalls.length; i++){
             require(functionCalls[i].target.isContract(), "Call to a non-contract");
-            (bool success, bytes memory result) = functionCalls[i].target.call(functionCalls[i].data);
+            (bool success, bytes memory result) = functionCalls[i].target.call{ value: proposal.value }(functionCalls[i].data);
             if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
             results[i] = result;
         }
