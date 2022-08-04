@@ -18,6 +18,7 @@ interface ITimelock {
     function propose(Call[] calldata functionCalls) external returns (bytes32 txHash);
     function proposeRepeated(Call[] calldata functionCalls, uint256 salt) external returns (bytes32 txHash);
     function approve(bytes32 txHash) external returns (uint32);
+    function cancel(bytes32 txHash) external;
     function execute(Call[] calldata functionCalls) external returns (bytes[] calldata results);
     function executeRepeated(Call[] calldata functionCalls, uint256 salt) external returns (bytes[] calldata results);
 }
@@ -33,12 +34,13 @@ contract Timelock is ITimelock, AccessControl {
     }
 
     uint32 public constant GRACE_PERIOD = 14 days;
-    uint32 public constant MINIMUM_DELAY = 2 days;
+    uint32 public constant MINIMUM_DELAY = 1 days;
     uint32 public constant MAXIMUM_DELAY = 30 days;
 
     event DelaySet(uint256 indexed delay);
     event Proposed(bytes32 indexed txHash);
     event Approved(bytes32 indexed txHash, uint32 eta);
+    event Cancelled(bytes32 indexed txHash);
     event Executed(bytes32 indexed txHash);
 
     uint32 public delay;
@@ -47,12 +49,14 @@ contract Timelock is ITimelock, AccessControl {
     constructor(address governor, address executor) AccessControl() {
         delay = 0; // delay is set to zero initially to allow testing and configuration. Set to a different value to go live.
 
-        // Each role in AccessControl.sol is a 1-of-n multisig. It is recommended that trusted individual accounts get `propose`
-        // and `execute` permissions, while only the governor keeps `approve` permissions. The governor should keep the `propose`
-        // and `execute` permissions, but use them only in emergency situations (such as all trusted individuals going rogue).
+        // Each role in AccessControl.sol is a 1-of-n multisig. It is recommended that trusted individual accounts get
+        // `propose` and `execute` permissions, while only the governor keeps `approve` and `cancel` permissions. The
+        // governor should keep the `propose` and `execute` permissions, but use them only in emergency situations
+        // (such as all trusted individuals going rogue).
         _grantRole(ITimelock.propose.selector, governor);
         _grantRole(ITimelock.proposeRepeated.selector, governor);
         _grantRole(ITimelock.approve.selector, governor);
+        _grantRole(ITimelock.cancel.selector, governor);
         _grantRole(ITimelock.execute.selector, governor);
         _grantRole(ITimelock.executeRepeated.selector, governor);
 
@@ -136,6 +140,17 @@ contract Timelock is ITimelock, AccessControl {
         proposal.eta = eta;
         proposals[txHash] = proposal;
         emit Approved(txHash, eta);
+    }
+
+    /// @dev Cancel a proposal, even if it is approved
+    function cancel(bytes32 txHash)
+        external override auth
+    {
+        Proposal memory proposal = proposals[txHash];
+        require(proposal.state == STATE.PROPOSED || proposal.state == STATE.APPROVED, "Not found.");
+
+        delete proposals[txHash];
+        emit Cancelled(txHash);
     }
 
     /// @dev Execute a proposal
