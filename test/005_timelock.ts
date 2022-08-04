@@ -109,17 +109,13 @@ describe("Timelock", async function () {
   it("doesn't allow to approve if not proposed", async () => {
     const txHash =
       "0x00004732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed";
-    await expect(timelock.approve(txHash)).to.be.revertedWith(
-      "Not proposed."
-    );
+    await expect(timelock.approve(txHash)).to.be.revertedWith("Not proposed.");
   });
 
   it("doesn't allow to cancel if not proposed", async () => {
     const txHash =
       "0x00004732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed";
-    await expect(timelock.cancel(txHash)).to.be.revertedWith(
-      "Not found."
-    );
+    await expect(timelock.cancel(txHash)).to.be.revertedWith("Not found.");
   });
 
   it("proposes a transaction", async () => {
@@ -201,7 +197,7 @@ describe("Timelock", async function () {
         "Cancelled"
       );
       //        .withArgs(txHash, targets, data, eta)
-      const [state] = await timelock.proposals(txHash)
+      const [state] = await timelock.proposals(txHash);
       expect(state).equal(0);
     });
 
@@ -297,7 +293,7 @@ describe("Timelock", async function () {
           "Cancelled"
         );
         //        .withArgs(txHash, targets, data, eta)
-        const [state] = await timelock.proposals(txHash)
+        const [state] = await timelock.proposals(txHash);
         expect(state).equal(0);
       });
 
