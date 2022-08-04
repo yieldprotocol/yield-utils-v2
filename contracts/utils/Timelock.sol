@@ -175,4 +175,15 @@ contract Timelock is ITimelock, AccessControl {
         }
         emit Executed(txHash);
     }
+
+    /// @dev To send Ether with a call, the Timelock must call itself at this function. This avoids
+    /// adding a rarely used `value` in the Call struct
+    function callWithValue(Call calldata functionCall, uint256 value) external returns (bytes memory result) {
+        require(msg.sender == address(this), "Only call from itself");
+        bool success;
+        (success, result) = functionCall.target.call{ value: value }(functionCall.data);
+        if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
+    }
+
+    receive() payable external {}
 }
