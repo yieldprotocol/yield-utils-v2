@@ -15,9 +15,9 @@ import "@yield-protocol/utils-v2/access/AccessControl.sol";
 
 contract Pausable is AccessControl {
 
-  error requirePaused(address msgSender, bool pausedState);
-  error requireUnpaused(address msgSender, bool pausedState);    
-  
+  error RequirePaused(address msgSender, bool pausedState);
+  error RequireUnpaused(address msgSender, bool pausedState);    
+
   /// @dev Emitted when contract's pause state is modified
   event Paused(address indexed account, bool indexed state);
 
@@ -43,7 +43,7 @@ contract Pausable is AccessControl {
   /// @dev Modifier to make a function callable only when the contract is not paused
   modifier whenNotPaused() {
     if(paused != false){
-      revert requirePaused({msgSender: msg.sender, pausedState: paused});
+      revert RequirePaused({msgSender: msg.sender, pausedState: paused});
     }
     //require(paused == false, "Pausable: paused");
     _;
@@ -52,7 +52,7 @@ contract Pausable is AccessControl {
   modifier whenPaused() {
     //require(paused == true, "Pausable: not paused");
     if(paused != true){
-      revert requireUnpaused({msgSender: msg.sender, pausedState: paused});
+      revert RequireUnpaused({msgSender: msg.sender, pausedState: paused});
     }
     _;
   }
