@@ -29,6 +29,9 @@ Fixed point math with 18 decimals. Multiplication and division, rounded down as 
  - EmergencyBrake: Register AccessControl permissioning patterns to isolate contracts on emergencies
  - Relay: Group transactions to be executed on a single external call
 
+## NPM Publishing
+While foundry and hardhat versions coexist in this repo, contracts tested by foundry must stay in the `foundry` directory, and hard links must be created from `contracts` to allow for NPM publishing.
+
 ## Audits
 C4 audit - commit: 78693c5
 
