@@ -41,7 +41,7 @@ contract StateZeroTest is StateZero {
     console2.log("On deployment, _paused == false. Wand active.");
     vm.prank(deployer);
 
-    vm.expectRevert("Pausable: not paused");
+    vm.expectRevert(abi.encodeWithSelector(Pausable.requireUnpaused.selector, deployer, false));
     dummyWand.actionWhenPaused();
 
     assertTrue(dummyWand.paused() == false);
@@ -74,7 +74,7 @@ contract StatePausedTest is StatePaused {
     console2.log("Set paused == true. whenNotPaused to fail");
 
     vm.prank(deployer);
-    vm.expectRevert("Pausable: paused");
+    vm.expectRevert(abi.encodeWithSelector(Pausable.requirePaused.selector, deployer, true));
     dummyWand.actionWhenNotPaused();
   }
 
