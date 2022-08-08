@@ -106,6 +106,18 @@ describe("Timelock", async function () {
     ).to.be.revertedWith("Access denied");
   });
 
+  it("doesn't allow to approve if not proposed", async () => {
+    const txHash =
+      "0x00004732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed";
+    await expect(timelock.approve(txHash)).to.be.revertedWith("Not proposed.");
+  });
+
+  it("doesn't allow to cancel if not proposed", async () => {
+    const txHash =
+      "0x00004732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed";
+    await expect(timelock.cancel(txHash)).to.be.revertedWith("Not found.");
+  });
+
   it("proposes a transaction", async () => {
     const functionCalls = [
       {
@@ -170,14 +182,6 @@ describe("Timelock", async function () {
       ).to.be.revertedWith("Access denied");
     });
 
-    it("doesn't allow to approve if not proposed", async () => {
-      const txHash =
-        "0x00004732e64f236e5182740fa5473c496f60cecc294538c44897d62be999d1ed";
-      await expect(timelock.approve(txHash)).to.be.revertedWith(
-        "Not proposed."
-      );
-    });
-
     it("approves a transaction", async () => {
       await expect(await timelock.approve(txHash)).to.emit(
         timelock,
@@ -185,6 +189,16 @@ describe("Timelock", async function () {
       );
       //        .withArgs(txHash, targets, data, eta)
       expect(await timelock.proposals(txHash)).not.equal(0);
+    });
+
+    it("cancels a proposed transaction", async () => {
+      await expect(await timelock.cancel(txHash)).to.emit(
+        timelock,
+        "Cancelled"
+      );
+      //        .withArgs(txHash, targets, data, eta)
+      const [state] = await timelock.proposals(txHash);
+      expect(state).equal(0);
     });
 
     describe("with an approved transaction", async () => {
@@ -271,6 +285,16 @@ describe("Timelock", async function () {
         );
 
         await ethers.provider.send("evm_revert", [snapshotId]);
+      });
+
+      it("cancels an approved transaction", async () => {
+        await expect(await timelock.cancel(txHash)).to.emit(
+          timelock,
+          "Cancelled"
+        );
+        //        .withArgs(txHash, targets, data, eta)
+        const [state] = await timelock.proposals(txHash);
+        expect(state).equal(0);
       });
 
       describe("once the eta arrives", async () => {
