@@ -4,8 +4,8 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "src/Pausable.sol";
-import "test/mocks/DummyWand.sol";
+import "../../contracts/utils/Pausable.sol";
+import "./mocks/DummyWand.sol";
 
 abstract contract StateZero is Test {
   event Paused(address indexed account, bool indexed state);
