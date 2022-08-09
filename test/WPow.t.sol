@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 
-import "./WPow.sol";
+import "contracts/math/WPow.sol";
 
 contract FixedPointMathLibTest is DSTest {
     // test a couple of concrete cases
