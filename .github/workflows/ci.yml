@@ -94,9 +94,7 @@ jobs:
           version: nightly
 
       - name: Build contracts
-        run: |
-          forge --version
-          forge build --sizes
+        run: yarn build
         id: build
 
       - name: Run tests
