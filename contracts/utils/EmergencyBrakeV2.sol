@@ -25,7 +25,7 @@ interface IEmergencyBrake {
 /// first place. As an additional safeguard, EmergencyBrake cannot revoke or grant ROOT roles.
 /// In addition, there is a separation of concerns between the planner and the executor accounts, so that both of them
 /// must be compromised simultaneously to execute non-approved emergency plans, and then only creating a denial of service.
-contract EmergencyBrake is AccessControl, IEmergencyBrake {
+contract EmergencyBrakeV2 is AccessControl, IEmergencyBrake {
     enum State {UNPLANNED, PLANNED, EXECUTED}
 
     struct Plan {
