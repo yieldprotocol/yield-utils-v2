@@ -7,7 +7,7 @@ import "../access/AccessControl.sol";
 interface IEmergencyBrake {
     struct Permission {
         address contact; /// contract for which a user holds auth priviliges
-        bytes4[] signatures;
+        bytes4 signature;
     }
 
     function plan(address target, Permission[] calldata permissions) external;
@@ -32,8 +32,8 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     struct Plan {
         State state;
-        address target;
         Permission[] permissions;
+        mapping(bytes32 => uint256) index; ///mapping of bytes32(signature) => position in permissions
     }
 
     event Planned(address indexed target, Permission[] permissions);
@@ -45,7 +45,6 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     event Terminated(address indexed target);
 
     mapping (address => Plan) public plans;
-    mapping (bytes => uint256) public permissionIndex;
 
     constructor(address planner, address executor) AccessControl() {
         _grantRole(IEmergencyBrake.plan.selector, planner);
@@ -64,25 +63,19 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {
         require(plans[target].state == State.UNPLANNED, "Emergency already planned for.");
-
         // Removing or granting ROOT permissions is out of bounds for EmergencyBrake
-        for (uint256 i = 0; i < permissions.length; i++){
-            Permission memory _permission = permissions[i];
-            for (uint256 j = 0; j < permissions[i].signatures.length;){
-                require(
-                    permissions[i].signatures[j] != ROOT,
-                    "Can't remove ROOT"
-                );
-                unchecked{++j;}
-            }
+        for (uint256 i = 0; i < permissions.length;){
+            require(
+                permissions[i].signature != ROOT,
+                "Can't remove ROOT"
+            );
+            
             plans[target].permissions.push(permissions[i]);
-            bytes memory toIndex = abi.encode(_permission);
+            bytes32 toIndex = _persmissionToId(permissions[i].contact, permissions[i].signature);
             unchecked{++i;}
-            permissionIndex[toIndex] = i;
+            plans[target].index[toIndex] = i;
         }
-
         plans[target].state = State.PLANNED;
-        plans[target].target = target;
         emit Planned(target, permissions);
     }
 
@@ -93,30 +86,14 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function addToPlan(address target, Permission calldata toAdd)
         external override auth 
     {   
-        Permission[] memory _permissions = plans[target].permissions;
         require(plans[target].state == State.PLANNED, "Target not planned for");
-
-        
-        
-        for(uint i; i < _permissions.length;) {
-            if(_permissions[i].contact == toAdd.contact){
-                for(uint j; j < _permissions[i].signatures.length;){
-                    for(uint k; k < toAdd.signatures.length;){
-                        require(toAdd.signatures[k] != ROOT, "Can't remove ROOT");
-                        require(_permissions[i].signatures[j] != toAdd.signatures[k], "Signature already in plan");
-                        unchecked{++k;}
-                    }
-                    unchecked{++j;}
-                }
-            }    
-            unchecked{++i;}
-        }
-         
-        bytes memory toIndex = abi.encode(toAdd);
+        require(toAdd.signature != ROOT, "Can't remove ROOT");
+        Permission[] memory _permissions = plans[target].permissions;
+        bytes32 toIndex = _persmissionToId(toAdd.contact, toAdd.signature);
+        require(plans[target].index[toIndex] == 0, "Permission set already in plan");
         uint256 planId = _permissions.length;
-        require(permissionIndex[toIndex] == 0, "Permission set already in plan");
         plans[target].permissions.push(toAdd);
-        permissionIndex[toIndex] = planId;
+        plans[target].index[toIndex] = planId;
         
         emit AddedTo(target, toAdd);
     }
@@ -126,20 +103,18 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     /// @param target address wuth auth privileges on a contract and a plan exists for
     function removeFromPlan(address target, Permission calldata toRemove) 
         external override auth
-    {
+    {   
         require(plans[target].state == State.PLANNED, "Target not planned for");
-        bytes memory toUnindex = abi.encode(toRemove);
-        require(permissionIndex[toUnindex] != 0, "Permission set not planned for");
-        uint256 planId = permissionIndex[toUnindex] - 1;
-        for(uint i = planId; i < plans[target].permissions.length - 1;)
-        {
-            plans[target].permissions[i] = plans[target].permissions[i + 1];
-            bytes memory toIndex = abi.encode(plans[target].permissions[i]);
-            unchecked{++i;}
-            permissionIndex[toIndex] = i;
-        }
+        bytes32 idToRemove = _persmissionToId(toRemove.contact, toRemove.signature); 
+        uint256 indexToReplace = plans[target].index[idToRemove];
+        require(indexToReplace > 0, "Permission set not planned");
+        --indexToReplace;
+        uint256 replacement = plans[target].permissions.length - 1;
+        bytes32 idToReindex = _persmissionToId(plans[target].permissions[replacement].contact, plans[target].permissions[replacement].signature);
+        plans[target].permissions[indexToReplace] = plans[target].permissions[replacement];
+        plans[target].index[idToRemove] = 0;
+        plans[target].index[idToReindex] = indexToReplace;
         plans[target].permissions.pop();
-        permissionIndex[toUnindex] = 0;
         emit RemovedFrom(target, toRemove);
     }
 
@@ -157,25 +132,22 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function execute(address target)
         external override auth
     {
-        Plan memory plan_ = plans[target];
-        require(plan_.state == State.PLANNED, "Emergency not planned for.");
+        require(plans[target].state == State.PLANNED, "Emergency not planned for.");
         plans[target].state = State.EXECUTED;
 
-        Permission[] memory permissions_ = plan_.permissions;
+        Permission[] memory permissions_ = plans[target].permissions;
 
         for (uint256 i = 0; i < permissions_.length; i++){
             // AccessControl.sol doesn't revert if revoking permissions that haven't been granted
             // If we don't check, planner and executor can collude to gain access to contacts
             Permission memory permission_ = permissions_[i]; 
-            for (uint256 j = 0; j < permission_.signatures.length; j++){
-                AccessControl contact = AccessControl(permission_.contact);
-                bytes4 signature_ = permission_.signatures[j];
-                require(
-                    contact.hasRole(signature_, plan_.target),
-                    "Permission not found"
-                );
-                contact.revokeRole(signature_, plan_.target);
-            }
+            AccessControl contact = AccessControl(permission_.contact);
+            bytes4 signature_ = permission_.signature;
+            require(
+                contact.hasRole(signature_, target),
+                "Permission not found"
+            );
+            contact.revokeRole(signature_, target);
         }
         emit Executed(target);
     }
@@ -184,19 +156,16 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function restore(address target)
         external override auth
     {
-        Plan memory plan_ = plans[target];
-        require(plan_.state == State.EXECUTED, "Emergency plan not executed.");
+        require(plans[target].state == State.EXECUTED, "Emergency plan not executed.");
         plans[target].state = State.PLANNED;
 
-        Permission[] memory permissions_ = plan_.permissions;
+        Permission[] memory permissions_ = plans[target].permissions;
 
         for (uint256 i = 0; i < permissions_.length; i++){
             Permission memory permission_ = permissions_[i]; 
-            for (uint256 j = 0; j < permission_.signatures.length; j++){
-                AccessControl contact = AccessControl(permission_.contact);
-                bytes4 signature_ = permission_.signatures[j];
-                contact.grantRole(signature_, plan_.target);
-            }
+            AccessControl contact = AccessControl(permission_.contact);
+            bytes4 signature_ = permission_.signature;
+            contact.grantRole(signature_, target);
         }
         emit Restored(target);
     }
@@ -208,5 +177,36 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         require(plans[target].state == State.EXECUTED, "Emergency plan not executed.");
         delete plans[target];
         emit Terminated(target);
+    }
+
+    /// @dev used to calculate the id of a Permission so it can be indexed within a Plan
+    /// @param contact the address for a contract
+    /// @param signature the auth signature of a function within contact
+    function permissionToId(address contact, bytes4 signature)
+        external pure returns(bytes32 id)
+    {
+        id = _persmissionToId(contact, signature);
+    }
+
+    /// @dev used to recreate a Permission from it's id
+    /// @param id the key used for indexing a Permission within a Plan
+    function idToPermission(bytes32 id)
+        external pure returns(Permission memory permission) 
+    {
+        permission = _idToPermission(id);
+    }
+
+    function _persmissionToId(address contact, bytes4 signature) 
+        internal pure returns(bytes32 id) 
+    {
+        id = (bytes32(signature) >> 160 | bytes32(bytes20(contact)));
+    }
+
+    function _idToPermission(bytes32 id) 
+        internal pure returns(Permission memory permission)
+    {
+        address contact = address(bytes20(id));
+        bytes4 signature = bytes4(id << 160);
+        permission = Permission(contact, signature);
     }
 }

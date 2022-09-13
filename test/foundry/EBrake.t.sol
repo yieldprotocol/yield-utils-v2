@@ -28,7 +28,6 @@ abstract contract ZeroState is Test {
 
     bytes4 public constant ROOT = 0x00000000;
 
-    bytes4[] public signatures;
     IEmergencyBrake.Permission[] public permissions;
     IEmergencyBrake.Permission public permission;
 
@@ -70,19 +69,15 @@ contract ZeroStateTest is ZeroState {
         bytes4 minterRole = RestrictedERC20Mock.mint.selector;
         bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
 
-        signatures.push(minterRole);
-        signatures.push(burnerRole);
-
-        IEmergencyBrake.Permission memory permission_ = IEmergencyBrake.Permission(address(rToken), signatures);
-
-        permissions.push(permission_);
+        permissions.push(IEmergencyBrake.Permission(address(rToken), minterRole));
+        permissions.push(IEmergencyBrake.Permission(address(rToken), burnerRole));
 
         vm.expectEmit(true, false, false, true);
         emit Planned(tokenAdmin, permissions);
         vm.prank(planner);
         ebrake.plan(tokenAdmin, permissions);
 
-        (EmergencyBrake.State state_,
+        (EmergencyBrake.State state_
             
         ) = ebrake.plans(tokenAdmin);
 
@@ -127,9 +122,8 @@ contract ZeroStateTest is ZeroState {
     }
 
     function testCannotPlanRoot() public {
-        signatures.push(ROOT);
 
-        IEmergencyBrake.Permission memory permission_ = IEmergencyBrake.Permission(address(rToken), signatures);
+        IEmergencyBrake.Permission memory permission_ = IEmergencyBrake.Permission(address(rToken), ROOT);
 
         permissions.push(permission_);
 
@@ -147,18 +141,13 @@ abstract contract PlanState is ZeroState {
         bytes4 minterRole = RestrictedERC20Mock.mint.selector;
         bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
 
-        signatures.push(minterRole);
-        signatures.push(burnerRole);
-
-        IEmergencyBrake.Permission memory permission_ = IEmergencyBrake.Permission(address(rToken), signatures);
-
-        permissions.push(permission_);
+        permissions.push(IEmergencyBrake.Permission(address(rToken), minterRole));
+        permissions.push(IEmergencyBrake.Permission(address(rToken), burnerRole));
 
         vm.startPrank(planner);
         ebrake.plan(tokenAdmin, permissions);
         ebrake.plan(executor, permissions);
         vm.stopPrank();
-        delete signatures;
         delete permissions;
     }
 }
@@ -171,8 +160,7 @@ contract PlanStateTest is PlanState {
         emit Cancelled(tokenAdmin);
         ebrake.cancel(tokenAdmin);
         
-        (EmergencyBrake.State state_,
-            
+        (EmergencyBrake.State state_
         ) = ebrake.plans(tokenAdmin);
 
        bool isCancelled = EmergencyBrake.State.UNPLANNED == state_;
@@ -185,7 +173,7 @@ contract PlanStateTest is PlanState {
         vm.prank(executor);
         ebrake.execute(tokenAdmin);
 
-        (EmergencyBrake.State state_,
+        (EmergencyBrake.State state_
             
         ) = ebrake.plans(tokenAdmin);
         
@@ -205,14 +193,8 @@ contract PlanStateTest is PlanState {
 
     function testAddToPlan() public {
         bytes4 propose = Timelock.propose.selector;
-        bytes4 approve = Timelock.approve.selector;
-        bytes4 cancel = Timelock.cancel.selector;
-
-        signatures.push(propose);
-        signatures.push(approve);
-        signatures.push(cancel);
-
-        permission = IEmergencyBrake.Permission(address(lock), signatures);
+        
+        permission = IEmergencyBrake.Permission(address(lock), propose);
         
         vm.expectEmit(true, false, false, true);
         emit AddedTo(tokenAdmin, permission);
@@ -222,12 +204,8 @@ contract PlanStateTest is PlanState {
 
     function testRemoveFromPlan() public {
         bytes4 minterRole = RestrictedERC20Mock.mint.selector;
-        bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
 
-        signatures.push(minterRole);
-        signatures.push(burnerRole);
-
-        permission = IEmergencyBrake.Permission(address(rToken), signatures);
+        permission = IEmergencyBrake.Permission(address(rToken), minterRole);
 
         vm.expectEmit(true, false, false, true);
         emit RemovedFrom(tokenAdmin, permission);
@@ -237,26 +215,30 @@ contract PlanStateTest is PlanState {
 
     function testCannotAddDuplicateSignature() public {
         bytes4 minterRole = RestrictedERC20Mock.mint.selector;
-        bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
 
-        signatures.push(minterRole);
-        signatures.push(burnerRole);
+        permission = IEmergencyBrake.Permission(address(rToken), minterRole);
 
-        permission = IEmergencyBrake.Permission(address(rToken), signatures);
-
-        vm.expectRevert("Signature already in plan");
+        vm.expectRevert("Permission set already in plan");
         vm.prank(planner);
         ebrake.addToPlan(tokenAdmin, permission);
     }
 
     function testCannotAddRoot() public {
-        signatures.push(ROOT);
-
-        permission = IEmergencyBrake.Permission(address(rToken), signatures);
+        permission = IEmergencyBrake.Permission(address(rToken), ROOT);
 
         vm.expectRevert("Can't remove ROOT");
         vm.prank(planner);
         ebrake.addToPlan(tokenAdmin, permission);
+    }
+
+    function testCannotRemoveUnplannedPermission() public {
+        bytes4 propose = Timelock.propose.selector;
+
+        permission = IEmergencyBrake.Permission(address(lock), propose);
+
+        vm.expectRevert("Permission set not planned");
+        vm.prank(planner);
+        ebrake.removeFromPlan(tokenAdmin, permission); 
     }
 }
 
@@ -277,7 +259,7 @@ contract ExecutedStateTest is ExecutedState {
         vm.prank(planner);
         ebrake.restore(tokenAdmin);
 
-        (EmergencyBrake.State state_,
+        (EmergencyBrake.State state_
             
         ) = ebrake.plans(tokenAdmin);
 
@@ -291,7 +273,7 @@ contract ExecutedStateTest is ExecutedState {
         vm.prank(planner);
         ebrake.terminate(tokenAdmin);
 
-        (EmergencyBrake.State state_, ) = ebrake.plans(tokenAdmin);
+        (EmergencyBrake.State state_ ) = ebrake.plans(tokenAdmin);
 
         bool isUnplanned = EmergencyBrake.State.UNPLANNED == state_;
         assertEq(isUnplanned, true);
