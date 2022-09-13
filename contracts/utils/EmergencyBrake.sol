@@ -105,13 +105,14 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {   
         require(plans[target].state == State.PLANNED, "Target not planned for");
+        Permission[] memory _permissions = plans[target].permissions;
         bytes32 idToRemove = _persmissionToId(toRemove.contact, toRemove.signature); 
         uint256 indexToReplace = plans[target].index[idToRemove];
         require(indexToReplace > 0, "Permission set not planned");
         --indexToReplace;
-        uint256 replacement = plans[target].permissions.length - 1;
-        bytes32 idToReindex = _persmissionToId(plans[target].permissions[replacement].contact, plans[target].permissions[replacement].signature);
-        plans[target].permissions[indexToReplace] = plans[target].permissions[replacement];
+        uint256 replacement = _permissions.length - 1;
+        bytes32 idToReindex = _persmissionToId(_permissions[replacement].contact, _permissions[replacement].signature);
+        plans[target].permissions[indexToReplace] = _permissions[replacement];
         plans[target].index[idToRemove] = 0;
         plans[target].index[idToReindex] = indexToReplace;
         plans[target].permissions.pop();
