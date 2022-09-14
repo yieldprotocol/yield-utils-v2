@@ -19,8 +19,8 @@ abstract contract ZeroState is Test {
     address public tokenAdmin;
 
     event Planned(address indexed target, IEmergencyBrake.Permission[] permissions);
-    event AddedTo(address indexed target, IEmergencyBrake.Permission toAdd);
-    event RemovedFrom(address indexed target, IEmergencyBrake.Permission toRemove);
+    event PermissionAdded(address indexed target, IEmergencyBrake.Permission newPermission);
+    event PermissionRemoved(address indexed target, IEmergencyBrake.Permission permissionOut);
     event Cancelled(address indexed target);
     event Executed(address indexed target);
     event Restored(address indexed target);
@@ -197,7 +197,7 @@ contract PlanStateTest is PlanState {
         permission = IEmergencyBrake.Permission(address(lock), propose);
         
         vm.expectEmit(true, false, false, true);
-        emit AddedTo(tokenAdmin, permission);
+        emit PermissionAdded(tokenAdmin, permission);
         vm.prank(planner);
         ebrake.addToPlan(tokenAdmin, permission);
     }
@@ -208,7 +208,7 @@ contract PlanStateTest is PlanState {
         permission = IEmergencyBrake.Permission(address(rToken), minterRole);
 
         vm.expectEmit(true, false, false, true);
-        emit RemovedFrom(tokenAdmin, permission);
+        emit PermissionRemoved(tokenAdmin, permission);
         vm.prank(planner);
         ebrake.removeFromPlan(tokenAdmin, permission);
     }

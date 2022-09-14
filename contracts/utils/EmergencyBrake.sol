@@ -90,7 +90,8 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         require(newPermission.signature != ROOT, "Can't remove ROOT");
         Permission[] memory _permissions = _plan.permissions;
         bytes32 newId = _permissionToId(newPermission);
-        require(_plan.index[newId] == 0, "Permission set already in plan");
+        uint256 newIndex = _plan.index[newId];
+        require(_permissionToId(_plan.permissions[newIndex]) != newId, "Permission set already in plan");
         _plan.permissions.push(newPermission);
         _plan.index[newId] = _permissions.length - 1;
         
@@ -107,7 +108,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         require(_plan.state == State.PLANNED, "Target not planned for");
         Permission[] memory _permissions = _plan.permissions;
         bytes32 idOut = _permissionToId(permissionOut); 
-        uint256 indexOut = plans[target].index[idOut];
+        uint256 indexOut = _plan.index[idOut];
         if (indexOut != _permissions.length - 1) {
             require(_permissionToId(_plan.permissions[indexOut]) == idOut, "Permission set not planned"); // indexOut might be zero if permissionOut is not in the plan, or if we want to remove the permission at position zero. We just check that the permission we are removing is the one intended.
             uint256 indexLast = _permissions.length - 1;               // The position of last permission in the permissions array
