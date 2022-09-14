@@ -108,13 +108,15 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         Permission[] memory _permissions = _plan.permissions;
         bytes32 idOut = _permissionToId(permissionOut); 
         uint256 indexOut = plans[target].index[idOut];
-        require(_permissionToId(_plan.permissions[indexOut]) == idOut, "Permission set not planned"); // indexOut might be zero if permissionOut is not in the plan, or if we want to remove the permission at position zero. We just check that the permission we are removing is the one intended.
-        uint256 indexLast = _permissions.length - 1;               // The position of last permission in the permissions array
-        bytes32 idLast = _permissionToId(_permissions[indexLast]); // The id of the last permission
-        _plan.permissions[indexOut] = _permissions[indexLast];     // Replace the outgoing permission with the last permission
+        if (indexOut != _permissions.length - 1) {
+            require(_permissionToId(_plan.permissions[indexOut]) == idOut, "Permission set not planned"); // indexOut might be zero if permissionOut is not in the plan, or if we want to remove the permission at position zero. We just check that the permission we are removing is the one intended.
+            uint256 indexLast = _permissions.length - 1;               // The position of last permission in the permissions array
+            bytes32 idLast = _permissionToId(_permissions[indexLast]); // The id of the last permission
+            _plan.permissions[indexOut] = _permissions[indexLast];     // Replace the outgoing permission with the last permission
+            _plan.index[idLast] = indexOut;                            // Correct the index so that we know that the last permission is now where the outgoing permission was
+            _plan.index[idOut] = 0;                                    // Correct the index, because the removed permission is not at idOut anymore
+        }
         _plan.permissions.pop();                                   // Shorten the permissions array, removing the now duplicated last permission
-        _plan.index[idLast] = indexOut;                            // Correct the index so that we know that the last permission is now where the outgoing permission was
-        _plan.index[idOut] = 0;                                    // Correct the index, because the removed permission is not at idOut anymore
         emit PermissionRemoved(target, permissionOut);
     }
 
