@@ -4,8 +4,7 @@ import { id } from "../src/index";
 
 import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json";
 import TimelockArtifact from "../artifacts/contracts/utils/Timelock.sol/Timelock.json";
-import { ERC20Mock as ERC20 } from "../typechain/ERC20Mock";
-import { Timelock } from "../typechain/Timelock";
+import { ERC20Mock as ERC20, Timelock } from "../typechain";
 
 import { BigNumber } from "ethers";
 

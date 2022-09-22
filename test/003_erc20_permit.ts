@@ -10,7 +10,7 @@ import {
 
 import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json";
 
-import { ERC20Mock as ERC20 } from "../typechain/ERC20Mock";
+import { ERC20Mock as ERC20 } from "../typechain";
 
 import { ethers, waffle, network } from "hardhat";
 import { expect } from "chai";
