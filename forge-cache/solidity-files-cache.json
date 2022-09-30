@@ -1,0 +1,2284 @@
+{
+  "_format": "ethers-rs-sol-cache-3",
+  "paths": {
+    "artifacts": "out",
+    "build_infos": "out/build-info",
+    "sources": "contracts",
+    "tests": "test/foundry",
+    "scripts": "script",
+    "libraries": [
+      "lib",
+      "node_modules"
+    ]
+  },
+  "files": {
+    "contracts/access/AccessControl.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "8a72d8f5255345c5756cc72a8952b620",
+      "sourceName": "contracts/access/AccessControl.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "AccessControl": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "AccessControl.sol/AccessControl.json"
+        }
+      }
+    },
+    "contracts/access/Ownable.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "df011b503197ac463a97572996667291",
+      "sourceName": "contracts/access/Ownable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Ownable": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Ownable.sol/Ownable.json"
+        }
+      }
+    },
+    "contracts/cast/CastBytes32Bytes12.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "1826e8ef1f7bf8522847b971e26a9e2e",
+      "sourceName": "contracts/cast/CastBytes32Bytes12.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastBytes32Bytes12": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastBytes32Bytes12.sol/CastBytes32Bytes12.json"
+        }
+      }
+    },
+    "contracts/cast/CastBytes32Bytes6.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "1517e7ed2f7ac6dd534029f6caece1fe",
+      "sourceName": "contracts/cast/CastBytes32Bytes6.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastBytes32Bytes6": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastBytes32Bytes6.sol/CastBytes32Bytes6.json"
+        }
+      }
+    },
+    "contracts/cast/CastI128U128.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "a4af767d399ee29347a94d1633f17764",
+      "sourceName": "contracts/cast/CastI128U128.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastI128U128": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastI128U128.sol/CastI128U128.json"
+        }
+      }
+    },
+    "contracts/cast/CastU128I128.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "26dc9b60bd60a6dcd51fab2d587c33da",
+      "sourceName": "contracts/cast/CastU128I128.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU128I128": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU128I128.sol/CastU128I128.json"
+        }
+      }
+    },
+    "contracts/cast/CastU128U104.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "9e691cda393a188d10eae8553527b9ac",
+      "sourceName": "contracts/cast/CastU128U104.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU128U104": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU128U104.sol/CastU128U104.json"
+        }
+      }
+    },
+    "contracts/cast/CastU128U112.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "7be843f793db8b2b91183d422534826a",
+      "sourceName": "contracts/cast/CastU128U112.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU128U112": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU128U112.sol/CastU128U112.json"
+        }
+      }
+    },
+    "contracts/cast/CastU256I128.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "37d64589850d31a5dfb6528f900d829d",
+      "sourceName": "contracts/cast/CastU256I128.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU256I128": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU256I128.sol/CastU256I128.json"
+        }
+      }
+    },
+    "contracts/cast/CastU256I256.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "42bf1e0957675e72478cd67aa847750b",
+      "sourceName": "contracts/cast/CastU256I256.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU256I256": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU256I256.sol/CastU256I256.json"
+        }
+      }
+    },
+    "contracts/cast/CastU256U104.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "97ecdd6bf89b75ccf63391aab69d2a09",
+      "sourceName": "contracts/cast/CastU256U104.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU256U104": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU256U104.sol/CastU256U104.json"
+        }
+      }
+    },
+    "contracts/cast/CastU256U112.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "67f8073a3925cb18248b35f85cf704ac",
+      "sourceName": "contracts/cast/CastU256U112.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU256U112": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU256U112.sol/CastU256U112.json"
+        }
+      }
+    },
+    "contracts/cast/CastU256U128.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "d2a92b89ba9969dad3e9e1e8f564949f",
+      "sourceName": "contracts/cast/CastU256U128.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU256U128": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU256U128.sol/CastU256U128.json"
+        }
+      }
+    },
+    "contracts/cast/CastU256U32.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "02dd017e6c33aeffffc8863219dff720",
+      "sourceName": "contracts/cast/CastU256U32.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "CastU256U32": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "CastU256U32.sol/CastU256U32.json"
+        }
+      }
+    },
+    "contracts/interfaces/IWETH9.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "b3c9f38a2e2d83933765e38a85f34ad0",
+      "sourceName": "contracts/interfaces/IWETH9.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/IERC20.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "IWETH9": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "IWETH9.sol/IWETH9.json"
+        }
+      }
+    },
+    "contracts/math/RDiv.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "9af097c13cad9ea5520e576856892549",
+      "sourceName": "contracts/math/RDiv.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "RDiv": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "RDiv.sol/RDiv.json"
+        }
+      }
+    },
+    "contracts/math/WDiv.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "b8bd66da6da78a7e65a1d8454db43bb4",
+      "sourceName": "contracts/math/WDiv.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "WDiv": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "WDiv.sol/WDiv.json"
+        }
+      }
+    },
+    "contracts/math/WDivUp.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "8a0c498965f0664c214fe65e4f354fb6",
+      "sourceName": "contracts/math/WDivUp.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "WDivUp": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "WDivUp.sol/WDivUp.json"
+        }
+      }
+    },
+    "contracts/math/WMul.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "ef183d30c1c658e5d9b682f3caef6ca2",
+      "sourceName": "contracts/math/WMul.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "WMul": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "WMul.sol/WMul.json"
+        }
+      }
+    },
+    "contracts/math/WMulUp.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "f0b3b174ddb2f13b4bb8a9ed7c1649d4",
+      "sourceName": "contracts/math/WMulUp.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "WMulUp": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "WMulUp.sol/WMulUp.json"
+        }
+      }
+    },
+    "contracts/math/WPow.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "e81f0fa7760fe04bf86f3664114154b1",
+      "sourceName": "contracts/math/WPow.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/math/WMul.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "WPow": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "WPow.sol/WPow.json"
+        }
+      }
+    },
+    "contracts/mocks/ERC20Mock.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "ebd05f4407b675d748235fed0e071baa",
+      "sourceName": "contracts/mocks/ERC20Mock.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/ERC20.sol",
+        "contracts/token/ERC20Permit.sol",
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol",
+        "contracts/token/IERC2612.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ERC20Mock": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "ERC20Mock.sol/ERC20Mock.json"
+        }
+      }
+    },
+    "contracts/mocks/ERC20RewardsMock.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "ce44078fe898271639a9e776b95b2292",
+      "sourceName": "contracts/mocks/ERC20RewardsMock.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol",
+        "contracts/cast/CastU256U128.sol",
+        "contracts/cast/CastU256U32.sol",
+        "contracts/token/ERC20.sol",
+        "contracts/token/ERC20Permit.sol",
+        "contracts/token/ERC20Rewards.sol",
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol",
+        "contracts/token/IERC2612.sol",
+        "contracts/token/MinimalTransferHelper.sol",
+        "contracts/utils/RevertMsgExtractor.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ERC20RewardsMock": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "ERC20RewardsMock.sol/ERC20RewardsMock.json"
+        }
+      }
+    },
+    "contracts/mocks/FlashBorrower.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "839c3b7705f998f951f6ae0254fa07b7",
+      "sourceName": "contracts/mocks/FlashBorrower.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/IERC20.sol",
+        "lib/ERC3156/contracts/interfaces/IERC3156FlashBorrower.sol",
+        "lib/ERC3156/contracts/interfaces/IERC3156FlashLender.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "FlashBorrower": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "FlashBorrower.sol/FlashBorrower.json"
+        }
+      }
+    },
+    "contracts/mocks/RestrictedERC20Mock.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "a72481c7dbfffe7bbfd06145c4e0f1d8",
+      "sourceName": "contracts/mocks/RestrictedERC20Mock.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol",
+        "contracts/token/ERC20.sol",
+        "contracts/token/ERC20Permit.sol",
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol",
+        "contracts/token/IERC2612.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "RestrictedERC20Mock": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "RestrictedERC20Mock.sol/RestrictedERC20Mock.json"
+        }
+      }
+    },
+    "contracts/mocks/WETH9Mock.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "5648a6b1ba134c50b7fb273dfeb3b28c",
+      "sourceName": "contracts/mocks/WETH9Mock.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/ERC20.sol",
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "WETH9Mock": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "WETH9Mock.sol/WETH9Mock.json"
+        }
+      }
+    },
+    "contracts/token/ERC20.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "717becb3eba94d8d3607a84ebd6f88c4",
+      "sourceName": "contracts/token/ERC20.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ERC20": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "ERC20.sol/ERC20.json"
+        }
+      }
+    },
+    "contracts/token/ERC20Permit.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "3c6edf8072c1596a888c4126630cd43e",
+      "sourceName": "contracts/token/ERC20Permit.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/ERC20.sol",
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol",
+        "contracts/token/IERC2612.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ERC20Permit": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "ERC20Permit.sol/ERC20Permit.json"
+        }
+      }
+    },
+    "contracts/token/ERC20Rewards.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "ad600ecf177be4940d54c5ab3f3a4133",
+      "sourceName": "contracts/token/ERC20Rewards.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol",
+        "contracts/cast/CastU256U128.sol",
+        "contracts/cast/CastU256U32.sol",
+        "contracts/token/ERC20.sol",
+        "contracts/token/ERC20Permit.sol",
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol",
+        "contracts/token/IERC2612.sol",
+        "contracts/token/MinimalTransferHelper.sol",
+        "contracts/utils/RevertMsgExtractor.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ERC20Rewards": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "ERC20Rewards.sol/ERC20Rewards.json"
+        }
+      }
+    },
+    "contracts/token/IERC20.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "776f140b8a9f56eddcebbf9a07982c7c",
+      "sourceName": "contracts/token/IERC20.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "IERC20": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "IERC20.sol/IERC20.json"
+        }
+      }
+    },
+    "contracts/token/IERC20Metadata.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "98c2b0a5592ce23838c86d5663eef914",
+      "sourceName": "contracts/token/IERC20Metadata.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/IERC20.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "IERC20Metadata": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "IERC20Metadata.sol/IERC20Metadata.json"
+        }
+      }
+    },
+    "contracts/token/IERC2612.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "e420861b28de80b995a8247ab92ca787",
+      "sourceName": "contracts/token/IERC2612.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "IERC2612": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "IERC2612.sol/IERC2612.json"
+        }
+      }
+    },
+    "contracts/token/MinimalTransferHelper.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "3139246a87e7b2f4ef4277bd843233f1",
+      "sourceName": "contracts/token/MinimalTransferHelper.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/IERC20.sol",
+        "contracts/utils/RevertMsgExtractor.sol"
+      ],
+      "versionRequirement": ">=0.6.0",
+      "artifacts": {
+        "MinimalTransferHelper": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "MinimalTransferHelper.sol/MinimalTransferHelper.json"
+        }
+      }
+    },
+    "contracts/token/SafeERC20Namer.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "8445798b8a676ac7cd422d54ed545d66",
+      "sourceName": "contracts/token/SafeERC20Namer.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol",
+        "contracts/utils/AddressStringUtil.sol"
+      ],
+      "versionRequirement": ">=0.5.0",
+      "artifacts": {
+        "SafeERC20Namer": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "SafeERC20Namer.sol/SafeERC20Namer.json"
+        }
+      }
+    },
+    "contracts/token/TransferHelper.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "eff4e6db8a790aaf3f14907f3b1be793",
+      "sourceName": "contracts/token/TransferHelper.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/token/IERC20.sol",
+        "contracts/utils/RevertMsgExtractor.sol"
+      ],
+      "versionRequirement": ">=0.6.0",
+      "artifacts": {
+        "TransferHelper": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "TransferHelper.sol/TransferHelper.json"
+        }
+      }
+    },
+    "contracts/utils/AddressStringUtil.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "e955c127dcc488f43ec8b850a4c7394f",
+      "sourceName": "contracts/utils/AddressStringUtil.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.5.0",
+      "artifacts": {
+        "AddressStringUtil": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "AddressStringUtil.sol/AddressStringUtil.json"
+        }
+      }
+    },
+    "contracts/utils/EmergencyBrake.sol": {
+      "lastModificationDate": 1664566887819,
+      "contentHash": "9c371a571dde2deaa30bde75acd034d9",
+      "sourceName": "contracts/utils/EmergencyBrake.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "EmergencyBrake": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EmergencyBrake.sol/EmergencyBrake.json"
+        },
+        "IEmergencyBrake": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EmergencyBrake.sol/IEmergencyBrake.json"
+        }
+      }
+    },
+    "contracts/utils/IsContract.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "59c2b4a265b68c1b3ba7666d47ae7fe0",
+      "sourceName": "contracts/utils/IsContract.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "IsContract": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "IsContract.sol/IsContract.json"
+        }
+      }
+    },
+    "contracts/utils/OnChainTest.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "0db55bdfda0759fbf0e6abf5910041b4",
+      "sourceName": "contracts/utils/OnChainTest.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "OnChainTest": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "OnChainTest.sol/OnChainTest.json"
+        }
+      }
+    },
+    "contracts/utils/Pausable.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "e39da3600b4b60ce5e7822df8547acd4",
+      "sourceName": "contracts/utils/Pausable.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Pausable": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Pausable.sol/Pausable.json"
+        }
+      }
+    },
+    "contracts/utils/Relay.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "4d453760860df317f07e7b840c354899",
+      "sourceName": "contracts/utils/Relay.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/Ownable.sol",
+        "contracts/utils/IsContract.sol",
+        "contracts/utils/RevertMsgExtractor.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "Relay": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Relay.sol/Relay.json"
+        }
+      }
+    },
+    "contracts/utils/RevertMsgExtractor.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "cba8ca48b27e56024f1c7fffe20ce4e5",
+      "sourceName": "contracts/utils/RevertMsgExtractor.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.6.0",
+      "artifacts": {
+        "RevertMsgExtractor": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "RevertMsgExtractor.sol/RevertMsgExtractor.json"
+        }
+      }
+    },
+    "contracts/utils/Timelock.sol": {
+      "lastModificationDate": 1661208363980,
+      "contentHash": "70a1ed0f35e2ab97119f559080eb3951",
+      "sourceName": "contracts/utils/Timelock.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol",
+        "contracts/utils/IsContract.sol",
+        "contracts/utils/RevertMsgExtractor.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ITimelock": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Timelock.sol/ITimelock.json"
+        },
+        "Timelock": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Timelock.sol/Timelock.json"
+        }
+      }
+    },
+    "lib/ERC3156/contracts/interfaces/IERC3156FlashBorrower.sol": {
+      "lastModificationDate": 1661208364972,
+      "contentHash": "c78ab7ef731c2b040b3e709f5b2dc9bd",
+      "sourceName": "lib/ERC3156/contracts/interfaces/IERC3156FlashBorrower.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.6.0, <0.9.0",
+      "artifacts": {
+        "IERC3156FlashBorrower": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "IERC3156FlashBorrower.sol/IERC3156FlashBorrower.json"
+        }
+      }
+    },
+    "lib/ERC3156/contracts/interfaces/IERC3156FlashLender.sol": {
+      "lastModificationDate": 1661208364972,
+      "contentHash": "cbd1895591d4e92d0ed90ebb1cc14c44",
+      "sourceName": "lib/ERC3156/contracts/interfaces/IERC3156FlashLender.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/ERC3156/contracts/interfaces/IERC3156FlashBorrower.sol"
+      ],
+      "versionRequirement": ">=0.6.0, <0.9.0",
+      "artifacts": {
+        "IERC3156FlashLender": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "IERC3156FlashLender.sol/IERC3156FlashLender.json"
+        }
+      }
+    },
+    "lib/forge-std/lib/ds-test/src/test.sol": {
+      "lastModificationDate": 1661208363984,
+      "contentHash": "962996f0e05d5218857a538a62d7c47e",
+      "sourceName": "lib/forge-std/lib/ds-test/src/test.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.5.0",
+      "artifacts": {
+        "DSTest": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "test.sol/DSTest.json"
+        }
+      }
+    },
+    "lib/forge-std/src/Script.sol": {
+      "lastModificationDate": 1661208363984,
+      "contentHash": "b313d0193442f5a12848be9c422a0064",
+      "sourceName": "lib/forge-std/src/Script.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol"
+      ],
+      "versionRequirement": ">=0.6.0, <0.9.0",
+      "artifacts": {
+        "Script": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Script.sol/Script.json"
+        }
+      }
+    },
+    "lib/forge-std/src/Test.sol": {
+      "lastModificationDate": 1661208363984,
+      "contentHash": "53ceea3c517ab4a534fd89689f36aee9",
+      "sourceName": "lib/forge-std/src/Test.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Script.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol"
+      ],
+      "versionRequirement": ">=0.6.0, <0.9.0",
+      "artifacts": {
+        "Test": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/Test.json"
+        },
+        "stdError": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/stdError.json"
+        },
+        "stdMath": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/stdMath.json"
+        },
+        "stdStorage": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Test.sol/stdStorage.json"
+        }
+      }
+    },
+    "lib/forge-std/src/Vm.sol": {
+      "lastModificationDate": 1661208363984,
+      "contentHash": "87cafdea05acb705b59c6fa2a685d229",
+      "sourceName": "lib/forge-std/src/Vm.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.6.0, <0.9.0",
+      "artifacts": {
+        "Vm": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Vm.sol/Vm.json"
+        }
+      }
+    },
+    "lib/forge-std/src/console.sol": {
+      "lastModificationDate": 1661208363984,
+      "contentHash": "100b8a33b917da1147740d7ab8b0ded3",
+      "sourceName": "lib/forge-std/src/console.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.4.22, <0.9.0",
+      "artifacts": {
+        "console": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "console.sol/console.json"
+        }
+      }
+    },
+    "lib/forge-std/src/console2.sol": {
+      "lastModificationDate": 1661208363984,
+      "contentHash": "5df91f8e93efbfcccf68973dc1b74a70",
+      "sourceName": "lib/forge-std/src/console2.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [],
+      "versionRequirement": ">=0.4.22, <0.9.0",
+      "artifacts": {
+        "console2": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "console2.sol/console2.json"
+        }
+      }
+    },
+    "test/foundry/EBrake.t.sol": {
+      "lastModificationDate": 1663186073341,
+      "contentHash": "a9c8c51315903a469b6ffa8c7e1ef2fc",
+      "sourceName": "test/foundry/EBrake.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol",
+        "contracts/mocks/RestrictedERC20Mock.sol",
+        "contracts/token/ERC20.sol",
+        "contracts/token/ERC20Permit.sol",
+        "contracts/token/IERC20.sol",
+        "contracts/token/IERC20Metadata.sol",
+        "contracts/token/IERC2612.sol",
+        "contracts/utils/EmergencyBrake.sol",
+        "contracts/utils/IsContract.sol",
+        "contracts/utils/RevertMsgExtractor.sol",
+        "contracts/utils/Timelock.sol",
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Script.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "ExecutedState": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EBrake.t.sol/ExecutedState.json"
+        },
+        "ExecutedStateTest": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EBrake.t.sol/ExecutedStateTest.json"
+        },
+        "PlanState": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EBrake.t.sol/PlanState.json"
+        },
+        "PlanStateTest": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EBrake.t.sol/PlanStateTest.json"
+        },
+        "ZeroState": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EBrake.t.sol/ZeroState.json"
+        },
+        "ZeroStateTest": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "EBrake.t.sol/ZeroStateTest.json"
+        }
+      }
+    },
+    "test/foundry/Pausable.t.sol": {
+      "lastModificationDate": 1661208363984,
+      "contentHash": "c8f3e9c8b53fa4914618b66aa5a59b90",
+      "sourceName": "test/foundry/Pausable.t.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol",
+        "contracts/utils/Pausable.sol",
+        "lib/forge-std/lib/ds-test/src/test.sol",
+        "lib/forge-std/src/Script.sol",
+        "lib/forge-std/src/Test.sol",
+        "lib/forge-std/src/Vm.sol",
+        "lib/forge-std/src/console.sol",
+        "lib/forge-std/src/console2.sol",
+        "test/foundry/mocks/DummyWand.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "StatePaused": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Pausable.t.sol/StatePaused.json"
+        },
+        "StatePausedTest": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Pausable.t.sol/StatePausedTest.json"
+        },
+        "StateZero": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Pausable.t.sol/StateZero.json"
+        },
+        "StateZeroTest": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "Pausable.t.sol/StateZeroTest.json"
+        }
+      }
+    },
+    "test/foundry/mocks/DummyWand.sol": {
+      "lastModificationDate": 1661208363988,
+      "contentHash": "720d1e59f5a4b5f39c5bff2bb7305b6a",
+      "sourceName": "test/foundry/mocks/DummyWand.sol",
+      "solcConfig": {
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "metadata": {
+            "bytecodeHash": "ipfs"
+          },
+          "outputSelection": {
+            "*": {
+              "": [
+                "ast"
+              ],
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ]
+            }
+          },
+          "evmVersion": "london",
+          "libraries": {}
+        }
+      },
+      "imports": [
+        "contracts/access/AccessControl.sol",
+        "contracts/utils/Pausable.sol"
+      ],
+      "versionRequirement": "^0.8.0",
+      "artifacts": {
+        "DummyWand": {
+          "0.8.13+commit.abaa5c0e.Linux.gcc": "DummyWand.sol/DummyWand.json"
+        }
+      }
+    }
+  }
+}
