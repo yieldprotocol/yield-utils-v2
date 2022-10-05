@@ -35,15 +35,20 @@ import { EmergencyBrake__factory } from "../typechain";
     txHashes.map(async ({ txHash }) => {
       const { state, target, permissions } = await EmergencyBrake.plans(txHash);
 
-      const decodedPermish = ethers.utils.defaultAbiCoder.decode(
-        ["(address contact,bytes4[] signatures)[]"],
-        permissions
-      );
+      const decodedPermissions = ethers.utils.defaultAbiCoder
+        .decode(["(address contact,bytes4[] signatures)[]"], permissions)
+        .flat(1);
 
-      return { state, target, permissions: decodedPermish.flat(10) };
+      const _permissions = decodedPermissions.map(({ contact, signatures }) => {
+        return { contact, signatures };
+      });
+
+      return { state, target, permissions: _permissions };
     })
   );
 
-  console.log("🦄 ~ file: emergencyBrakeOldPlans.ts ~ line 49 ~ plans", plans);
+  plans.map((p) => {
+    console.log("🦄 ~ file: emergencyBrakeOldPlans.ts ~ line 53 ~ p", p);
+  });
   return plans;
 })();
