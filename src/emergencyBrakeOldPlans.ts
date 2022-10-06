@@ -1,4 +1,3 @@
-import { FunctionFragment } from "@ethersproject/abi";
 import { ethers } from "hardhat";
 import { EmergencyBrake__factory } from "../typechain";
 
@@ -35,13 +34,15 @@ import { EmergencyBrake__factory } from "../typechain";
     txHashes.map(async ({ txHash }) => {
       const { state, target, permissions } = await EmergencyBrake.plans(txHash);
 
-      const decodedPermissions = ethers.utils.defaultAbiCoder
-        .decode(["(address contact,bytes4[] signatures)[]"], permissions)
-        .flat(1);
+      const decodedPermissions: { contact: string; signatures: string[] }[] =
+        ethers.utils.defaultAbiCoder
+          .decode(["(address contact,bytes4[] signatures)[]"], permissions)
+          .flat(1);
 
-      const _permissions = decodedPermissions.map(({ contact, signatures }) => {
-        return { contact, signatures };
-      });
+      const _permissions = decodedPermissions.flatMap(
+        ({ contact, signatures }) =>
+          signatures.map((s) => ({ contact, signature: s }))
+      );
 
       return { state, target, permissions: _permissions };
     })
@@ -50,5 +51,6 @@ import { EmergencyBrake__factory } from "../typechain";
   plans.map((p) => {
     console.log("🦄 ~ file: emergencyBrakeOldPlans.ts ~ line 53 ~ p", p);
   });
+
   return plans;
 })();
