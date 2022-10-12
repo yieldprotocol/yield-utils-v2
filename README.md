@@ -34,5 +34,7 @@ C4 audit - commit: 78693c5
 
 Audit of Timelock.sol at 8ff8841 by Mudit Gupta: https://twitter.com/Mudit__Gupta/status/1429463910298525701?s=20
 
+Audit of EmergencyBrake.sol [6e37565](https://github.com/yieldprotocol/yield-utils-v2/pull/54/commits/6e375651bee1c08fdac74999aa99874a56d1b396) by devtooligan: https://hackmd.io/@devtooligan/YieldEmergencyBrakeSecurityReview2022-10-11
+
 ## License
 All files in this repository are released under the MIT license.
