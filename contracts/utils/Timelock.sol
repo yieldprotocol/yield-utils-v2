@@ -19,7 +19,6 @@ interface ITimelock {
     function approve(bytes32 txHash) external returns (uint32);
     function cancel(bytes32 txHash) external;
     function execute(Call[] calldata functionCalls) external returns (bytes[] calldata results);
-    function salt(uint256) external view;
     function callWithValue(Call calldata functionCall, uint256 value) external returns (bytes memory result);
 }
 
