@@ -91,11 +91,11 @@ library SafeERC20Namer {
         return name;
     }
 
-    /// @notice Provides a safe ERC20.decimals version which returns '18' as fallback value.
+    /// @notice Provides a safe ERC20.decimals version which returns '0' as fallback value.
     /// @param token The address of the ERC-20 token contract.
     /// @return (uint8) Token decimals.
     function tokenDecimals(address token) public view returns (uint8) {
         (bool success, bytes memory data) = token.staticcall(abi.encodeWithSelector(IERC20Metadata.decimals.selector));
-        return success && data.length == 32 ? abi.decode(data, (uint8)) : 18;
+        return success && data.length == 32 ? abi.decode(data, (uint8)) : 0;
     }
 }
