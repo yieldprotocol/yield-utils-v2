@@ -86,6 +86,10 @@ contract Timelock is ITimelock, AccessControl {
     }
 
     /// @dev Propose a transaction batch for execution
+    /// @notice If several identical proposals should be simultaneously lodged, such as for example for
+    /// identical monthly payments to the same contractor, their proposal hash can be made to differ by
+    /// appending to each one a different view function call such as `dai.balanceOf(0xbabe)` and
+    /// `dai.balanceOf(0xbeef)`.
     function propose(Call[] calldata functionCalls)
         external override auth returns (bytes32 txHash)
     {
@@ -141,9 +145,6 @@ contract Timelock is ITimelock, AccessControl {
         }
         emit Executed(txHash);
     }
-
-    /// @dev Add a call to this function to obtain different hashes for otherwise identical proposals.
-    function salt(uint256) external view override {}
 
     /// @dev To send Ether with a call, the Timelock must call itself at this function. This avoids
     /// adding a rarely used `value` in the Call struct
