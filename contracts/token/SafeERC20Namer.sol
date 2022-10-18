@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+// Last audit: https://github.com/yieldprotocol/yield-utils-v2/commit/0d0b08b6b67cef6dfa69e6e6539bee542f49e25b
+// Report: https://code4rena.com/reports/2021-05-yield
 
 pragma solidity >=0.5.0;
 
@@ -91,11 +93,11 @@ library SafeERC20Namer {
         return name;
     }
 
-    /// @notice Provides a safe ERC20.decimals version which returns '18' as fallback value.
+    /// @notice Provides a safe ERC20.decimals version which returns '0' as fallback value.
     /// @param token The address of the ERC-20 token contract.
     /// @return (uint8) Token decimals.
     function tokenDecimals(address token) public view returns (uint8) {
         (bool success, bytes memory data) = token.staticcall(abi.encodeWithSelector(IERC20Metadata.decimals.selector));
-        return success && data.length == 32 ? abi.decode(data, (uint8)) : 18;
+        return success && data.length == 32 ? abi.decode(data, (uint8)) : 0;
     }
 }
