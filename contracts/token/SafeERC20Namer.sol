@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+// Last audit: https://github.com/yieldprotocol/yield-utils-v2/commit/0d0b08b6b67cef6dfa69e6e6539bee542f49e25b
+// Report: https://code4rena.com/reports/2021-05-yield
 
 pragma solidity >=0.5.0;
 
