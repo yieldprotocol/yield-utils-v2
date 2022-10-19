@@ -3,7 +3,7 @@ import { id } from "../src/index";
 
 import RestrictedERC20MockArtifact from "../artifacts/contracts/mocks/RestrictedERC20Mock.sol/RestrictedERC20Mock.json";
 
-import { RestrictedERC20Mock as Restricted } from "../typechain";
+import { RestrictedERC20Mock as Restricted } from "../typechain/RestrictedERC20Mock";
 
 import { ethers, waffle } from "hardhat";
 import { expect } from "chai";

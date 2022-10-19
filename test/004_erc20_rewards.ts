@@ -5,10 +5,8 @@ const { WAD } = constants;
 
 import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json";
 import ERC20RewardsMockArtifact from "../artifacts/contracts/mocks/ERC20RewardsMock.sol/ERC20RewardsMock.json";
-import {
-  ERC20RewardsMock as ERC20Rewards,
-  ERC20Mock as ERC20,
-} from "../typechain";
+import { ERC20Mock as ERC20 } from "../typechain/ERC20Mock";
+import { ERC20RewardsMock as ERC20Rewards } from "../typechain/ERC20RewardsMock";
 
 import { BigNumber } from "ethers";
 

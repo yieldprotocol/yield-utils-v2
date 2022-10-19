@@ -2,7 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json";
 
-import { ERC20Mock as ERC20 } from "../typechain";
+import { ERC20Mock as ERC20 } from "../typechain/ERC20Mock";
 
 const MAX =
   "115792089237316195423570985008687907853269984665640564039457584007913129639935";

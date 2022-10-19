@@ -7,13 +7,14 @@
     "resolveJsonModule": true
   },
   "include": [
-    "./typechain",
-    "./src",
-    "./test"
-  ],
-  "files": [
-    "hardhat.config.ts",
-    "./node_modules/@nomiclabs/hardhat-ethers/internal/type-extensions.d.ts",
-    "./node_modules/@nomiclabs/hardhat-waffle/dist/src/type-extensions.d.ts"
+    "src/**/*.ts",
+    "artifacts/**/*",
+    "artifacts/**/*.json",
+    "scripts/**/*",
+    "tasks/**/*",
+    "test/**/*",
+    "typechain/**/*",
+    "types/**/*",
+    "hardhat.config.ts"
   ]
 }

@@ -2,7 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 import ERC20MockArtifact from "../artifacts/contracts/mocks/ERC20Mock.sol/ERC20Mock.json";
 import OnChainTestArtifact from "../artifacts/contracts/utils/OnChainTest.sol/OnChainTest.json";
-import { ERC20Mock as ERC20 } from "../typechain";
+import { ERC20Mock as ERC20 } from "../typechain/ERC20Mock";
 
 import { ethers, waffle } from "hardhat";
 import { expect } from "chai";
