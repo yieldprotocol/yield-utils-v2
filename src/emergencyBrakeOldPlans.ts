@@ -50,13 +50,11 @@ const governanceCloak = new ethers.Contract(
     signer
 )
 
-
-
 class OldPlan {
     
     state = ""
     target = ""
-    permissions = []
+    permissions = ""
 }
 
 var OldPlans: OldPlan[] = []
@@ -65,35 +63,14 @@ for(var i = 0; i < plans.length; i++) {
     let txHash_ = plans[i].txHash;
     OldPlans[i].state = governanceCloak.plans(txHash_).state;
     OldPlans[i].target = governanceCloak.plans(txHash_).contact;
-    var _permissions = governanceCloak.plans(txHash_).permissions;
-    OldPlans[i].permissions = ethers.utils.defaultAbiCoder
-    .decode(["address contact,bytes4[] signatures[]"], _permissions)
-    .flat(1);
-}
-
-class Permission {
-    contact = ""
-    signature = ""
+    OldPlans[i].permissions = governanceCloak.plans(txHash_).permissions;
 }
 
 class NewPlan {
-
     target = ""
-    permissions: Permission[] = []
+    permission = ""
 }
 
-var newPlans: NewPlan[] = []
-
-for(var i = 0; i < OldPlans.length; i++) {
-    if(OldPlans[i].state == "PLANNED"){
-        
-        for(var j = 0; j < OldPlans[i].permissions.length; j++) {
-            for(var k = 0; k < OldPlans[i].permissions[j].signatures.length; k++) {
-                const new Permission = (
-                    OldPlans[i].permissions[j].contact,
-                    )
-            }
-        }
-    }
+class Persmission {
 
 }
