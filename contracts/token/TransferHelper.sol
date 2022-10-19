@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Taken from https://github.com/Uniswap/uniswap-lib/blob/master/contracts/libraries/TransferHelper.sol
 
-pragma solidity >=0.6.0;
+pragma solidity >=0.8.15;
 
 import "./IERC20.sol";
 import "../utils/RevertMsgExtractor.sol";
@@ -21,6 +21,13 @@ library TransferHelper {
     ) internal {
         (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.transfer.selector, to, value));
         if (!(success && (data.length == 0 || abi.decode(data, (bool))))) revert(RevertMsgExtractor.getRevertMsg(data));
+    }
+
+    function safeApprove(
+        IERC20 token, 
+        address spender, 
+        uint256 value
+    ) internal {
     }
 
     /// @notice Transfers tokens from the targeted address to the given destination

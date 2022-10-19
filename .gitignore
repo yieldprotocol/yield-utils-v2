@@ -19,6 +19,7 @@ typechain/
 deployments/
 
 # Secret files
+.env
 .etherscanKey
 .infuraKey
 .mythxKey
@@ -44,4 +45,5 @@ dist/
 
 # Foundry
 foundry/out/
+forge-cache
 out/
