@@ -6,6 +6,8 @@ import "./IERC20.sol";
 import "../utils/RevertMsgExtractor.sol";
 
 // helper methods for interacting with ERC20 tokens and sending ETH that do not consistently return true/false
+// USDT is a well known token that returns nothing for its transfer, transferFrom, and approve functions
+// and part of the reason this library exists
 library TransferHelper {
     /// @notice Transfers tokens from msg.sender to a recipient
     /// @dev Errors with the underlying revert message if transfer fails
@@ -18,38 +20,21 @@ library TransferHelper {
         uint256 value
     ) internal {
         (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.transfer.selector, to, value));
-        if (!(success && (data.length == 0 || abi.decode(data, (bool))))) revert(RevertMsgExtractor.getRevertMsg(data));
+        if (!(success && _returnTrueOrNothing(data))) revert(RevertMsgExtractor.getRevertMsg(data));
     }
 
+    /// @notice Approves a spender to transfer tokens from msg.sender
+    /// @dev Errors with the underlying revert message if transfer fails
+    /// @param token The contract address of the token which will be approved
+    /// @param spender The approved spender
+    /// @param value The value of the allowance
     function safeApprove(
-        IERC20 token, 
-        address spender, 
+        IERC20 token,
+        address spender,
         uint256 value
     ) internal {
-        require(
-            (value == 0) || (token.allowance(address(this), spender) == 0),
-            "approve from non-zero to non-zero allowance"
-        );
-        bytes memory data = abi.encodeWithSelector(token.approve.selector, spender, value);
-        require(address(this).balance >= 0, "insufficient balance for call");
-        (bool success, bytes memory returndata) = address(token).call{value: 0}(data);
-        if (success) {
-            if (returndata.length == 0) {
-                // only check isContract if the call was successful and the return data is empty
-                // otherwise we already know that it was a contract
-                require(address(token).code.length > 0, "call to non-contract");
-            }
-        } else {
-            // Look for revert reason and bubble it up if present
-            if (returndata.length > 0) {
-                assembly {
-                    let returndata_size := mload(returndata)
-                    revert(add(32, returndata), returndata_size)
-                }
-            } else {
-                revert("low-level call failed");
-            }
-        }
+        (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.approve.selector, spender, value));
+        if (!(success && _returnTrueOrNothing(data))) revert(RevertMsgExtractor.getRevertMsg(data));
     }
 
     /// @notice Transfers tokens from the targeted address to the given destination
@@ -65,7 +50,7 @@ library TransferHelper {
         uint256 value
     ) internal {
         (bool success, bytes memory data) = address(token).call(abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value));
-        if (!(success && (data.length == 0 || abi.decode(data, (bool))))) revert(RevertMsgExtractor.getRevertMsg(data));
+        if (!(success && _returnTrueOrNothing(data))) revert(RevertMsgExtractor.getRevertMsg(data));
     }
 
     /// @notice Transfers ETH to the recipient address
@@ -75,5 +60,9 @@ library TransferHelper {
     function safeTransferETH(address payable to, uint256 value) internal {
         (bool success, bytes memory data) = to.call{value: value}(new bytes(0));
         if (!success) revert(RevertMsgExtractor.getRevertMsg(data));
+    }
+
+    function _returnTrueOrNothing(bytes memory data) internal pure returns(bool) {
+        return (data.length == 0 || abi.decode(data, (bool)));
     }
 }
