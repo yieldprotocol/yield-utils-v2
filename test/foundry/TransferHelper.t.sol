@@ -22,5 +22,9 @@ contract TransferHelperTest is Test {
     function testSafeApprove() public {
         console.log("can successfully safe approve");
         usdt.safeApprove(other, 100);
+        assertEq(
+            usdt.allowance(address(this), other), 
+            100
+        );
     }
 }
