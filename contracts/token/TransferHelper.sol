@@ -31,26 +31,14 @@ library TransferHelper {
             "approve from non-zero to non-zero allowance"
         );
         bytes memory data = abi.encodeWithSelector(token.approve.selector, spender, value);
-        bytes memory returndata = _safeApprove(address(token), data, "low-level call failed");
-        if (returndata.length > 0) {
-            require(abi.decode(returndata, (bool)), "ERC20 operation did not succeed");
-        }
-    }
-
-    function _safeApprove(
-        address target,
-        bytes memory data,
-        string memory errorMessage
-    ) internal returns (bytes memory) {
         require(address(this).balance >= 0, "insufficient balance for call");
-        (bool success, bytes memory returndata) = target.call{value: 0}(data);
+        (bool success, bytes memory returndata) = address(token).call{value: 0}(data);
         if (success) {
             if (returndata.length == 0) {
                 // only check isContract if the call was successful and the return data is empty
                 // otherwise we already know that it was a contract
-                require(target.code.length > 0, "call to non-contract");
+                require(address(token).code.length > 0, "call to non-contract");
             }
-            return returndata;
         } else {
             // Look for revert reason and bubble it up if present
             if (returndata.length > 0) {
@@ -59,7 +47,7 @@ library TransferHelper {
                     revert(add(32, returndata), returndata_size)
                 }
             } else {
-                revert(errorMessage);
+                revert("low-level call failed");
             }
         }
     }
