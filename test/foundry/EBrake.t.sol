@@ -17,15 +17,16 @@ abstract contract ZeroState is Test {
     address public executor;
     address public tokenAdmin;
 
-    event Added(address indexed target, IEmergencyBrake.Permission[] permissionsIn);
-    event Removed(address indexed target, IEmergencyBrake.Permission[] permissionsOut);
-    event Executed(address indexed target);
-    event Restored(address indexed target);
+    event Added(address indexed user, IEmergencyBrake.Permission permissionIn);
+    event Removed(address indexed user, IEmergencyBrake.Permission permissionOut);
+    event Executed(address indexed user);
+    event Restored(address indexed user);
 
     bytes4 public constant ROOT = bytes4(0);
 
-    IEmergencyBrake.Permission[] public permissions;
-    IEmergencyBrake.Permission public permission;
+    IEmergencyBrake.Plan public plan;
+    IEmergencyBrake.Permission[] public permissionsIn;
+    IEmergencyBrake.Permission[] public permissionsOut;
 
     function setUp() public virtual {
         vm.startPrank(deployer);
@@ -59,33 +60,50 @@ abstract contract ZeroState is Test {
     }
 }
 
-// contract ZeroStateTest is ZeroState {
-// 
-//     function testPlan() public {
-//         bytes4 minterRole = RestrictedERC20Mock.mint.selector;
-//         bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
-// 
-//         permissions.push(IEmergencyBrake.Permission(address(rToken), minterRole));
-//         permissions.push(IEmergencyBrake.Permission(address(rToken), burnerRole));
-// 
-//         vm.expectEmit(true, false, false, true);
-//         emit Planned(tokenAdmin, permissions);
-//         vm.prank(planner);
-//         ebrake.plan(tokenAdmin, permissions);
-// 
-//         (EmergencyBrake.State state_
-//             
-//         ) = ebrake.plans(tokenAdmin);
-// 
-//         bool isPlanned = EmergencyBrake.State.PLANNED == state_;
-//         assertEq(isPlanned, true);
-//     }
-// 
-//     function testCannotAddToUnplanned() public {
-//         vm.expectRevert("Target not planned for");
-//         vm.prank(planner);
-//         ebrake.addToPlan(tokenAdmin, permission);
-//     }
+contract ZeroStateTest is ZeroState {
+
+    function testAddOne() public {
+        bytes4 minterRole = RestrictedERC20Mock.mint.selector;
+
+        EmergencyBrake.Permission memory permissionIn = IEmergencyBrake.Permission(address(rToken), minterRole);
+
+        vm.expectEmit(true, false, false, true);
+        emit Added(tokenAdmin, permissionIn);
+
+        permissionsIn.push(permissionIn);
+        vm.prank(planner);
+        ebrake.add(tokenAdmin, permissionsIn);
+
+        assertFalse(ebrake.executed(tokenAdmin));
+        assertTrue(ebrake.contains(tokenAdmin, permissionIn));
+        assertEq(ebrake.index(tokenAdmin, permissionIn), 1);
+    }
+
+//    function testAdd() public {
+//        bytes4 minterRole = RestrictedERC20Mock.mint.selector;
+//        bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
+//
+//        permissions.push(IEmergencyBrake.Permission(address(rToken), minterRole));
+//        permissions.push(IEmergencyBrake.Permission(address(rToken), burnerRole));
+//
+//        vm.expectEmit(true, false, false, true);
+//        emit Planned(tokenAdmin, permissions);
+//        vm.prank(planner);
+//        ebrake.plan(tokenAdmin, permissions);
+//
+//        (EmergencyBrake.State state_
+//            
+//        ) = ebrake.plans(tokenAdmin);
+//
+//        bool isPlanned = EmergencyBrake.State.PLANNED == state_;
+//        assertEq(isPlanned, true);
+//    }
+//
+//    function testCannotAddToUnplanned() public {
+//        vm.expectRevert("Target not planned for");
+//        vm.prank(planner);
+//        ebrake.addToPlan(tokenAdmin, permission);
+//    }
 // 
 //     function testCannotRemoveFromUnplanned() public {
 //         vm.expectRevert("Target not planned for");
@@ -127,7 +145,7 @@ abstract contract ZeroState is Test {
 //         vm.prank(planner);
 //         ebrake.plan(tokenAdmin, permissions);
 //     }
-// }
+}
 // 
 // abstract contract PlanState is ZeroState {
 // 

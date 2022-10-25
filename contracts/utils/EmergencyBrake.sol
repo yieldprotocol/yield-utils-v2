@@ -6,10 +6,20 @@ import "../access/AccessControl.sol";
 
 
 interface IEmergencyBrake {
+    struct Plan {
+        bool executed;
+        mapping(bytes32 => Permission) permissions;
+        mapping(uint => bytes32) ids; // Manual implementation of a dynamic array. Ids are assigned incrementally and position zero contains the length.
+    }
+
     struct Permission {
         address host; /// contract for which a user holds auth priviliges
         bytes4 signature;
     }
+
+    function executed(address user) external view returns (bool);
+    function contains(address user, Permission calldata permission) external view returns (bool);
+    function index(address user, Permission calldata permission) external view returns (uint index_);
 
     function add(address user, Permission[] calldata permissionsIn) external;
     function remove(address user, Permission[] calldata permissionsOut) external;
@@ -27,13 +37,7 @@ interface IEmergencyBrake {
 /// first place. As an additional safeguard, EmergencyBrake cannot revoke or grant ROOT roles.
 contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
-    struct Plan {
-        bool executed;
-        mapping(bytes32 => Permission) permissions;
-        mapping(uint => bytes32) ids; // Manual implementation of a dynamic array. Ids are assigned incrementally and position zero contains the length.
-    }
-
-    event Added(address indexed user, Permission newPermission);
+    event Added(address indexed user, Permission permissionIn);
     event Removed(address indexed user, Permission permissionOut);
     event Executed(address indexed user);
     event Restored(address indexed user);
@@ -49,6 +53,29 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         _grantRole(IEmergencyBrake.restore.selector, planner);
         _grantRole(IEmergencyBrake.terminate.selector, planner);
         // Granting roles (plan, cancel, execute, restore, terminate, modifyPlan) is reserved to ROOT
+    }
+
+    function executed(address user) external view returns (bool) {
+        return plans[user].executed;
+    }
+
+    function contains(address user, Permission calldata permission) external view returns (bool) {
+        return plans[user].permissions[_permissionToId(permission)].signature != bytes4(0);
+    }
+
+    function index(address user, Permission calldata permission) external view returns (uint index_) {
+        Plan storage plan_ = plans[user];
+        uint length = uint(plan_.ids[0]);
+        require(length > 0, "Plan not found");
+
+        bytes32 id = _permissionToId(permission);
+
+        for (uint i = 1; i <= length; ++i ) {
+            if (plan_.ids[i] == id) {
+                index_ = i;
+                break;
+            }
+        }
     }
 
     /// @dev Add permissions to an isolation plan
