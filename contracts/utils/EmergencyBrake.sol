@@ -11,8 +11,8 @@ interface IEmergencyBrake {
         bytes4 signature;
     }
 
-    function add(address user, Permission calldata permission) external;
-    function remove(address user, Permission calldata permission) external;
+    function add(address user, Permission[] calldata permissionsIn) external;
+    function remove(address user, Permission[] calldata permissionsOut) external;
     function cancel(address user) external;
     function execute(address user) external;
     function restore(address user) external;
@@ -51,10 +51,9 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         // Granting roles (plan, cancel, execute, restore, terminate, modifyPlan) is reserved to ROOT
     }
 
-    /// @dev Add permissions to an isolation scheme
-    /// @dev a host can be added multiple times to a plan but ensures that all signatures are unique to prevent revert on execution
-    /// @param user address with auth privileges on a contract and a plan exists for
-    /// @param newPermission permission set that is being added to an existing plan
+    /// @dev Add permissions to an isolation plan
+    /// @param user address with auth privileges on permission hosts
+    /// @param permissionsIn permissions that are being added to an existing plan
     function add(address user, Permission[] memory permissionsIn)
         external override auth 
     {   
@@ -71,15 +70,16 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             plan_.permissions[idIn] = permissionIn; // Set the permission
             uint idLength = uint(plan_.ids[0]) + 1;
             plan_.ids[idLength] = idIn; // Push the id
-            plan_.ids[0] = idLength; // Update id array length
+            plan_.ids[0] = bytes32(idLength); // Update id array length
             
             emit Added(user, permissionIn);
         }
 
     }
 
-    /// @dev Remove permissions from an isolation scheme
-    /// @param user address with auth privileges on a contract and a plan exists for
+    /// @dev Remove permissions from an isolation plan
+    /// @param user address with auth privileges on permission hosts
+    /// @param permissionsOut permissions that are being removed from an existing plan
     function remove(address user, Permission[] memory permissionsOut) 
         external override auth
     {   
@@ -95,12 +95,12 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             delete plan_.permissions[idOut]; // Remove the permission
             
             // Loop through the ids array, copy the last item on top of the removed permission, then pop.
-            uint idLength = plan_.ids[0];
-            for (uint i = 1; i <= idLength; ++i ) {
-                if (plan_.ids[i] == idOut) {
-                    if (i < idLength) plan_.ids[i] = plan_.ids[idLength];
+            uint idLength = uint(plan_.ids[0]);
+            for (uint j = 1; j <= idLength; ++j ) {
+                if (plan_.ids[j] == idOut) {
+                    if (j < idLength) plan_.ids[j] = plan_.ids[idLength];
                     delete plan_.ids[idLength]; // Remove the id
-                    plan_.ids[0] = idLength - 1; // Update id array length
+                    plan_.ids[0] = bytes32(idLength - 1); // Update id array length
                     break;
                 }
             }
@@ -109,7 +109,8 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         }
     }
 
-    /// @dev Remove a planned isolation scheme
+    /// @dev Remove a planned isolation plan
+    /// @param user address with an isolation plan
     function cancel(address user)
         external override auth
     {
@@ -134,15 +135,15 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         require(!plan_.executed, "No changes while in execution");
 
         // Loop through the ids array, and remove everything.
-        uint length = plan_.ids[0];
+        uint length = uint(plan_.ids[0]);
+        require(length > 0, "Plan not found");
         for (uint i = 1; i <= length; ++i ) {
-            emit PermissionRemoved(user, plan_.permissions[id);
             bytes32 id = plan_.ids[i];
+            emit Removed(user, plan_.permissions[id]);
             delete plan_.ids[i]; // Remove the id
             delete plan_.permissions[id]; // Remove the permission
         }
         delete plan_.ids[0]; // Set the array length to zero
-        delete plan_; // Remove the plan
     }
 
     /// @dev Execute an access removal transaction
@@ -150,16 +151,14 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {
         Plan storage plan_ = plans[user];
-        require(!plan.executed, "Already executed");
-        plan_.execute = true;
-
-        Permission[] memory permissions_ = plan_.permissions;
+        require(!plan_.executed, "Already executed");
+        plan_.executed = true;
 
         // Loop through the ids array, and revoke all roles.
-        uint length = plan_.ids[0];
+        uint length = uint(plan_.ids[0]);
         for (uint i = 1; i <= length; ++i ) {
             bytes32 id = plan_.ids[i];
-            Permission memory permission_ = permissions_[id]; 
+            Permission memory permission_ = plan_.permissions[id]; 
             AccessControl host = AccessControl(permission_.host);
             bytes4 signature_ = permission_.signature;
             require(
@@ -178,15 +177,13 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     {
         Plan storage plan_ = plans[user];
         require(plan_.executed, "Plan not executed");
-        plan_.execute = false;
-
-        Permission[] memory permissions_ = plan_.permissions;
+        plan_.executed = false;
 
         // Loop through the ids array, and grant all roles.
-        uint length = plan_.ids[0];
+        uint length = uint(plan_.ids[0]);
         for (uint i = 1; i <= length; ++i ) {
             bytes32 id = plan_.ids[i];
-            Permission memory permission_ = permissions_[id]; 
+            Permission memory permission_ = plan_.permissions[id]; 
             AccessControl host = AccessControl(permission_.host);
             bytes4 signature_ = permission_.signature;
             host.grantRole(signature_, user);
@@ -216,7 +213,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function _permissionToId(Permission memory permission) 
         internal pure returns(bytes32 id) 
     {
-        id = bytes32(abi.encodePacked(permission.signature, permission.contact));
+        id = bytes32(abi.encodePacked(permission.signature, permission.host));
     }
 
     function _idToPermission(bytes32 id) 
