@@ -160,21 +160,6 @@ describe("Timelock", async function () {
       );
     });
 
-    it("allows proposing repeated transactions", async () => {
-      const txHash2 = await timelock.callStatic.proposeRepeated(
-        functionCalls,
-        1
-      );
-
-      await expect(await timelock.proposeRepeated(functionCalls, 1)).to.emit(
-        timelock,
-        "Proposed"
-      );
-      //      .withArgs(txHash, targets, data, eta)
-      const proposal = await timelock.proposals(txHash2);
-      expect(proposal.state).to.equal(STATE.PROPOSED);
-    });
-
     it("only the governor can approve", async () => {
       await expect(
         timelock.connect(otherAcc).approve(txHash)
@@ -205,21 +190,12 @@ describe("Timelock", async function () {
       let timestamp: number;
       let now: BigNumber;
       let eta: BigNumber;
-      let txHash2: string;
-      let txHash3: string;
 
       beforeEach(async () => {
         ({ timestamp } = await ethers.provider.getBlock("latest"));
         now = BigNumber.from(timestamp);
         eta = now.add(await timelock.delay()).add(100);
         await timelock.approve(txHash);
-
-        txHash2 = await timelock.callStatic.proposeRepeated(functionCalls, 1);
-        await timelock.proposeRepeated(functionCalls, 1);
-        await timelock.approve(txHash2);
-
-        txHash3 = await timelock.callStatic.proposeRepeated(functionCalls, 2);
-        await timelock.proposeRepeated(functionCalls, 2);
       });
 
       it("only the governor can execute", async () => {
@@ -315,23 +291,6 @@ describe("Timelock", async function () {
             .to.emit(target2, "Approval");
           //          .withArgs(governor, governor, 1)
           expect((await timelock.proposals(txHash)).state).to.equal(
-            STATE.UNKNOWN
-          );
-          expect(await target1.balanceOf(governor)).to.equal(1);
-          expect(await target2.allowance(timelock.address, governor)).to.equal(
-            1
-          );
-        });
-
-        it("executes a repeated transaction", async () => {
-          await expect(await timelock.executeRepeated(functionCalls, 1))
-            .to.emit(timelock, "Executed")
-            //          .withArgs(txHash, targets, data, eta)
-            .to.emit(target1, "Transfer")
-            //          .withArgs(null, governor, 1)
-            .to.emit(target2, "Approval");
-          //          .withArgs(governor, governor, 1)
-          expect((await timelock.proposals(txHash2)).state).to.equal(
             STATE.UNKNOWN
           );
           expect(await target1.balanceOf(governor)).to.equal(1);

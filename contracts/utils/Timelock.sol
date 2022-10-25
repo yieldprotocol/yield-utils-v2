@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Inspired on Timelock.sol from Compound.
 // Special thanks to BoringCrypto and Mudit Gupta for their feedback.
+// Last audit by Trail of Bits on https://github.com/yieldprotocol/yield-utils-v2/commit/13190065ff409741d23836a33fd3d6c3059c3461
 
 pragma solidity ^0.8.0;
 import "../access/AccessControl.sol";
@@ -16,11 +17,10 @@ interface ITimelock {
 
     function setDelay(uint32 delay_) external;
     function propose(Call[] calldata functionCalls) external returns (bytes32 txHash);
-    function proposeRepeated(Call[] calldata functionCalls, uint256 salt) external returns (bytes32 txHash);
     function approve(bytes32 txHash) external returns (uint32);
     function cancel(bytes32 txHash) external;
     function execute(Call[] calldata functionCalls) external returns (bytes[] calldata results);
-    function executeRepeated(Call[] calldata functionCalls, uint256 salt) external returns (bytes[] calldata results);
+    function callWithValue(Call calldata functionCall, uint256 value) external returns (bytes memory result);
 }
 
 contract Timelock is ITimelock, AccessControl {
@@ -54,16 +54,12 @@ contract Timelock is ITimelock, AccessControl {
         // governor should keep the `propose` and `execute` permissions, but use them only in emergency situations
         // (such as all trusted individuals going rogue).
         _grantRole(ITimelock.propose.selector, governor);
-        _grantRole(ITimelock.proposeRepeated.selector, governor);
         _grantRole(ITimelock.approve.selector, governor);
         _grantRole(ITimelock.cancel.selector, governor);
         _grantRole(ITimelock.execute.selector, governor);
-        _grantRole(ITimelock.executeRepeated.selector, governor);
 
         _grantRole(ITimelock.propose.selector, executor);
-        _grantRole(ITimelock.proposeRepeated.selector, executor);
         _grantRole(ITimelock.execute.selector, executor);
-        _grantRole(ITimelock.executeRepeated.selector, executor);
 
         // Changing the delay must now be executed through this Timelock contract
         _grantRole(ITimelock.setDelay.selector, address(this)); // bytes4(keccak256("setDelay(uint256)"))
@@ -86,44 +82,18 @@ contract Timelock is ITimelock, AccessControl {
     function hash(Call[] calldata functionCalls)
         external pure returns (bytes32 txHash)
     {
-        return _hash(functionCalls, 0);
-    }
-
-    /// @dev Compute the hash for a proposal, with other identical proposals existing
-    /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
-    function hashRepeated(Call[] calldata functionCalls, uint256 salt)
-        external pure returns (bytes32 txHash)
-    {
-        return _hash(functionCalls, salt);
-    }
-
-    /// @dev Compute the hash for a proposal
-    function _hash(Call[] calldata functionCalls, uint256 salt)
-        private pure returns (bytes32 txHash)
-    {
-        txHash = keccak256(abi.encode(functionCalls, salt));
+        txHash = keccak256(abi.encode(functionCalls));
     }
 
     /// @dev Propose a transaction batch for execution
+    /// @notice If several identical proposals should be simultaneously lodged, such as for example for
+    /// identical monthly payments to the same contractor, their proposal hash can be made to differ by
+    /// appending to each one a different view function call such as `dai.balanceOf(0xbabe)` and
+    /// `dai.balanceOf(0xbeef)`.
     function propose(Call[] calldata functionCalls)
         external override auth returns (bytes32 txHash)
     {
-        return _propose(functionCalls, 0);
-    }
-
-    /// @dev Propose a transaction batch for execution, with other identical proposals existing
-    /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
-    function proposeRepeated(Call[] calldata functionCalls, uint256 salt)
-        external override auth returns (bytes32 txHash)
-    {
-        return _propose(functionCalls, salt);
-    }
-
-    /// @dev Propose a transaction batch for execution
-    function _propose(Call[] calldata functionCalls, uint256 salt)
-        private returns (bytes32 txHash)
-    {
-        txHash = keccak256(abi.encode(functionCalls, salt));
+        txHash = keccak256(abi.encode(functionCalls));
         require(proposals[txHash].state == STATE.UNKNOWN, "Already proposed.");
         proposals[txHash].state = STATE.PROPOSED;
         emit Proposed(txHash);
@@ -157,22 +127,7 @@ contract Timelock is ITimelock, AccessControl {
     function execute(Call[] calldata functionCalls)
         external override auth returns (bytes[] memory results)
     {
-        return _execute(functionCalls, 0);
-    }
-    
-    /// @dev Execute a proposal, among several identical ones
-    /// @param salt Unique identifier for the transaction when repeatedly proposed. Chosen by governor.
-    function executeRepeated(Call[] calldata functionCalls, uint256 salt)
-        external override auth returns (bytes[] memory results)
-    {
-        return _execute(functionCalls, salt);
-    }
-
-    /// @dev Execute a proposal
-    function _execute(Call[] calldata functionCalls, uint256 salt)
-        private returns (bytes[] memory results)
-    {
-        bytes32 txHash = keccak256(abi.encode(functionCalls, salt));
+        bytes32 txHash = keccak256(abi.encode(functionCalls));
         Proposal memory proposal = proposals[txHash];
 
         require(proposal.state == STATE.APPROVED, "Not approved.");
@@ -190,4 +145,15 @@ contract Timelock is ITimelock, AccessControl {
         }
         emit Executed(txHash);
     }
+
+    /// @dev To send Ether with a call, the Timelock must call itself at this function. This avoids
+    /// adding a rarely used `value` in the Call struct
+    function callWithValue(Call calldata functionCall, uint256 value) external override returns (bytes memory result) {
+        require(msg.sender == address(this), "Only call from itself");
+        bool success;
+        (success, result) = functionCall.target.call{ value: value }(functionCall.data);
+        if (!success) revert(RevertMsgExtractor.getRevertMsg(result));
+    }
+
+    receive() payable external {}
 }
