@@ -121,6 +121,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Remove the restoring option from an isolated user
+    /// @param user address with an isolation plan
     function terminate(address user)
         external override auth
     {
@@ -128,6 +129,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Remove all data related to an user
+    /// @param user address with an isolation plan
     function _erase(address user)
         internal
     {
@@ -137,6 +139,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         // Loop through the ids array, and remove everything.
         uint length = uint(plan_.ids[0]);
         require(length > 0, "Plan not found");
+
         for (uint i = 1; i <= length; ++i ) {
             bytes32 id = plan_.ids[i];
             emit Removed(user, plan_.permissions[id]);
@@ -147,6 +150,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     }
 
     /// @dev Execute an access removal transaction
+    /// @param user address with an isolation plan
     function execute(address user)
         external override auth
     {
@@ -156,6 +160,8 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
         // Loop through the ids array, and revoke all roles.
         uint length = uint(plan_.ids[0]);
+        require(length > 0, "Plan not found");
+
         for (uint i = 1; i <= length; ++i ) {
             bytes32 id = plan_.ids[i];
             Permission memory permission_ = plan_.permissions[id]; 
@@ -181,6 +187,8 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
         // Loop through the ids array, and grant all roles.
         uint length = uint(plan_.ids[0]);
+        require(length > 0, "Plan not found");
+
         for (uint i = 1; i <= length; ++i ) {
             bytes32 id = plan_.ids[i];
             Permission memory permission_ = plan_.permissions[id]; 
