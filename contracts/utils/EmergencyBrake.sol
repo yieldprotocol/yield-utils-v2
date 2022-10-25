@@ -19,6 +19,7 @@ interface IEmergencyBrake {
     function terminate(address target) external;
 }
 
+/// @notice DO NOT DEPLOY - In the process of being audited
 /// @dev EmergencyBrake allows to plan for and execute transactions that remove access permissions for a target
 /// contract. In an permissioned environment this can be used for pausing components.
 /// All contracts in scope of emergency plans must grant ROOT permissions to EmergencyBrake. To mitigate the risk
