@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// Audit: https://hackmd.io/@devtooligan/YieldEmergencyBrakeSecurityReview2022-10-11
 
 pragma solidity ^0.8.0;
 import "../access/AccessControl.sol";
@@ -19,15 +20,12 @@ interface IEmergencyBrake {
     function terminate(address target) external;
 }
 
-/// @notice DO NOT DEPLOY - In the process of being audited
 /// @dev EmergencyBrake allows to plan for and execute transactions that remove access permissions for a target
 /// contract. In an permissioned environment this can be used for pausing components.
 /// All contracts in scope of emergency plans must grant ROOT permissions to EmergencyBrake. To mitigate the risk
 /// of governance capture, EmergencyBrake has very limited functionality, being able only to revoke existing roles
 /// and to restore previously revoked roles. Thus EmergencyBrake cannot grant permissions that weren't there in the 
 /// first place. As an additional safeguard, EmergencyBrake cannot revoke or grant ROOT roles.
-/// In addition, there is a separation of concerns between the planner and the executor accounts, so that both of them
-/// must be compromised simultaneously to execute non-approved emergency plans, and then only creating a denial of service.
 contract EmergencyBrake is AccessControl, IEmergencyBrake {
     enum State {UNPLANNED, PLANNED, EXECUTED}
 
@@ -48,6 +46,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     mapping (address => Plan) public plans;
 
     constructor(address planner, address executor) AccessControl() {
+        // TODO: Think about the permissions and what is best to give on deployment
         _grantRole(IEmergencyBrake.plan.selector, planner);
         _grantRole(IEmergencyBrake.addToPlan.selector, planner);
         _grantRole(IEmergencyBrake.removeFromPlan.selector, planner);
