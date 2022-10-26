@@ -31,16 +31,16 @@ abstract contract ZeroState is Test {
     function setUp() public virtual {
         vm.startPrank(deployer);
 
-        deployer = address(1);
+        deployer = address(0);
         vm.label(deployer, "deployer");
 
-        planner = address(2);
+        planner = address(1);
         vm.label(planner, "planner");
 
-        executor = address(3);
+        executor = address(2);
         vm.label(executor, "executor");
 
-        tokenAdmin = address(4);
+        tokenAdmin = address(3);
         vm.label(tokenAdmin, "tokenAdmin");
 
         ebrake = new EmergencyBrake(planner, executor);
