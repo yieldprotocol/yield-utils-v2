@@ -146,7 +146,6 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         internal
     {
         Plan storage plan_ = plans[user];
-        require(!plan_.executed, "No changes while in execution");
 
         // Loop through the ids array, and remove everything.
         uint length = uint(plan_.ids[0]);
