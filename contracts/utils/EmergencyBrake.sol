@@ -34,21 +34,21 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     /// @dev Is a plan executed?
     /// @param user address with auth privileges on permission hosts
-    function executed(address user) external view returns (bool) {
+    function executed(address user) external view override returns (bool) {
         return plans[user].executed;
     }
 
     /// @dev Does a plan contain a permission?
     /// @param user address with auth privileges on permission hosts
     /// @param permission permission that is being queried about
-    function contains(address user, Permission calldata permission) external view returns (bool) {
+    function contains(address user, Permission calldata permission) external view override returns (bool) {
         return plans[user].permissions[_permissionToId(permission)].signature != bytes4(0);
     }
 
     /// @dev Return a permission by index
     /// @param user address with auth privileges on permission hosts
     /// @param idx permission index that is being queried about
-    function permissionAt(address user, uint idx) external view returns (Permission memory) {
+    function permissionAt(address user, uint idx) external view override returns (Permission memory) {
         Plan storage plan_ = plans[user];
         return plan_.permissions[plan_.ids[idx]];
     }
@@ -56,7 +56,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     /// @dev Index of a permission in a plan. Returns 0 if not present.
     /// @param user address with auth privileges on permission hosts
     /// @param permission permission that is being queried about
-    function index(address user, Permission calldata permission) external view returns (uint) {
+    function index(address user, Permission calldata permission) external view override returns (uint) {
         Plan storage plan_ = plans[user];
         uint length = uint(plan_.ids[0]);
 

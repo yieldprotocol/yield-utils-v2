@@ -17,6 +17,7 @@ interface IEmergencyBrake {
 
     function executed(address user) external view returns (bool);
     function contains(address user, Permission calldata permission) external view returns (bool);
+    function permissionAt(address user, uint idx) external view returns (Permission memory);
     function index(address user, Permission calldata permission) external view returns (uint index_);
 
     function add(address user, Permission[] calldata permissionsIn) external;
