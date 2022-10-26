@@ -21,14 +21,17 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     mapping (address => Plan) public plans;
 
-    constructor(address planner, address executor) AccessControl() {
-        // TODO: Think about the permissions and what is best to give on deployment
+    constructor(address governor, address planner, address executor) AccessControl() {
+        _grantRole(IEmergencyBrake.execute.selector, executor);
         _grantRole(IEmergencyBrake.add.selector, planner);
         _grantRole(IEmergencyBrake.remove.selector, planner);
         _grantRole(IEmergencyBrake.cancel.selector, planner);
-        _grantRole(IEmergencyBrake.execute.selector, executor);
-        _grantRole(IEmergencyBrake.restore.selector, planner);
-        _grantRole(IEmergencyBrake.terminate.selector, planner);
+        _grantRole(IEmergencyBrake.add.selector, governor);
+        _grantRole(IEmergencyBrake.remove.selector, governor);
+        _grantRole(IEmergencyBrake.cancel.selector, governor);
+        _grantRole(IEmergencyBrake.execute.selector, governor);
+        _grantRole(IEmergencyBrake.restore.selector, governor);
+        _grantRole(IEmergencyBrake.terminate.selector, governor);
         // Granting roles (add, remove, cancel, execute, restore, terminate) is reserved to ROOT
     }
 

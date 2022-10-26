@@ -13,6 +13,7 @@ abstract contract ZeroState is Test {
     RestrictedERC20Mock public rToken;
     Timelock public lock;
     address public deployer;
+    address public governor;
     address public planner;
     address public executor;
     address public tokenAdmin;
@@ -34,6 +35,9 @@ abstract contract ZeroState is Test {
         deployer = address(0);
         vm.label(deployer, "deployer");
 
+        governor = address(1);
+        vm.label(governor, "governor");
+
         planner = address(1);
         vm.label(planner, "planner");
 
@@ -43,7 +47,7 @@ abstract contract ZeroState is Test {
         tokenAdmin = address(3);
         vm.label(tokenAdmin, "tokenAdmin");
 
-        ebrake = new EmergencyBrake(planner, executor);
+        ebrake = new EmergencyBrake(governor, planner, executor);
         vm.label(address(ebrake), "Emergency Brake contract");
 
         rToken = new RestrictedERC20Mock("FakeToken", "FT");
@@ -133,7 +137,7 @@ contract ZeroStateTest is ZeroState {
     // testNotTerminate
     function testNotTerminate() public {
         vm.expectRevert("Plan not found");
-        vm.prank(planner);
+        vm.prank(governor);
         ebrake.terminate(tokenAdmin);
     }
 
@@ -266,7 +270,7 @@ contract PlanStateTest is PlanState {
         permissionsOut.push(ebrake.permissionAt(tokenAdmin, 0));
         permissionsOut.push(ebrake.permissionAt(tokenAdmin, 1));
 
-        vm.prank(planner);
+        vm.prank(governor);
         ebrake.terminate(tokenAdmin);
 
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
@@ -329,7 +333,7 @@ contract ExecutedStateTest is ExecutedState {
     function testRestore() public {
        vm.expectEmit(true, false, false, true);
        emit Restored(tokenAdmin);
-        vm.prank(planner);
+        vm.prank(governor);
         ebrake.restore(tokenAdmin);
 
         assertFalse(ebrake.executed(tokenAdmin));
@@ -346,7 +350,7 @@ contract ExecutedStateTest is ExecutedState {
         permissionsOut.push(ebrake.permissionAt(tokenAdmin, 0));
         permissionsOut.push(ebrake.permissionAt(tokenAdmin, 1));
 
-        vm.prank(planner);
+        vm.prank(governor);
         ebrake.terminate(tokenAdmin);
 
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
