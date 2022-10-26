@@ -83,7 +83,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth 
     {   
         Plan storage plan_ = plans[user];
-        require(!plan_.executed, "No changes while in execution");
+        require(!plan_.executed, "Plan in execution");
 
         uint length = permissionsIn.length;
         for (uint i; i < length; ++i) {
@@ -109,7 +109,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {   
         Plan storage plan_ = plans[user];
-        require(!plan_.executed, "No changes while in execution");
+        require(!plan_.executed, "Plan in execution");
 
         uint length = permissionsOut.length;
         for (uint i; i < length; ++i) {
@@ -140,7 +140,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {
         Plan storage plan_ = plans[user];
-        require(!plan_.executed, "No changes while in execution");
+        require(!plan_.executed, "Plan in execution");
 
         _erase(user);
     }
@@ -211,7 +211,6 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
         // Loop through the ids array, and grant all roles.
         uint length = uint(plan_.ids[0]);
-        require(length > 0, "Plan not found");
 
         for (uint i = 1; i <= length; ++i ) {
             bytes32 id = plan_.ids[i];
