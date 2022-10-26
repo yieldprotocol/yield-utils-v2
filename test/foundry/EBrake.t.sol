@@ -81,79 +81,40 @@ contract ZeroStateTest is ZeroState {
 
     // testAddSeveral
     // testNotAddRoot
+    function testNotAddRoot() public {
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), ROOT));
+
+        vm.expectRevert("Can't remove ROOT");
+        vm.prank(planner);
+        ebrake.add(tokenAdmin, permissionsIn);
+    }
+
+    // testNotRemove
+    function testNotRemove() public {
+        permissionsOut.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.mint.selector));
+
+        vm.expectRevert("Permission not found");
+        vm.prank(planner);
+        ebrake.remove(tokenAdmin, permissionsOut);
+    }
+
+    // testNotExecute
+    function testNotExecute() public {
+        vm.expectRevert("Plan not found");
+        vm.prank(executor);
+        ebrake.execute(tokenAdmin);
+    }
+
+    // testNotTerminate
+    function testNotTerminate() public {
+        vm.expectRevert("Plan not found");
+        vm.prank(planner);
+        ebrake.terminate(tokenAdmin);
+    }
+
     // testPermissionToId
     // testIdToPermission
-    // testNotRemove
-    // testNotExecute
-    // testNotRestore
-    // testNotTerminate
 
-//    function testAdd() public {
-//        bytes4 minterRole = RestrictedERC20Mock.mint.selector;
-//        bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
-//
-//        permissions.push(IEmergencyBrake.Permission(address(rToken), minterRole));
-//        permissions.push(IEmergencyBrake.Permission(address(rToken), burnerRole));
-//
-//        vm.expectEmit(true, false, false, true);
-//        emit Planned(tokenAdmin, permissions);
-//        vm.prank(planner);
-//        ebrake.plan(tokenAdmin, permissions);
-//
-//        (EmergencyBrake.State state_
-//            
-//        ) = ebrake.plans(tokenAdmin);
-//
-//        bool isPlanned = EmergencyBrake.State.PLANNED == state_;
-//        assertEq(isPlanned, true);
-//    }
-//
-//    function testCannotAddToUnplanned() public {
-//        vm.expectRevert("Target not planned for");
-//        vm.prank(planner);
-//        ebrake.addToPlan(tokenAdmin, permission);
-//    }
-// 
-//     function testCannotRemoveFromUnplanned() public {
-//         vm.expectRevert("Target not planned for");
-//         vm.prank(planner);
-//         ebrake.removeFromPlan(tokenAdmin, permission);
-//     }
-// 
-//     function testCannotCancelUnplanned() public {
-//         vm.expectRevert("Emergency not planned for.");
-//         vm.prank(planner);
-//         ebrake.cancel(tokenAdmin);
-//     }
-// 
-//     function testCannotExecuteUnplanned() public {
-//         vm.expectRevert("Emergency not planned for.");
-//         vm.prank(executor);
-//         ebrake.execute(tokenAdmin);
-//     }
-// 
-//     function testCannotRestoreUnexecuted() public {
-//         vm.expectRevert("Emergency plan not executed.");
-//         vm.prank(planner);
-//         ebrake.restore(tokenAdmin);
-//     }
-// 
-//     function testCannotTerminateUnexecuted() public {
-//         vm.expectRevert("Emergency plan not executed.");
-//         vm.prank(planner);
-//         ebrake.terminate(tokenAdmin);
-//     }
-// 
-//     function testCannotPlanRoot() public {
-// 
-//         IEmergencyBrake.Permission memory permission_ = IEmergencyBrake.Permission(address(rToken), ROOT);
-// 
-//         permissions.push(permission_);
-// 
-//         vm.expectRevert("Can't remove ROOT");
-//         vm.prank(planner);
-//         ebrake.plan(tokenAdmin, permissions);
-//     }
 }
 
 /// @dev In this state we have a valid plan
@@ -195,6 +156,14 @@ abstract contract ExecuteState is PlanState {
     // testCancelExecuted
     // testExecuteExecuted
     // testRestoreNotFound
+
+    // testNotRestore
+    // function testNotRestore() public {
+    //     vm.expectRevert("Plan not found");
+    //     vm.prank(planner);
+    //     ebrake.restore(tokenAdmin);
+    // }
+
     // testRestore
     // testTerminateExecuted
 }
