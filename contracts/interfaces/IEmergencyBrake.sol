@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.0;
+
+
+interface IEmergencyBrake {
+    struct Plan {
+        bool executed;
+        mapping(bytes32 => Permission) permissions;
+        mapping(uint => bytes32) ids; // Manual implementation of a dynamic array. Ids are assigned incrementally and position zero contains the length.
+    }
+
+    struct Permission {
+        address host;
+        bytes4 signature;
+    }
+
+    function executed(address user) external view returns (bool);
+    function contains(address user, Permission calldata permission) external view returns (bool);
+    function index(address user, Permission calldata permission) external view returns (uint index_);
+
+    function add(address user, Permission[] calldata permissionsIn) external;
+    function remove(address user, Permission[] calldata permissionsOut) external;
+    function cancel(address user) external;
+    function execute(address user) external;
+    function restore(address user) external;
+    function terminate(address user) external;
+}

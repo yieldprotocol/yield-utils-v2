@@ -3,31 +3,8 @@
 
 pragma solidity ^0.8.0;
 import "../access/AccessControl.sol";
+import "../interfaces/IEmergencyBrake.sol";
 
-
-interface IEmergencyBrake {
-    struct Plan {
-        bool executed;
-        mapping(bytes32 => Permission) permissions;
-        mapping(uint => bytes32) ids; // Manual implementation of a dynamic array. Ids are assigned incrementally and position zero contains the length.
-    }
-
-    struct Permission {
-        address host; /// contract for which a user holds auth priviliges
-        bytes4 signature;
-    }
-
-    function executed(address user) external view returns (bool);
-    function contains(address user, Permission calldata permission) external view returns (bool);
-    function index(address user, Permission calldata permission) external view returns (uint index_);
-
-    function add(address user, Permission[] calldata permissionsIn) external;
-    function remove(address user, Permission[] calldata permissionsOut) external;
-    function cancel(address user) external;
-    function execute(address user) external;
-    function restore(address user) external;
-    function terminate(address user) external;
-}
 
 /// @dev EmergencyBrake allows to plan for and execute transactions that remove access permissions for a user
 /// contract. In an permissioned environment this can be used for pausing components.
@@ -52,18 +29,26 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         _grantRole(IEmergencyBrake.execute.selector, executor);
         _grantRole(IEmergencyBrake.restore.selector, planner);
         _grantRole(IEmergencyBrake.terminate.selector, planner);
-        // Granting roles (plan, cancel, execute, restore, terminate, modifyPlan) is reserved to ROOT
+        // Granting roles (add, remove, cancel, execute, restore, terminate) is reserved to ROOT
     }
 
+    /// @dev Is a plan executed?
+    /// @param user address with auth privileges on permission hosts
     function executed(address user) external view returns (bool) {
         return plans[user].executed;
     }
 
+    /// @dev Does a plan contain a permission?
+    /// @param user address with auth privileges on permission hosts
+    /// @param permission permission that is being queried about
     function contains(address user, Permission calldata permission) external view returns (bool) {
         return plans[user].permissions[_permissionToId(permission)].signature != bytes4(0);
     }
 
-    function index(address user, Permission calldata permission) external view returns (uint index_) {
+    /// @dev Index of a permission in a plan. Returns 0 if not present.
+    /// @param user address with auth privileges on permission hosts
+    /// @param permission permission that is being queried about
+    function index(address user, Permission calldata permission) external view returns (uint) {
         Plan storage plan_ = plans[user];
         uint length = uint(plan_.ids[0]);
         require(length > 0, "Plan not found");
@@ -72,10 +57,10 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
         for (uint i = 1; i <= length; ++i ) {
             if (plan_.ids[i] == id) {
-                index_ = i;
-                break;
+                return i;
             }
         }
+        return 0;
     }
 
     /// @dev Add permissions to an isolation plan
