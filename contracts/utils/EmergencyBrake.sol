@@ -63,6 +63,12 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         return 0;
     }
 
+    /// @dev Number of permissions in a plan
+    /// @param user address with auth privileges on permission hosts
+    function total(address user) external view returns (uint) {
+        return uint(plans[user].ids[0]);
+    }
+
     /// @dev Add permissions to an isolation plan
     /// @param user address with auth privileges on permission hosts
     /// @param permissionsIn permissions that are being added to an existing plan

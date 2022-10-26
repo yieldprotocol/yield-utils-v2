@@ -77,9 +77,28 @@ contract ZeroStateTest is ZeroState {
         assertFalse(ebrake.executed(tokenAdmin));
         assertTrue(ebrake.contains(tokenAdmin, permissionIn));
         assertEq(ebrake.index(tokenAdmin, permissionIn), 1);
+        assertEq(ebrake.total(tokenAdmin), 1);
     }
 
     // testAddSeveral
+    function testAddSeveral() public {
+        bytes4 minterRole = RestrictedERC20Mock.mint.selector;
+        bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
+
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), minterRole));
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), burnerRole));
+
+        vm.prank(planner);
+        ebrake.add(tokenAdmin, permissionsIn);
+
+        assertFalse(ebrake.executed(tokenAdmin));
+        assertTrue(ebrake.contains(tokenAdmin, permissionsIn[0]));
+        assertEq(ebrake.index(tokenAdmin, permissionsIn[0]), 1);
+        assertTrue(ebrake.contains(tokenAdmin, permissionsIn[1]));
+        assertEq(ebrake.index(tokenAdmin, permissionsIn[1]), 2);
+        assertEq(ebrake.total(tokenAdmin), 2);
+    }
+
     // testNotAddRoot
     function testNotAddRoot() public {
         permissionsIn.push(IEmergencyBrake.Permission(address(rToken), ROOT));
