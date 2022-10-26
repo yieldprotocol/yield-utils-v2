@@ -116,6 +116,17 @@ contract ZeroStateTest is ZeroState {
         permissionsIn.pop();
     }
 
+    // testAddNotFound
+    function testAddNotFound() public {
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), ERC20.transfer.selector));
+
+        vm.expectRevert("Permission not found");
+        vm.prank(planner);
+        ebrake.add(tokenAdmin, permissionsIn);
+
+        permissionsIn.pop();
+    }
+
     // testNotRemove
     function testNotRemove() public {
         permissionsOut.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.mint.selector));

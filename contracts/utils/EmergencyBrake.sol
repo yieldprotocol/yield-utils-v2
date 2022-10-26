@@ -92,6 +92,12 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         for (uint i; i < length; ++i) {
             Permission memory permissionIn = permissionsIn[i];
             require(permissionIn.signature != ROOT, "Can't remove ROOT");
+
+            require(
+                AccessControl(permissionIn.host).hasRole(permissionIn.signature, user),
+                "Permission not found"
+            );
+
             bytes32 idIn = _permissionToId(permissionIn);
             require(plan_.permissions[idIn].signature == bytes4(0), "Permission already set");
 
