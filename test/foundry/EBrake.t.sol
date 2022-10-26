@@ -78,25 +78,27 @@ contract ZeroStateTest is ZeroState {
         assertTrue(ebrake.contains(tokenAdmin, permissionIn));
         assertEq(ebrake.index(tokenAdmin, permissionIn), 1);
         assertEq(ebrake.total(tokenAdmin), 1);
+
+        permissionsIn.pop();
     }
 
     // testAddSeveral
     function testAddSeveral() public {
-        bytes4 minterRole = RestrictedERC20Mock.mint.selector;
-        bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
-
-        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), minterRole));
-        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), burnerRole));
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.mint.selector));
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector));
 
         vm.prank(planner);
         ebrake.add(tokenAdmin, permissionsIn);
 
         assertFalse(ebrake.executed(tokenAdmin));
         assertTrue(ebrake.contains(tokenAdmin, permissionsIn[0]));
-        assertEq(ebrake.index(tokenAdmin, permissionsIn[0]), 1);
         assertTrue(ebrake.contains(tokenAdmin, permissionsIn[1]));
+        assertEq(ebrake.index(tokenAdmin, permissionsIn[0]), 1);
         assertEq(ebrake.index(tokenAdmin, permissionsIn[1]), 2);
         assertEq(ebrake.total(tokenAdmin), 2);
+
+        permissionsIn.pop();
+        permissionsIn.pop();
     }
 
     // testNotAddRoot
@@ -106,6 +108,8 @@ contract ZeroStateTest is ZeroState {
         vm.expectRevert("Can't remove ROOT");
         vm.prank(planner);
         ebrake.add(tokenAdmin, permissionsIn);
+
+        permissionsIn.pop();
     }
 
     // testNotRemove
@@ -115,6 +119,8 @@ contract ZeroStateTest is ZeroState {
         vm.expectRevert("Permission not found");
         vm.prank(planner);
         ebrake.remove(tokenAdmin, permissionsOut);
+        
+        permissionsOut.pop();
     }
 
     // testNotExecute
@@ -145,16 +151,66 @@ abstract contract PlanState is ZeroState {
         permissionsIn.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.mint.selector));
         permissionsIn.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector));
 
-        vm.startPrank(planner);
+        vm.prank(planner);
         ebrake.add(tokenAdmin, permissionsIn);
-        ebrake.add(executor, permissionsIn);
-        vm.stopPrank();
-        delete permissionsIn; // Does this work?
+
+        permissionsIn.pop();
+        permissionsIn.pop();
+    }
+}
+
+contract PlanStateTest is PlanState {
+    // testRemoveOne
+    function testRemoveOne() public {
+        bytes4 minterRole = RestrictedERC20Mock.mint.selector;
+
+        EmergencyBrake.Permission memory permissionOut = IEmergencyBrake.Permission(address(rToken), minterRole);
+
+        vm.expectEmit(true, false, false, true);
+        emit Removed(tokenAdmin, permissionOut);
+
+        permissionsOut.push(permissionOut);
+        vm.prank(planner);
+        ebrake.remove(tokenAdmin, permissionsOut);
+
+        assertFalse(ebrake.contains(tokenAdmin, permissionOut));
+        assertEq(ebrake.index(tokenAdmin, permissionOut), 0);
+        assertEq(ebrake.index(tokenAdmin, IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector)), 1);
+        assertEq(ebrake.total(tokenAdmin), 1);
+
+        permissionsOut.pop();
     }
 
-    // testRemoveOne
     // testRemoveSeveral
+    function testRemoveSeveral() public {
+        assertEq(ebrake.total(tokenAdmin), 2);
+
+        permissionsOut.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.mint.selector));
+        permissionsOut.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector));
+        vm.prank(planner);
+        ebrake.remove(tokenAdmin, permissionsOut);
+
+        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
+        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), 0);
+        assertEq(ebrake.total(tokenAdmin), 0);
+
+        permissionsOut.pop();
+        permissionsOut.pop();
+    }
+
     // testRemoveNotFound
+    function testRemoveNotFound() public {
+        permissionsOut.push(IEmergencyBrake.Permission(address(rToken), ERC20.transfer.selector));
+
+        vm.expectRevert("Permission not found");
+        vm.prank(planner);
+        ebrake.remove(tokenAdmin, permissionsOut);
+        
+        permissionsOut.pop();
+    }
+
     // testExecute
     // testExecuteNotFound
     // testExecuteNotHasRole

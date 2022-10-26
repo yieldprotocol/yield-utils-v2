@@ -51,7 +51,6 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function index(address user, Permission calldata permission) external view returns (uint) {
         Plan storage plan_ = plans[user];
         uint length = uint(plan_.ids[0]);
-        require(length > 0, "Plan not found");
 
         bytes32 id = _permissionToId(permission);
 
