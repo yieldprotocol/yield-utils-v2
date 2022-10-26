@@ -79,6 +79,15 @@ contract ZeroStateTest is ZeroState {
         assertEq(ebrake.index(tokenAdmin, permissionIn), 1);
     }
 
+    // testAddSeveral
+    // testNotAddRoot
+    // testPermissionToId
+    // testIdToPermission
+    // testNotRemove
+    // testNotExecute
+    // testNotRestore
+    // testNotTerminate
+
 //    function testAdd() public {
 //        bytes4 minterRole = RestrictedERC20Mock.mint.selector;
 //        bytes4 burnerRole = RestrictedERC20Mock.burn.selector;
@@ -145,6 +154,49 @@ contract ZeroStateTest is ZeroState {
 //         vm.prank(planner);
 //         ebrake.plan(tokenAdmin, permissions);
 //     }
+}
+
+/// @dev In this state we have a valid plan
+abstract contract PlanState is ZeroState {
+
+    function setUp() public virtual override {
+        super.setUp();
+
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.mint.selector));
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector));
+
+        vm.startPrank(planner);
+        ebrake.add(tokenAdmin, permissionsIn);
+        ebrake.add(executor, permissionsIn);
+        vm.stopPrank();
+        delete permissionsIn; // Does this work?
+    }
+
+    // testRemoveOne
+    // testRemoveSeveral
+    // testRemoveNotFound
+    // testExecute
+    // testExecuteNotFound
+    // testExecuteNotHasRole
+    // testEraseNotFound
+    // testCancel
+    // testTerminateNotExecuted
+}
+
+/// @dev In this state we have an executed plan
+abstract contract ExecuteState is PlanState {
+
+    function setUp() public virtual override {
+        super.setUp();
+    }
+
+    // testAddExecuted
+    // testRemoveExecuted
+    // testCancelExecuted
+    // testExecuteExecuted
+    // testRestoreNotFound
+    // testRestore
+    // testTerminateExecuted
 }
 // 
 // abstract contract PlanState is ZeroState {
