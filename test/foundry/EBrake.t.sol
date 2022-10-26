@@ -212,11 +212,69 @@ contract PlanStateTest is PlanState {
     }
 
     // testExecute
-    // testExecuteNotFound
+    function testExecute() public {
+        vm.expectEmit(true, false, false, true);
+        emit Executed(tokenAdmin);
+        vm.prank(executor);
+        ebrake.execute(tokenAdmin);
+
+        assertTrue(ebrake.executed(tokenAdmin));
+
+        vm.expectRevert("Access denied");
+        vm.prank(tokenAdmin);
+        rToken.mint(deployer, 1e18);
+
+        vm.expectRevert("Access denied");
+        vm.prank(tokenAdmin);
+        rToken.burn(deployer, 1e18);
+    }
+
     // testExecuteNotHasRole
+//    function testExecuteNotHasRole() public {
+//        vm.prank(deployer);
+//        rToken.revokeRole(RestrictedERC20Mock.mint.selector, tokenAdmin);
+//
+//        vm.expectRevert("Permission not found");
+//        vm.prank(executor);
+//        ebrake.execute(tokenAdmin);
+//    }
+
     // testEraseNotFound
+    function testEraseNotFound() public {
+       vm.expectRevert("Plan not found");
+       vm.prank(executor);
+       ebrake.execute(executor);
+    }
+
     // testCancel
+    function testCancel() public {
+        permissionsOut.push(ebrake.permissionAt(tokenAdmin, 0));
+        permissionsOut.push(ebrake.permissionAt(tokenAdmin, 1));
+
+        vm.prank(planner);
+        ebrake.cancel(tokenAdmin);
+
+        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
+        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), 0);
+        assertEq(ebrake.total(tokenAdmin), 0);
+    }
+
     // testTerminateNotExecuted
+    function testTerminateAnytime() public {
+        permissionsOut.push(ebrake.permissionAt(tokenAdmin, 0));
+        permissionsOut.push(ebrake.permissionAt(tokenAdmin, 1));
+
+        vm.prank(planner);
+        ebrake.terminate(tokenAdmin);
+
+        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
+        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), 0);
+        assertEq(ebrake.total(tokenAdmin), 0);
+    }
 }
 
 /// @dev In this state we have an executed plan

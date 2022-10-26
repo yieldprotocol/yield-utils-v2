@@ -45,6 +45,14 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         return plans[user].permissions[_permissionToId(permission)].signature != bytes4(0);
     }
 
+    /// @dev Return a permission by index
+    /// @param user address with auth privileges on permission hosts
+    /// @param idx permission index that is being queried about
+    function permissionAt(address user, uint idx) external view returns (Permission memory) {
+        Plan storage plan_ = plans[user];
+        return plan_.permissions[plan_.ids[idx]];
+    }
+
     /// @dev Index of a permission in a plan. Returns 0 if not present.
     /// @param user address with auth privileges on permission hosts
     /// @param permission permission that is being queried about
