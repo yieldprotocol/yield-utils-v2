@@ -61,11 +61,11 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     /// @param permission permission that is being queried about
     function index(address user, Permission calldata permission) external view override returns (uint) {
         Plan storage plan_ = plans[user];
-        uint length = uint(plan_.ids[0]);
+        uint length = uint(plan_.ids.length);
 
         bytes32 id = _permissionToId(permission);
 
-        for (uint i = 1; i <= length; ++i ) {
+        for (uint i = 0; i < length; ++i ) {
             if (plan_.ids[i] == id) {
                 return i;
             }
@@ -76,7 +76,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     /// @dev Number of permissions in a plan
     /// @param user address with auth privileges on permission hosts
     function total(address user) external view returns (uint) {
-        return uint(plans[user].ids[0]);
+        return uint(plans[user].ids.length);
     }
 
     /// @dev Add permissions to an isolation plan
@@ -96,16 +96,19 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             require(
                 AccessControl(permissionIn.host).hasRole(permissionIn.signature, user),
                 "Permission not found"
-            );
+            ); // You don't want to find out execute reverts when you need it
+
+            require(
+                AccessControl(permissionIn.host).hasRole(ROOT, address(this)),
+                "Need ROOT on host"
+            ); // You don't want to find out you don't have ROOT while executing
 
             bytes32 idIn = _permissionToId(permissionIn);
             require(plan_.permissions[idIn].signature == bytes4(0), "Permission already set");
 
             plan_.permissions[idIn] = permissionIn; // Set the permission
-            uint idLength = uint(plan_.ids[0]) + 1;
-            plan_.ids[idLength] = idIn; // Push the id
-            plan_.ids[0] = bytes32(idLength); // Update id array length
-            
+            plan_.ids.push(idIn);
+
             emit Added(user, permissionIn);
         }
 
@@ -129,12 +132,11 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             delete plan_.permissions[idOut]; // Remove the permission
             
             // Loop through the ids array, copy the last item on top of the removed permission, then pop.
-            uint idLength = uint(plan_.ids[0]);
-            for (uint j = 1; j <= idLength; ++j ) {
+            uint last = uint(plan_.ids.length) - 1; // Length should be at least one at this point.
+            for (uint j = 0; j <= last; ++j ) {
                 if (plan_.ids[j] == idOut) {
-                    if (j < idLength) plan_.ids[j] = plan_.ids[idLength];
-                    delete plan_.ids[idLength]; // Remove the id
-                    plan_.ids[0] = bytes32(idLength - 1); // Update id array length
+                    if (j != last) plan_.ids[j] = plan_.ids[last];
+                    plan_.ids.pop(); // Remove the id
                     break;
                 }
             }
@@ -169,17 +171,23 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     {
         Plan storage plan_ = plans[user];
 
-        // Loop through the ids array, and remove everything.
-        uint length = uint(plan_.ids[0]);
+        // Loop through the plan, and remove permissions and ids.
+        uint length = uint(plan_.ids.length);
         require(length > 0, "Plan not found");
 
-        for (uint i = 1; i <= length; ++i ) {
+        // First remove the permissions
+        for (uint i = 0; i < length; ++i ) {
             bytes32 id = plan_.ids[i];
             emit Removed(user, plan_.permissions[id]);
-            delete plan_.ids[i]; // Remove the id
-            delete plan_.permissions[id]; // Remove the permission
+            delete plan_.permissions[id];
         }
-        delete plan_.ids[0]; // Set the array length to zero
+
+        // Now remove the ids
+        for (uint i = 0; i < length; ++i ) {
+            plan_.ids.pop();
+        }
+
+        delete plans[user];
     }
 
     /// @dev Execute an access removal transaction
@@ -192,10 +200,10 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         plan_.executed = true;
 
         // Loop through the ids array, and revoke all roles.
-        uint length = uint(plan_.ids[0]);
+        uint length = uint(plan_.ids.length);
         require(length > 0, "Plan not found");
 
-        for (uint i = 1; i <= length; ++i ) {
+        for (uint i = 0; i < length; ++i ) {
             bytes32 id = plan_.ids[i];
             Permission memory permission_ = plan_.permissions[id]; 
             AccessControl host = AccessControl(permission_.host);
@@ -219,9 +227,9 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         plan_.executed = false;
 
         // Loop through the ids array, and grant all roles.
-        uint length = uint(plan_.ids[0]);
+        uint length = uint(plan_.ids.length);
 
-        for (uint i = 1; i <= length; ++i ) {
+        for (uint i = 0; i < length; ++i ) {
             bytes32 id = plan_.ids[i];
             Permission memory permission_ = plan_.permissions[id]; 
             AccessControl host = AccessControl(permission_.host);
@@ -231,7 +239,6 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
         emit Restored(user);
     }
-
 
 
     /// @dev used to calculate the id of a Permission so it can be indexed within a Plan

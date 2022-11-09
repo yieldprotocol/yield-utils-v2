@@ -80,7 +80,7 @@ contract ZeroStateTest is ZeroState {
 
         assertFalse(ebrake.executed(tokenAdmin));
         assertTrue(ebrake.contains(tokenAdmin, permissionIn));
-        assertEq(ebrake.index(tokenAdmin, permissionIn), 1);
+        assertEq(ebrake.index(tokenAdmin, permissionIn), 0);
         assertEq(ebrake.total(tokenAdmin), 1);
 
         permissionsIn.pop();
@@ -97,8 +97,8 @@ contract ZeroStateTest is ZeroState {
         assertFalse(ebrake.executed(tokenAdmin));
         assertTrue(ebrake.contains(tokenAdmin, permissionsIn[0]));
         assertTrue(ebrake.contains(tokenAdmin, permissionsIn[1]));
-        assertEq(ebrake.index(tokenAdmin, permissionsIn[0]), 1);
-        assertEq(ebrake.index(tokenAdmin, permissionsIn[1]), 2);
+        assertEq(ebrake.index(tokenAdmin, permissionsIn[0]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsIn[1]), 1);
         assertEq(ebrake.total(tokenAdmin), 2);
 
         permissionsIn.pop();
@@ -121,6 +121,20 @@ contract ZeroStateTest is ZeroState {
         permissionsIn.push(IEmergencyBrake.Permission(address(rToken), ERC20.transfer.selector));
 
         vm.expectRevert("Permission not found");
+        vm.prank(planner);
+        ebrake.add(tokenAdmin, permissionsIn);
+
+        permissionsIn.pop();
+    }
+
+    // testNotAddRoot
+    function testNeedRoot() public {
+        permissionsIn.push(IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.mint.selector));
+
+        vm.prank(deployer);
+        rToken.revokeRole(ROOT, address(ebrake));
+
+        vm.expectRevert("Need ROOT on host");
         vm.prank(planner);
         ebrake.add(tokenAdmin, permissionsIn);
 
@@ -190,7 +204,7 @@ contract PlanStateTest is PlanState {
 
         assertFalse(ebrake.contains(tokenAdmin, permissionOut));
         assertEq(ebrake.index(tokenAdmin, permissionOut), 0);
-        assertEq(ebrake.index(tokenAdmin, IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector)), 1);
+        assertEq(ebrake.index(tokenAdmin, IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector)), 0);
         assertEq(ebrake.total(tokenAdmin), 1);
 
         permissionsOut.pop();
