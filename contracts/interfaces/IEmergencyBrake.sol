@@ -7,7 +7,7 @@ interface IEmergencyBrake {
     struct Plan {
         bool executed;
         mapping(bytes32 => Permission) permissions;
-        mapping(uint => bytes32) ids; // Manual implementation of a dynamic array. Ids are assigned incrementally and position zero contains the length.
+        bytes32[] ids;
     }
 
     struct Permission {
