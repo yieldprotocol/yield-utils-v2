@@ -176,15 +176,12 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         require(length > 0, "Plan not found");
 
         // First remove the permissions
-        for (uint i = 0; i < length; ++i ) {
+        for (uint i = length - 1; ; --i ) {
             bytes32 id = plan_.ids[i];
             emit Removed(user, plan_.permissions[id]);
             delete plan_.permissions[id];
-        }
-
-        // Now remove the ids
-        for (uint i = 0; i < length; ++i ) {
             plan_.ids.pop();
+            if (i == 0) break; // Not sure why `for (uint i = length - 1; i >= 0; --i )` doesn't work
         }
 
         delete plans[user];
