@@ -173,7 +173,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         claiming = _claim(msg.sender, to);
     }
 
-    /// @dev Give all of their rewards to an user
+    /// @dev Trigger a claim for any user
     function remit(address user)
         external
         returns (uint256 claiming)
