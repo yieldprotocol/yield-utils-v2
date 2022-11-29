@@ -252,6 +252,20 @@ describe("ERC20Rewards", async function () {
           (await rewards.rewardsPerToken()).accumulated
         );
       });
+
+      it("allows to remit", async () => {
+        expect(await rewards.connect(user2Acc).remit(user1))
+          .to.emit(rewards, "Claimed")
+          .withArgs(user1, await governance.balanceOf(user1));
+
+        expect(await governance.balanceOf(user1)).to.equal(
+          (await rewards.rewardsPerToken()).accumulated
+        ); // See previous test
+        expect((await rewards.rewards(user1)).accumulated).to.equal(0);
+        expect((await rewards.rewards(user1)).checkpoint).to.equal(
+          (await rewards.rewardsPerToken()).accumulated
+        );
+      });
     });
 
     describe("after the program", async () => {
