@@ -64,14 +64,50 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
 
 contract DeployedTest is Deployed {
 
-    function testStartBeforeEnd() public {
-        vm.expectRevert(bytes("Incorrect input"));
+    function testSetRewardsToken() public {
         vm.prank(admin);
-        vault.setRewards(2, 1, 3);
+        vault.setRewardsToken(rewards);
+
+        assertEq(address(vault.rewardsToken()), address(rewards));
     }
 }
 
-abstract contract WithProgram is Deployed {
+abstract contract WithRewardsToken is Deployed {
+    function setUp() public override virtual {
+        super.setUp();
+
+        vm.prank(admin);
+        vault.setRewardsToken(rewards);
+    }
+}
+
+
+contract WithRewardsTokenTest is WithRewardsToken {
+
+    function testDontResetRewardsToken(address token) public {
+        vm.expectRevert(bytes("Rewards token already set"));
+
+        vm.prank(admin);
+        vault.setRewardsToken(IERC20(token));
+    }
+
+    function testStartBeforeEnd(uint32 start, uint32 end) public {
+        end = uint32(bound(end, block.timestamp, type(uint32).max - 1));
+        start = uint32(bound(start, end + 1, type(uint32).max));
+        vm.expectRevert(bytes("Incorrect input"));
+        vm.prank(admin);
+        vault.setRewards(start, end, 1);
+    }
+
+    function testSetRewards(uint32 start, uint32 end, uint96 rate) public {
+        end = uint32(bound(end, block.timestamp + 1, type(uint32).max));
+        start = uint32(bound(start, block.timestamp, end - 1));
+        vm.prank(admin);
+        vault.setRewards(start, end, rate);
+    }
+}
+
+abstract contract WithProgram is WithRewardsToken {
     function setUp() public override virtual {
         super.setUp();
 
