@@ -15,6 +15,12 @@ using stdStorage for StdStorage;
 
 abstract contract Deployed is Test, TestExtensions, TestConstants {
 
+    event RewardsTokenSet(IERC20 token);
+    event RewardsSet(uint32 start, uint32 end, uint256 rate);
+    event RewardsPerTokenUpdated(uint256 accumulated);
+    event UserRewardsUpdated(address user, uint256 userRewards, uint256 paidRewardPerToken);
+    event Claimed(address receiver, uint256 claimed);
+
     ERC20Rewards public vault;
     uint256 public vaultUnit;
     IERC20 public rewards;
@@ -64,11 +70,14 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
 
 contract DeployedTest is Deployed {
 
-    function testSetRewardsToken() public {
-        vm.prank(admin);
-        vault.setRewardsToken(rewards);
+    function testSetRewardsToken(IERC20 token) public {
+        vm.expectEmit(true, false, false, false);
+        emit RewardsTokenSet(token);
 
-        assertEq(address(vault.rewardsToken()), address(rewards));
+        vm.prank(admin);
+        vault.setRewardsToken(token);
+
+        assertEq(address(vault.rewardsToken()), address(token));
     }
 }
 
@@ -102,6 +111,10 @@ contract WithRewardsTokenTest is WithRewardsToken {
     function testSetRewards(uint32 start, uint32 end, uint96 rate) public {
         end = uint32(bound(end, block.timestamp + 1, type(uint32).max));
         start = uint32(bound(start, block.timestamp, end - 1));
+
+        vm.expectEmit(true, false, false, false);
+        emit RewardsSet(start, end, rate);
+
         vm.prank(admin);
         vault.setRewards(start, end, rate);
     }
