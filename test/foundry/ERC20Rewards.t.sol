@@ -25,7 +25,10 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
     uint256 public vaultUnit;
     IERC20 public rewards;
     uint256 public rewardsUnit;
-        
+    uint256 totalRewards = 10 * WAD;
+    uint256 length = 1000000;
+
+
     address user;
     address other;
     address admin;
@@ -38,7 +41,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
         vaultUnit = 10 ** ERC20Mock(address(vault)).decimals();
         rewards = IERC20(address(new ERC20Mock("Rewards Token", "REW")));
         rewardsUnit = 10 ** ERC20Mock(address(rewards)).decimals();
-        
+
         vault.grantRole(ERC20Rewards.setRewardsToken.selector, admin);
         vault.grantRole(ERC20Rewards.setRewards.selector, admin);
     }
@@ -65,7 +68,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
         vm.label(me, "me");
         vm.label(address(vault), "vault");
         vm.label(address(rewards), "rewards");
-    }  
+    }
 }
 
 contract DeployedTest is Deployed {
@@ -131,18 +134,16 @@ abstract contract WithProgram is WithRewardsToken {
     function setUp() public override virtual {
         super.setUp();
 
-        uint256 totalRewards = WAD;
         uint256 start = block.timestamp + 1000000;
-        uint256 length = 2000000;
         uint256 end = start + length;
-        uint256 rate = totalRewards * 1e18 / length;
+        uint256 rate = totalRewards / length;
 
         vm.startPrank(admin);
         vault.setRewards(uint32(start), uint32(end), uint96(rate));
         vm.stopPrank();
 
         cash(rewards, address(vault), totalRewards); // Rewards to be distributed
-        vault.mint(address(vault), 2 * WAD); // So that total supply is not zero and ERC20Rewards:L118 is skipped
+        vault.mint(user, 0.2e18); // So that total supply is not zero and ERC20Rewards:L118 is not skipped later
     }
 }
 
@@ -175,7 +176,7 @@ contract WithProgramTest is WithProgram {
 abstract contract DuringProgram is WithProgram {
     function setUp() public override virtual {
         super.setUp();
-        vault.mint(user, WAD * 10);
+        vault.mint(user, 9.8e18); // increase total supply to 10 WAD
 
         (uint256 start,) = vault.rewardsPeriod();
 
@@ -234,7 +235,7 @@ contract DuringProgramTest is DuringProgram {
     function testUpdatesUserRewardsOnMint(uint32 elapsed, uint32 elapseAgain, uint128 mintAmount) public {
         (uint32 start, uint32 end) = vault.rewardsPeriod();
         elapsed = uint32(bound(elapsed, 0, end - start));
-        
+
         vm.warp(start + elapsed);
         vault.mint(user, mintAmount);
         (uint128 accumulatedUserStart, uint128 accumulatedCheckpoint) = vault.rewards(user);
@@ -256,7 +257,7 @@ contract DuringProgramTest is DuringProgram {
         uint256 userBalance = vault.balanceOf(user);
         assertGt(userBalance, 0);
         burnAmount = uint128(bound(burnAmount, 0, userBalance)) / 2;
-        
+
         vm.warp(start + elapsed);
         vault.burn(user, burnAmount);
         (uint128 accumulatedUserStart, uint128 accumulatedCheckpoint) = vault.rewards(user);
@@ -278,7 +279,7 @@ contract DuringProgramTest is DuringProgram {
         uint256 userBalance = vault.balanceOf(user);
         assertGt(userBalance, 0);
         transferAmount = uint128(bound(transferAmount, 0, userBalance));
-        
+
         vm.warp(start + elapsed);
         vm.prank(user);
         vault.transfer(other, transferAmount);
@@ -301,37 +302,54 @@ contract DuringProgramTest is DuringProgram {
         assertEq(accumulatedOther, accumulatedOtherStart + otherBalance * (accumulatedPerTokenNow - accumulatedPerToken) / 1e18);
     }
 
+    function testClaim() public {
+        (uint32 start, uint32 end) = vault.rewardsPeriod();
+        uint256 elapsed = length / 10; //  100_000
+        vm.warp(start + elapsed);
+
+        (uint128 accumulatedUser,) = vault.rewards(user);
+        assertEq(accumulatedUser, 0);
+
+        track("userRewardsBalance", rewards.balanceOf(user));
+
+        uint256 calculatedRewards = totalRewards * elapsed / length;
+
+        vm.expectEmit(true, true, false, false);
+        emit Claimed(user, calculatedRewards);
+        vm.prank(user);
+        vault.claim(user);
+        (uint128 accumulatedPerTokenNow,,) = vault.rewardsPerToken();
+
+        uint256 expectedRewards = uint256(accumulatedPerTokenNow) * vault.totalSupply() / 1e18;
+        assertEq(expectedRewards, calculatedRewards);
+
+        assertTrackPlusEq("userRewardsBalance", expectedRewards, rewards.balanceOf(user));
+        assertEq(expectedRewards, WAD);
+    }
+
     function testClaim(uint32 elapsed) public {
         (uint32 start, uint32 end) = vault.rewardsPeriod();
         elapsed = uint32(bound(elapsed, 1, end - start));
         vm.warp(start + elapsed);
 
         (uint128 accumulatedUser,) = vault.rewards(user);
-        assertGt(accumulatedUser, 0);
+        assertEq(accumulatedUser, 0);
 
         track("userRewardsBalance", rewards.balanceOf(user));
 
-        // vm.expectEmit(true, true, false, false);
-        // emit Claimed(user, accumulatedUser);
+        uint256 calculatedRewards = totalRewards * elapsed / length;
+
+        vm.expectEmit(true, true, false, false);
+        emit Claimed(user, calculatedRewards);
         vm.prank(user);
         vault.claim(user);
+        (uint128 accumulatedPerTokenNow,,) = vault.rewardsPerToken();
 
-        assertTrackPlusEq("userRewardsBalance", accumulatedUser, rewards.balanceOf(user));
+        uint256 expectedRewards = uint256(accumulatedPerTokenNow) * vault.totalSupply() / 1e18;
+        assertEq(expectedRewards, calculatedRewards);
+
+        assertTrackPlusEq("userRewardsBalance", expectedRewards, rewards.balanceOf(user));
     }
-//
-//      it("allows to claim", async () => {
-//        expect(await rewards.connect(user1Acc).claim(user1))
-//          .to.emit(rewards, "Claimed")
-//          .withArgs(user1, await governance.balanceOf(user1));
-//
-//        expect(await governance.balanceOf(user1)).to.equal(
-//          (await rewards.rewardsPerToken()).accumulated <-- HOW CAN THIS BE TRUE? IT SHOULD BE `rewards.rewards(user).accumulated`
-//        ); // See previous test
-//        expect((await rewards.rewards(user1)).accumulated).to.equal(0);
-//        expect((await rewards.rewards(user1)).checkpoint).to.equal(
-//          (await rewards.rewardsPerToken()).accumulated
-//        );
-//      });
 }
 
 abstract contract AfterProgramEnd is WithProgram {
