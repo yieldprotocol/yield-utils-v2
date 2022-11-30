@@ -301,6 +301,23 @@ contract DuringProgramTest is DuringProgram {
         assertEq(accumulatedOther, accumulatedOtherStart + otherBalance * (accumulatedPerTokenNow - accumulatedPerToken) / 1e18);
     }
 
+    function testClaim(uint32 elapsed) public {
+        (uint32 start, uint32 end) = vault.rewardsPeriod();
+        elapsed = uint32(bound(elapsed, 1, end - start));
+        vm.warp(start + elapsed);
+
+        (uint128 accumulatedUser,) = vault.rewards(user);
+        assertGt(accumulatedUser, 0);
+
+        track("userRewardsBalance", rewards.balanceOf(user));
+
+        // vm.expectEmit(true, true, false, false);
+        // emit Claimed(user, accumulatedUser);
+        vm.prank(user);
+        vault.claim(user);
+
+        assertTrackPlusEq("userRewardsBalance", accumulatedUser, rewards.balanceOf(user));
+    }
 //
 //      it("allows to claim", async () => {
 //        expect(await rewards.connect(user1Acc).claim(user1))
@@ -308,7 +325,7 @@ contract DuringProgramTest is DuringProgram {
 //          .withArgs(user1, await governance.balanceOf(user1));
 //
 //        expect(await governance.balanceOf(user1)).to.equal(
-//          (await rewards.rewardsPerToken()).accumulated
+//          (await rewards.rewardsPerToken()).accumulated <-- HOW CAN THIS BE TRUE? IT SHOULD BE `rewards.rewards(user).accumulated`
 //        ); // See previous test
 //        expect((await rewards.rewards(user1)).accumulated).to.equal(0);
 //        expect((await rewards.rewards(user1)).checkpoint).to.equal(
