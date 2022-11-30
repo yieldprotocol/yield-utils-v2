@@ -4,9 +4,9 @@ pragma solidity >=0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "../../contracts/token/ERC20Rewards.sol";
 import "../../contracts/token/IERC20.sol";
 import { ERC20Mock } from "../../contracts/mocks/ERC20Mock.sol";
+import { ERC20Rewards, ERC20RewardsMock } from "../../contracts/mocks/ERC20RewardsMock.sol";
 import { TestExtensions } from "./utils/TestExtensions.sol";
 import { TestConstants } from "./utils/TestConstants.sol";
 
@@ -21,7 +21,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
     event UserRewardsUpdated(address user, uint256 userRewards, uint256 paidRewardPerToken);
     event Claimed(address receiver, uint256 claimed);
 
-    ERC20Rewards public vault;
+    ERC20RewardsMock public vault;
     uint256 public vaultUnit;
     IERC20 public rewards;
     uint256 public rewardsUnit;
@@ -34,7 +34,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
     function setUpMock() public {
         admin = address(3);
 
-        vault = new ERC20Rewards("Incentivized Vault", "VLT", 18);
+        vault = new ERC20RewardsMock("Incentivized Vault", "VLT", 18);
         vaultUnit = 10 ** ERC20Mock(address(vault)).decimals();
         rewards = IERC20(address(new ERC20Mock("Rewards Token", "REW")));
         rewardsUnit = 10 ** ERC20Mock(address(rewards)).decimals();
@@ -131,12 +131,37 @@ abstract contract WithProgram is WithRewardsToken {
         uint256 rate = totalRewards * 1e18 / length;
 
         vm.startPrank(admin);
-        vault.setRewardsToken(rewards);
         vault.setRewards(uint32(start), uint32(end), uint96(rate));
         vm.stopPrank();
 
         cash(rewards, address(vault), totalRewards); // Rewards to be distributed
-        cash(IERC20(address(vault)), address(vault), 1); // So that total supply is not zero TODO: Why?
+        // vault.mint(address(vault), 1); // So that total supply is not zero TODO: Why?
+    }
+}
+
+contract WithProgramTest is WithProgram {
+
+    function testProgramChange(uint32 start, uint32 end, uint96 rate) public {
+        end = uint32(bound(end, block.timestamp + 1, type(uint32).max));
+        start = uint32(bound(start, block.timestamp, end - 1));
+
+        vm.expectEmit(true, false, false, false);
+        emit RewardsSet(start, end, rate);
+
+        vm.prank(admin);
+        vault.setRewards(start, end, rate);
+    }
+
+    function testDoesntUpdateRewardsPerToken() public {
+        vault.mint(user, WAD);
+        (uint128 accumulated,,) = vault.rewardsPerToken();
+        assertEq(accumulated, 0);
+    }
+
+    function testDoesntUpdateUserRewards() public {
+        vault.mint(user, WAD);
+        (uint128 accumulated,) = vault.rewards(user);
+        assertEq(accumulated, 0);
     }
 }
 
