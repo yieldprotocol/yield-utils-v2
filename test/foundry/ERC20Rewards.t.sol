@@ -47,7 +47,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
     }
 
     function setUpHarness(string memory network) public {
-        setUpMock(); // TODO: Setup the test harness
+        setUpMock(); // TODO: Not sure how to setup a test harness if ERC20Rewards doesn't have public methods for `mint` and `burn`.
     }
 
     function setUp() public virtual {
