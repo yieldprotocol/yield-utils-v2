@@ -31,6 +31,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
     bytes32 proposalHash;
     ITimelock.Call[] proposalNonContract;
     ITimelock.Call[] proposalWithValue;
+    ITimelock.Call[] proposalSetDelay;
 
     function setUpMock() public {
         governor = address(1);
@@ -80,6 +81,12 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
         proposalWithValue.push(ITimelock.Call({
             target: address(timelock),
             data: abi.encodeWithSelector(Timelock.callWithValue.selector, innerCall, 1)
+        }));
+
+        // We will use this proposal to test the setDaly functionality
+        proposalSetDelay.push(ITimelock.Call({
+            target: address(timelock),
+            data: abi.encodeWithSelector(Timelock.setDelay.selector, 2 days)
         }));
 
         // Set the delay bypassing the timelock proposal process
@@ -139,6 +146,7 @@ abstract contract ProposedState is Deployed {
         timelock.propose(proposal);
         timelock.propose(proposalNonContract);
         timelock.propose(proposalWithValue);
+        timelock.propose(proposalSetDelay);
         vm.stopPrank();
     }
 }
@@ -187,6 +195,7 @@ abstract contract ApprovedState is ProposedState {
         timelock.approve(proposalHash);
         timelock.approve(keccak256(abi.encode(proposalNonContract)));
         timelock.approve(keccak256(abi.encode(proposalWithValue)));
+        timelock.approve(keccak256(abi.encode(proposalSetDelay)));
         vm.stopPrank();
     }
 }
@@ -252,5 +261,13 @@ contract AfterETATest is afterETA {
 
         // Check that the proposal was executed
         assertEq(address(other).balance, 1);
+    }
+
+    function testExecuteSetDelay() public {
+        vm.prank(executor);
+        timelock.execute(proposalSetDelay);
+
+        // Check that the proposal was executed
+        assertEq(timelock.delay(), 2 days);
     }
 }
