@@ -99,4 +99,6 @@ jobs:
       - name: Run tests
         run: forge test -vvv
         env:
-          MAINNET_RPC: ${{ secrets.ALCHEMY_MAINNET_RPC }}
+          MOCK: true
+          NETWORK: LOCALHOST
+          MAINNET_RPC: ${{ secrets.MAINNET_RPC }}
