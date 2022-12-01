@@ -76,6 +76,8 @@ contract DeployedTest is Deployed {
     }
 
     function testGrant() public {
+        vm.expectEmit(true, true, true, false);
+        emit RoleGranted(role, owner, owner);
         vm.startPrank(owner);
         restricted.grantRole(role, owner);
         assertTrue(restricted.hasRole(role, owner));
@@ -89,6 +91,10 @@ contract DeployedTest is Deployed {
     }
 
     function testGrantMultipleRoles() public {
+        vm.expectEmit(true, true, true, false);
+        emit RoleGranted(role, owner, owner);
+        vm.expectEmit(true, true, true, false);
+        emit RoleGranted(otherRole, owner, owner);
         vm.prank(owner);
         restricted.grantRoles(roles, owner);
 
@@ -97,6 +103,8 @@ contract DeployedTest is Deployed {
     }
 
     function testLock() public {
+        vm.expectEmit(true, true, false, false);
+        emit RoleAdminChanged(role, LOCK);
         vm.prank(owner);
         restricted.lockRole(role);
 
@@ -121,6 +129,8 @@ abstract contract WithGrantedRoles is Deployed {
 contract WithGrantedRolesTest is WithGrantedRoles {
 
     function testRevokeRole() public {
+        vm.expectEmit(true, true, true, false);
+        emit RoleRevoked(role, owner, owner);
         vm.prank(owner);
         restricted.revokeRole(role, owner);
 
@@ -128,6 +138,10 @@ contract WithGrantedRolesTest is WithGrantedRoles {
     }
 
     function testRevokeMultipleRoles() public {
+        vm.expectEmit(true, true, true, false);
+        emit RoleRevoked(role, owner, owner);
+        vm.expectEmit(true, true, true, false);
+        emit RoleRevoked(otherRole, owner, owner);
         vm.prank(owner);
         restricted.revokeRoles(roles, owner);
 
