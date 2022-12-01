@@ -303,7 +303,7 @@ contract DuringProgramTest is DuringProgram {
     }
 
     function testClaim() public {
-        (uint32 start, uint32 end) = vault.rewardsPeriod();
+        (uint32 start,) = vault.rewardsPeriod();
         uint256 elapsed = length / 10; //  100_000
         vm.warp(start + elapsed);
 
@@ -360,5 +360,41 @@ abstract contract AfterProgramEnd is WithProgram {
         (, uint256 end) = vault.rewardsPeriod();
 
         vm.warp(end + 1);
+    }
+}
+
+contract AfterProgramEndTest is AfterProgramEnd {
+
+    function testSetNewRewards(uint32 start, uint32 end, uint96 rate) public {
+        end = uint32(bound(end, block.timestamp + 1, type(uint32).max));
+        start = uint32(bound(start, block.timestamp, end - 1));
+
+        vm.expectEmit(true, false, false, false);
+        emit RewardsSet(start, end, rate);
+
+        vm.prank(admin);
+        vault.setRewards(start, end, rate);
+
+        (uint32 start_, uint32 end_) = vault.rewardsPeriod();
+        (,, uint96 rate_) = vault.rewardsPerToken();
+
+        assertEq(start_, start);
+        assertEq(end_, end);
+        assertEq(rate_, rate);
+    }
+
+    function testAccumulateNoMore() public {
+        (,, uint96 rate) = vault.rewardsPerToken();
+        (uint32 start, uint32 end) = vault.rewardsPeriod();
+        uint256 expectedAccumulated = 1e18 * ((end - start) * rate / vault.totalSupply());
+        vm.warp(end + 10);
+
+        vault.mint(user, WAD);
+
+        (uint128 globalAccumulated,,) = vault.rewardsPerToken();
+        (, uint128 userAccumulated) = vault.rewards(user);
+
+        assertEq(globalAccumulated, expectedAccumulated);
+        assertEq(userAccumulated, expectedAccumulated);
     }
 }
