@@ -4,9 +4,9 @@ pragma solidity >=0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "../../contracts/token/IERC20.sol";
-import { ERC20Mock } from "../../contracts/mocks/ERC20Mock.sol";
-import { ERC20Rewards, ERC20RewardsMock } from "../../contracts/mocks/ERC20RewardsMock.sol";
+import "../contracts/token/IERC20.sol";
+import { ERC20Mock } from "../contracts/mocks/ERC20Mock.sol";
+import { ERC20Rewards, ERC20RewardsMock } from "../contracts/mocks/ERC20RewardsMock.sol";
 import { TestExtensions } from "./utils/TestExtensions.sol";
 import { TestConstants } from "./utils/TestConstants.sol";
 

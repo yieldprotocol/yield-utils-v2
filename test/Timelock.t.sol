@@ -4,8 +4,8 @@ pragma solidity >=0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "../../contracts/utils/Timelock.sol";
-import { ERC20Mock } from "../../contracts/mocks/ERC20Mock.sol";
+import "../contracts/utils/Timelock.sol";
+import { ERC20Mock } from "../contracts/mocks/ERC20Mock.sol";
 import { TestExtensions } from "./utils/TestExtensions.sol";
 import { TestConstants } from "./utils/TestConstants.sol";
 

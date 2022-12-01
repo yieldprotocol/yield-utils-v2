@@ -2,7 +2,7 @@
 pragma solidity >=0.8.13;
 
 import "forge-std/Test.sol";
-import "../../../contracts/token/IERC20.sol";
+import "../../contracts/token/IERC20.sol";
 
 contract TestExtensions is Test {
 
