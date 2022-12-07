@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
-import "../../contracts/token/TransferHelper.sol";
-import "../../contracts/token/IERC20.sol";
+import "../contracts/token/TransferHelper.sol";
+import "../contracts/token/IERC20.sol";
 
 contract TransferHelperTest is Test {
     using TransferHelper for IERC20;
