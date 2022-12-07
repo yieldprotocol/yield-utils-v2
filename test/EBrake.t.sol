@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "../../contracts/utils/EmergencyBrake.sol";
-import "../../contracts/mocks/RestrictedERC20Mock.sol";
-import "../../contracts/utils/Timelock.sol";
+import "../contracts/utils/EmergencyBrake.sol";
+import "../contracts/mocks/RestrictedERC20Mock.sol";
+import "../contracts/utils/Timelock.sol";
 
 abstract contract ZeroState is Test {
     enum State {UNPLANNED, PLANNED, EXECUTED}
