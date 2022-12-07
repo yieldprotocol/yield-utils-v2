@@ -19,7 +19,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
     event RewardsSet(uint32 start, uint32 end, uint256 rate);
     event RewardsPerTokenUpdated(uint256 accumulated);
     event UserRewardsUpdated(address user, uint256 userRewards, uint256 paidRewardPerToken);
-    event Claimed(address receiver, uint256 claimed);
+    event Claimed(address user, address receiver, uint256 claimed);
 
     ERC20RewardsMock public vault;
     uint256 public vaultUnit;
@@ -310,24 +310,49 @@ contract DuringProgramTest is DuringProgram {
         (uint128 accumulatedUser,) = vault.rewards(user);
         assertEq(accumulatedUser, 0);
 
-        track("userRewardsBalance", rewards.balanceOf(user));
+        track("otherRewardsBalance", rewards.balanceOf(other));
 
         uint256 calculatedRewards = totalRewards * elapsed / length;
 
         vm.expectEmit(true, true, false, false);
-        emit Claimed(user, calculatedRewards);
+        emit Claimed(user, other, calculatedRewards);
         vm.prank(user);
-        vault.claim(user);
+        vault.claim(other);
         (uint128 accumulatedPerTokenNow,,) = vault.rewardsPerToken();
 
         uint256 expectedRewards = uint256(accumulatedPerTokenNow) * vault.totalSupply() / 1e18;
         assertEq(expectedRewards, calculatedRewards);
 
-        assertTrackPlusEq("userRewardsBalance", expectedRewards, rewards.balanceOf(user));
+        assertTrackPlusEq("otherRewardsBalance", expectedRewards, rewards.balanceOf(other));
         assertEq(expectedRewards, WAD);
     }
 
     function testClaim(uint32 elapsed) public {
+        (uint32 start, uint32 end) = vault.rewardsPeriod();
+        elapsed = uint32(bound(elapsed, 1, end - start));
+        vm.warp(start + elapsed);
+
+        (uint128 accumulatedUser,) = vault.rewards(user);
+        assertEq(accumulatedUser, 0);
+
+        track("otherRewardsBalance", rewards.balanceOf(other));
+
+        uint256 calculatedRewards = totalRewards * elapsed / length;
+
+        vm.expectEmit(true, true, false, false);
+        emit Claimed(user, other, calculatedRewards);
+        vm.prank(user);
+        vault.claim(other);
+        (uint128 accumulatedPerTokenNow,,) = vault.rewardsPerToken();
+
+        uint256 expectedRewards = uint256(accumulatedPerTokenNow) * vault.totalSupply() / 1e18;
+        assertEq(expectedRewards, calculatedRewards);
+
+        assertTrackPlusEq("otherRewardsBalance", expectedRewards, rewards.balanceOf(other));
+    }
+
+
+    function testRemit(uint32 elapsed) public {
         (uint32 start, uint32 end) = vault.rewardsPeriod();
         elapsed = uint32(bound(elapsed, 1, end - start));
         vm.warp(start + elapsed);
@@ -340,9 +365,9 @@ contract DuringProgramTest is DuringProgram {
         uint256 calculatedRewards = totalRewards * elapsed / length;
 
         vm.expectEmit(true, true, false, false);
-        emit Claimed(user, calculatedRewards);
-        vm.prank(user);
-        vault.claim(user);
+        emit Claimed(user, user, calculatedRewards);
+        vm.prank(other);
+        vault.remit(user);
         (uint128 accumulatedPerTokenNow,,) = vault.rewardsPerToken();
 
         uint256 expectedRewards = uint256(accumulatedPerTokenNow) * vault.totalSupply() / 1e18;

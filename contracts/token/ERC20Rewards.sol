@@ -22,7 +22,7 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
     event RewardsSet(uint32 start, uint32 end, uint256 rate);
     event RewardsPerTokenUpdated(uint256 accumulated);
     event UserRewardsUpdated(address user, uint256 userRewards, uint256 paidRewardPerToken);
-    event Claimed(address receiver, uint256 claimed);
+    event Claimed(address user, address receiver, uint256 claimed);
 
     struct RewardsPeriod {
         uint32 start;                                   // Start time for the current rewardsToken schedule
@@ -190,6 +190,6 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
         claiming = _updateUserRewards(from);
         rewards[from].accumulated = 0; // A Claimed event implies the rewards were set to zero
         rewardsToken.safeTransfer(to, claiming);
-        emit Claimed(to, claiming);
+        emit Claimed(from, to, claiming);
     }
 }
