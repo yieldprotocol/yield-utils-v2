@@ -85,6 +85,9 @@ contract ERC20Rewards is AccessControl, ERC20Permit {
             "Ongoing rewards"
         );
 
+        // Update the rewards per token so that we don't lose any rewards
+        _updateRewardsPerToken();
+
         rewardsPeriod.start = start;
         rewardsPeriod.end = end;
 

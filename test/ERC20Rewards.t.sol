@@ -381,7 +381,6 @@ abstract contract AfterProgramEnd is WithProgram {
     function setUp() public override virtual {
         super.setUp();
 
-        super.setUp();
         (, uint256 end) = vault.rewardsPeriod();
 
         vm.warp(end + 1);
@@ -391,10 +390,16 @@ abstract contract AfterProgramEnd is WithProgram {
 contract AfterProgramEndTest is AfterProgramEnd {
 
     function testSetNewRewards(uint32 start, uint32 end, uint96 rate) public {
+        // Collect data from previous period to make sure per token rewards are updated
+        (uint32 previousStart, uint32 previousEnd) = vault.rewardsPeriod();
+        (,, uint96 previousRate) = vault.rewardsPerToken();
+        vm.expectEmit(true, false, false, false);
+        emit RewardsPerTokenUpdated((previousEnd - previousStart) * previousRate);
+
+        // Setup a new rewards period
         end = uint32(bound(end, block.timestamp + 1, type(uint32).max));
         start = uint32(bound(start, block.timestamp, end - 1));
-
-        vm.expectEmit(true, false, false, false);
+        vm.expectEmit(true, true, true, false);
         emit RewardsSet(start, end, rate);
 
         vm.prank(admin);
