@@ -187,7 +187,31 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         delete plans[user];
     }
 
+
+    /// @dev Check if a plan is valid for execution
+    /// @param user address with an isolation plan
+    function check(address user)
+        external view override returns (bool)
+    {
+        Plan storage plan_ = plans[user];
+
+        // Loop through the ids array, and check all roles.
+        uint length = uint(plan_.ids.length);
+        require(length > 0, "Plan not found");
+
+        for (uint i = 0; i < length; ++i ) {
+            bytes32 id = plan_.ids[i];
+            Permission memory permission_ = plan_.permissions[id]; 
+            AccessControl host = AccessControl(permission_.host);
+
+            if (!host.hasRole(permission_.signature, user)) return false;
+        }
+
+        return true;
+    }
+
     /// @dev Execute an access removal transaction
+    /// @notice The plan needs to be kept up to date with the current permissioning, or it will revert.
     /// @param user address with an isolation plan
     function execute(address user)
         external override auth
@@ -204,12 +228,20 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             bytes32 id = plan_.ids[i];
             Permission memory permission_ = plan_.permissions[id]; 
             AccessControl host = AccessControl(permission_.host);
+
+            // `revokeRole` won't revert if the role is not granted, but we need
+            // to revert because otherwise operators with `execute` and `restore`
+            // permissions will be able to restore removed roles if the plan is not
+            // updated to reflect the removed roles.
+            // By reverting, a plan that is not up to date will revert on execution,
+            // but that seems like a lesser evil versus allowing operators to override
+            // governance decisions.
             bytes4 signature_ = permission_.signature;
             require(
                 host.hasRole(signature_, user),
                 "Permission not found"
             );
-            host.revokeRole(signature_, user);
+            host.revokeRole(permission_.signature, user);
         }
 
         emit Executed(user);

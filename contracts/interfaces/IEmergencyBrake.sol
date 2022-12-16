@@ -23,6 +23,7 @@ interface IEmergencyBrake {
     function add(address user, Permission[] calldata permissionsIn) external;
     function remove(address user, Permission[] calldata permissionsOut) external;
     function cancel(address user) external;
+    function check(address user) external view returns (bool);
     function execute(address user) external;
     function restore(address user) external;
     function terminate(address user) external;
