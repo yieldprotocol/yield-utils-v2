@@ -181,12 +181,11 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         uint length = uint(plan_.ids.length);
 
         // First remove the permissions
-        for (uint i = length - 1; ; --i ) {
-            bytes32 id = plan_.ids[i];
+        for (uint i = length; i > 0; --i ) {
+            bytes32 id = plan_.ids[i - 1];
             emit Removed(user, plan_.permissions[id]);
             delete plan_.permissions[id];
             plan_.ids.pop();
-            if (i == 0) break; // Not sure why `for (uint i = length - 1; i >= 0; --i )` doesn't work
         }
 
         delete plans[user];
