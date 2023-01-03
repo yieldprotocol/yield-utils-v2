@@ -24,6 +24,7 @@ abstract contract ZeroState is Test {
     event Restored(address indexed user);
 
     bytes4 public constant ROOT = bytes4(0);
+    uint256 public constant NOT_FOUND = type(uint256).max;
 
     IEmergencyBrake.Plan public plan;
     IEmergencyBrake.Permission[] public permissionsIn;
@@ -203,7 +204,7 @@ contract PlanStateTest is PlanState {
         ebrake.remove(tokenAdmin, permissionsOut);
 
         assertFalse(ebrake.contains(tokenAdmin, permissionOut));
-        assertEq(ebrake.index(tokenAdmin, permissionOut), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionOut), NOT_FOUND);
         assertEq(ebrake.index(tokenAdmin, IEmergencyBrake.Permission(address(rToken), RestrictedERC20Mock.burn.selector)), 0);
         assertEq(ebrake.total(tokenAdmin), 1);
 
@@ -221,8 +222,8 @@ contract PlanStateTest is PlanState {
 
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), 0);
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), NOT_FOUND);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), NOT_FOUND);
         assertEq(ebrake.total(tokenAdmin), 0);
 
         permissionsOut.pop();
@@ -285,8 +286,8 @@ contract PlanStateTest is PlanState {
 
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), 0);
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), NOT_FOUND);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), NOT_FOUND);
         assertEq(ebrake.total(tokenAdmin), 0);
     }
 
@@ -300,8 +301,8 @@ contract PlanStateTest is PlanState {
 
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), 0);
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), NOT_FOUND);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), NOT_FOUND);
         assertEq(ebrake.total(tokenAdmin), 0);
     }
 }
@@ -380,8 +381,8 @@ contract ExecutedStateTest is ExecutedState {
 
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
         assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), 0);
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), 0);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), NOT_FOUND);
+        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), NOT_FOUND);
         assertEq(ebrake.total(tokenAdmin), 0);
     }
 }
