@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "../../contracts/utils/Pausable.sol";
+import "../contracts/utils/Pausable.sol";
 import "./mocks/DummyWand.sol";
 
 abstract contract StateZero is Test {
