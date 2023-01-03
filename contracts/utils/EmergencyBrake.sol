@@ -153,6 +153,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
         external override auth
     {
         Plan storage plan_ = plans[user];
+        require(plan_.ids.length > 0, "Plan not found");
         require(!plan_.executed, "Plan in execution");
 
         _erase(user);
@@ -163,6 +164,9 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function terminate(address user)
         external override auth
     {
+        Plan storage plan_ = plans[user];
+        require(plan_.executed, "Plan not in execution");
+        // If the plan is executed, then it must exist
         _erase(user);
     }
 
@@ -175,7 +179,6 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
         // Loop through the plan, and remove permissions and ids.
         uint length = uint(plan_.ids.length);
-        require(length > 0, "Plan not found");
 
         // First remove the permissions
         for (uint i = length - 1; ; --i ) {

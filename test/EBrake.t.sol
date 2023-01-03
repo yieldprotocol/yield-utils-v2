@@ -153,18 +153,18 @@ contract ZeroStateTest is ZeroState {
         permissionsOut.pop();
     }
 
+    // testNotCancel
+    function testNotCancel() public {
+        vm.expectRevert("Plan not found");
+        vm.prank(planner);
+        ebrake.cancel(tokenAdmin);
+    }
+
     // testNotExecute
     function testNotExecute() public {
         vm.expectRevert("Plan not found");
         vm.prank(executor);
         ebrake.execute(tokenAdmin);
-    }
-
-    // testNotTerminate
-    function testNotTerminate() public {
-        vm.expectRevert("Plan not found");
-        vm.prank(governor);
-        ebrake.terminate(tokenAdmin);
     }
 
     // testPermissionToId
@@ -291,19 +291,14 @@ contract PlanStateTest is PlanState {
         assertEq(ebrake.total(tokenAdmin), 0);
     }
 
-    // testTerminateNotExecuted
-    function testTerminateAnytime() public {
+    // testTerminateOnlyExecuted
+    function testTerminateOnlyExecuted() public {
         permissionsOut.push(ebrake.permissionAt(tokenAdmin, 0));
         permissionsOut.push(ebrake.permissionAt(tokenAdmin, 1));
 
+        vm.expectRevert("Plan not in execution");
         vm.prank(governor);
         ebrake.terminate(tokenAdmin);
-
-        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[0]));
-        assertFalse(ebrake.contains(tokenAdmin, permissionsOut[1]));
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[0]), NOT_FOUND);
-        assertEq(ebrake.index(tokenAdmin, permissionsOut[1]), NOT_FOUND);
-        assertEq(ebrake.total(tokenAdmin), 0);
     }
 }
 
