@@ -84,7 +84,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     /// @dev Add permissions to an isolation plan
     /// @param user address with auth privileges on permission hosts
     /// @param permissionsIn permissions that are being added to an existing plan
-    function add(address user, Permission[] memory permissionsIn)
+    function add(address user, Permission[] calldata permissionsIn)
         external override auth 
     {   
         Plan storage plan_ = plans[user];
@@ -119,7 +119,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     /// @dev Remove permissions from an isolation plan
     /// @param user address with auth privileges on permission hosts
     /// @param permissionsOut permissions that are being removed from an existing plan
-    function remove(address user, Permission[] memory permissionsOut) 
+    function remove(address user, Permission[] calldata permissionsOut) 
         external override auth
     {   
         Plan storage plan_ = plans[user];
@@ -276,7 +276,7 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
 
     /// @dev used to calculate the id of a Permission so it can be indexed within a Plan
     /// @param permission a permission, containing a host address and a function signature
-    function permissionToId(Permission memory permission)
+    function permissionToId(Permission calldata permission)
         external pure returns(bytes32 id)
     {
         id = _permissionToId(permission);
