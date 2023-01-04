@@ -240,9 +240,8 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
             // By reverting, a plan that is not up to date will revert on execution,
             // but that seems like a lesser evil versus allowing operators to override
             // governance decisions.
-            bytes4 signature_ = permission_.signature;
             require(
-                host.hasRole(signature_, user),
+                host.hasRole(permission_.signature, user),
                 "Permission not found"
             );
             host.revokeRole(permission_.signature, user);
