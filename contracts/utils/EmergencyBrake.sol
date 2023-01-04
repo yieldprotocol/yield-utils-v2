@@ -1,191 +1,281 @@
 // SPDX-License-Identifier: MIT
+// Audit: https://hackmd.io/@devtooligan/YieldEmergencyBrakeSecurityReview2022-10-11
 
 pragma solidity ^0.8.0;
 import "../access/AccessControl.sol";
+import "../interfaces/IEmergencyBrake.sol";
 
 
-interface IEmergencyBrake {
-    struct Permission {
-        address contact; /// contract for which a user holds auth priviliges
-        bytes4 signature;
-    }
-
-    function plan(address target, Permission[] calldata permissions) external;
-    function addToPlan(address target, Permission calldata permission) external;
-    function removeFromPlan(address target, Permission calldata permission) external;
-    function cancel(address target) external;
-    function execute(address target) external;
-    function restore(address target) external;
-    function terminate(address target) external;
-}
-
-/// @notice DO NOT DEPLOY - In the process of being audited
-/// @dev EmergencyBrake allows to plan for and execute transactions that remove access permissions for a target
+/// @dev EmergencyBrake allows to plan for and execute transactions that remove access permissions for a user
 /// contract. In an permissioned environment this can be used for pausing components.
 /// All contracts in scope of emergency plans must grant ROOT permissions to EmergencyBrake. To mitigate the risk
 /// of governance capture, EmergencyBrake has very limited functionality, being able only to revoke existing roles
 /// and to restore previously revoked roles. Thus EmergencyBrake cannot grant permissions that weren't there in the 
 /// first place. As an additional safeguard, EmergencyBrake cannot revoke or grant ROOT roles.
-/// In addition, there is a separation of concerns between the planner and the executor accounts, so that both of them
-/// must be compromised simultaneously to execute non-approved emergency plans, and then only creating a denial of service.
 contract EmergencyBrake is AccessControl, IEmergencyBrake {
-    enum State {UNPLANNED, PLANNED, EXECUTED}
 
-    struct Plan {
-        State state;
-        Permission[] permissions;
-        mapping(bytes32 => uint256) index; ///mapping of bytes32(signature) => position in permissions
-    }
+    event Added(address indexed user, Permission permissionIn);
+    event Removed(address indexed user, Permission permissionOut);
+    event Executed(address indexed user);
+    event Restored(address indexed user);
 
-    event Planned(address indexed target, Permission[] permissions);
-    event PermissionAdded(address indexed target, Permission newPermission);
-    event PermissionRemoved(address indexed target, Permission permissionOut);
-    event Cancelled(address indexed target);
-    event Executed(address indexed target);
-    event Restored(address indexed target);
-    event Terminated(address indexed target);
+    uint256 public constant NOT_FOUND = type(uint256).max;
 
     mapping (address => Plan) public plans;
 
-    constructor(address planner, address executor) AccessControl() {
-        _grantRole(IEmergencyBrake.plan.selector, planner);
-        _grantRole(IEmergencyBrake.addToPlan.selector, planner);
-        _grantRole(IEmergencyBrake.removeFromPlan.selector, planner);
-        _grantRole(IEmergencyBrake.cancel.selector, planner);
+    constructor(address governor, address planner, address executor) AccessControl() {
         _grantRole(IEmergencyBrake.execute.selector, executor);
-        _grantRole(IEmergencyBrake.restore.selector, planner);
-        _grantRole(IEmergencyBrake.terminate.selector, planner);
-        // Granting roles (plan, cancel, execute, restore, terminate, modifyPlan) is reserved to ROOT
+        _grantRole(IEmergencyBrake.add.selector, planner);
+        _grantRole(IEmergencyBrake.remove.selector, planner);
+        _grantRole(IEmergencyBrake.cancel.selector, planner);
+        _grantRole(IEmergencyBrake.add.selector, governor);
+        _grantRole(IEmergencyBrake.remove.selector, governor);
+        _grantRole(IEmergencyBrake.cancel.selector, governor);
+        _grantRole(IEmergencyBrake.execute.selector, governor);
+        _grantRole(IEmergencyBrake.restore.selector, governor);
+        _grantRole(IEmergencyBrake.terminate.selector, governor);
+        // Granting roles (add, remove, cancel, execute, restore, terminate) is reserved to ROOT
     }
 
-    /// @dev Register an access removal transaction
-    /// @param target address with auth privileges on contracts
-    function plan(address target, Permission[] memory permissions)
-        external override auth
-    {
-        require(plans[target].state == State.UNPLANNED, "Emergency already planned for.");
-        // Removing or granting ROOT permissions is out of bounds for EmergencyBrake
-        for (uint256 i = 0; i < permissions.length; ++i){
-            require(
-                permissions[i].signature != ROOT,
-                "Can't remove ROOT"
-            );
-            
-            plans[target].permissions.push(permissions[i]);
-            bytes32 newId = _permissionToId(permissions[i]);
-            plans[target].index[newId] = i;
+    /// @dev Is a plan executed?
+    /// @param user address with auth privileges on permission hosts
+    function executed(address user) external view override returns (bool) {
+        return plans[user].executed;
+    }
+
+    /// @dev Does a plan contain a permission?
+    /// @param user address with auth privileges on permission hosts
+    /// @param permission permission that is being queried about
+    function contains(address user, Permission calldata permission) external view override returns (bool) {
+        return plans[user].permissions[_permissionToId(permission)].signature != bytes4(0);
+    }
+
+    /// @dev Return a permission by index
+    /// @param user address with auth privileges on permission hosts
+    /// @param idx permission index that is being queried about
+    function permissionAt(address user, uint idx) external view override returns (Permission memory) {
+        Plan storage plan_ = plans[user];
+        return plan_.permissions[plan_.ids[idx]];
+    }
+
+    /// @dev Index of a permission in a plan. Returns type(uint256).max if not present.
+    /// @param user address with auth privileges on permission hosts
+    /// @param permission permission that is being queried about
+    function index(address user, Permission calldata permission) external view override returns (uint) {
+        Plan storage plan_ = plans[user];
+        uint length = uint(plan_.ids.length);
+
+        bytes32 id = _permissionToId(permission);
+
+        for (uint i = 0; i < length; ++i ) {
+            if (plan_.ids[i] == id) {
+                return i;
+            }
         }
-        plans[target].state = State.PLANNED;
-        emit Planned(target, permissions);
+        return NOT_FOUND;
     }
 
-    /// @dev add a permission set to remove for a contact to an existing plan
-    /// @dev a contact can be added multiple times to a plan but ensures that all signatures are unique to prevent revert on execution
-    /// @param target address with auth privileges on a contract and a plan exists for
-    /// @param newPermission permission set that is being added to an existing plan
-    function addToPlan(address target, Permission memory newPermission)
+    /// @dev Number of permissions in a plan
+    /// @param user address with auth privileges on permission hosts
+    function total(address user) external view returns (uint) {
+        return uint(plans[user].ids.length);
+    }
+
+    /// @dev Add permissions to an isolation plan
+    /// @param user address with auth privileges on permission hosts
+    /// @param permissionsIn permissions that are being added to an existing plan
+    function add(address user, Permission[] calldata permissionsIn)
         external override auth 
     {   
-        Plan storage _plan = plans[target];
-        require(_plan.state == State.PLANNED, "Target not planned for");
-        require(newPermission.signature != ROOT, "Can't remove ROOT");
-        Permission[] memory _permissions = _plan.permissions;
-        bytes32 newId = _permissionToId(newPermission);
-        uint256 newIndex = _plan.index[newId];
-        require(_permissionToId(_plan.permissions[newIndex]) != newId, "Permission set already in plan");
-        _plan.permissions.push(newPermission);
-        _plan.index[newId] = _permissions.length - 1;
-        
-        emit PermissionAdded(target, newPermission);
+        Plan storage plan_ = plans[user];
+        require(!plan_.executed, "Plan in execution");
+
+        uint length = permissionsIn.length;
+        for (uint i; i < length; ++i) {
+            Permission memory permissionIn = permissionsIn[i];
+            require(permissionIn.signature != ROOT, "Can't remove ROOT");
+
+            require(
+                AccessControl(permissionIn.host).hasRole(permissionIn.signature, user),
+                "Permission not found"
+            ); // You don't want to find out execute reverts when you need it
+
+            require(
+                AccessControl(permissionIn.host).hasRole(ROOT, address(this)),
+                "Need ROOT on host"
+            ); // You don't want to find out you don't have ROOT while executing
+
+            bytes32 idIn = _permissionToId(permissionIn);
+            require(plan_.permissions[idIn].signature == bytes4(0), "Permission already set");
+
+            plan_.permissions[idIn] = permissionIn; // Set the permission
+            plan_.ids.push(idIn);
+
+            emit Added(user, permissionIn);
+        }
+
     }
 
-    /// @dev remove a permission set from an existing plan
-    /// @dev retains the order of permissions and updates their index
-    /// @param target address wuth auth privileges on a contract and a plan exists for
-    function removeFromPlan(address target, Permission memory permissionOut) 
+    /// @dev Remove permissions from an isolation plan
+    /// @param user address with auth privileges on permission hosts
+    /// @param permissionsOut permissions that are being removed from an existing plan
+    function remove(address user, Permission[] calldata permissionsOut) 
         external override auth
     {   
-        Plan storage _plan = plans[target];
-        require(_plan.state == State.PLANNED, "Target not planned for");
-        Permission[] memory _permissions = _plan.permissions;
-        bytes32 idOut = _permissionToId(permissionOut); 
-        uint256 indexOut = _plan.index[idOut];
-        if (indexOut != _permissions.length - 1) {
-            require(_permissionToId(_plan.permissions[indexOut]) == idOut, "Permission set not planned"); // indexOut might be zero if permissionOut is not in the plan, or if we want to remove the permission at position zero. We just check that the permission we are removing is the one intended.
-            uint256 indexLast = _permissions.length - 1;               // The position of last permission in the permissions array
-            bytes32 idLast = _permissionToId(_permissions[indexLast]); // The id of the last permission
-            _plan.permissions[indexOut] = _permissions[indexLast];     // Replace the outgoing permission with the last permission
-            _plan.index[idLast] = indexOut;                            // Correct the index so that we know that the last permission is now where the outgoing permission was
-            _plan.index[idOut] = 0;                                    // Correct the index, because the removed permission is not at idOut anymore
+        Plan storage plan_ = plans[user];
+        require(!plan_.executed, "Plan in execution");
+
+        uint length = permissionsOut.length;
+        for (uint i; i < length; ++i) {
+            Permission memory permissionOut = permissionsOut[i];
+            bytes32 idOut = _permissionToId(permissionOut);
+            require(plan_.permissions[idOut].signature != bytes4(0), "Permission not found");
+
+            delete plan_.permissions[idOut]; // Remove the permission
+            
+            // Loop through the ids array, copy the last item on top of the removed permission, then pop.
+            uint last = uint(plan_.ids.length) - 1; // Length should be at least one at this point.
+            for (uint j = 0; j <= last; ++j ) {
+                if (plan_.ids[j] == idOut) {
+                    if (j != last) plan_.ids[j] = plan_.ids[last];
+                    plan_.ids.pop(); // Remove the id
+                    break;
+                }
+            }
+
+            emit Removed(user, permissionOut);
         }
-        _plan.permissions.pop();                                   // Shorten the permissions array, removing the now duplicated last permission
-        emit PermissionRemoved(target, permissionOut);
+    }
+
+    /// @dev Remove a planned isolation plan
+    /// @param user address with an isolation plan
+    function cancel(address user)
+        external override auth
+    {
+        Plan storage plan_ = plans[user];
+        require(plan_.ids.length > 0, "Plan not found");
+        require(!plan_.executed, "Plan in execution");
+
+        _erase(user);
+    }
+
+    /// @dev Remove the restoring option from an isolated user
+    /// @param user address with an isolation plan
+    function terminate(address user)
+        external override auth
+    {
+        Plan storage plan_ = plans[user];
+        require(plan_.executed, "Plan not in execution");
+        // If the plan is executed, then it must exist
+        _erase(user);
+    }
+
+    /// @dev Remove all data related to an user
+    /// @param user address with an isolation plan
+    function _erase(address user)
+        internal
+    {
+        Plan storage plan_ = plans[user];
+
+        // Loop through the plan, and remove permissions and ids.
+        uint length = uint(plan_.ids.length);
+
+        // First remove the permissions
+        for (uint i = length; i > 0; --i ) {
+            bytes32 id = plan_.ids[i - 1];
+            emit Removed(user, plan_.permissions[id]);
+            delete plan_.permissions[id];
+            plan_.ids.pop();
+        }
+
+        delete plans[user];
     }
 
 
-    /// @dev Erase a planned access removal transaction
-    function cancel(address target)
-        external override auth
+    /// @dev Check if a plan is valid for execution
+    /// @param user address with an isolation plan
+    function check(address user)
+        external view override returns (bool)
     {
-        require(plans[target].state == State.PLANNED, "Emergency not planned for.");
-        delete plans[target];
-        emit Cancelled(target);
+        Plan storage plan_ = plans[user];
+
+        // Loop through the ids array, and check all roles.
+        uint length = uint(plan_.ids.length);
+        require(length > 0, "Plan not found");
+
+        for (uint i = 0; i < length; ++i ) {
+            bytes32 id = plan_.ids[i];
+            Permission memory permission_ = plan_.permissions[id]; 
+            AccessControl host = AccessControl(permission_.host);
+
+            if (!host.hasRole(permission_.signature, user)) return false;
+        }
+
+        return true;
     }
 
     /// @dev Execute an access removal transaction
-    function execute(address target)
+    /// @notice The plan needs to be kept up to date with the current permissioning, or it will revert.
+    /// @param user address with an isolation plan
+    function execute(address user)
         external override auth
     {
-        require(plans[target].state == State.PLANNED, "Emergency not planned for.");
-        plans[target].state = State.EXECUTED;
+        Plan storage plan_ = plans[user];
+        require(!plan_.executed, "Already executed");
+        plan_.executed = true;
 
-        Permission[] memory permissions_ = plans[target].permissions;
+        // Loop through the ids array, and revoke all roles.
+        uint length = uint(plan_.ids.length);
+        require(length > 0, "Plan not found");
 
-        for (uint256 i = 0; i < permissions_.length; i++){
-            // AccessControl.sol doesn't revert if revoking permissions that haven't been granted
-            // If we don't check, planner and executor can collude to gain access to contacts
-            Permission memory permission_ = permissions_[i]; 
-            AccessControl contact = AccessControl(permission_.contact);
-            bytes4 signature_ = permission_.signature;
+        for (uint i = 0; i < length; ++i ) {
+            bytes32 id = plan_.ids[i];
+            Permission memory permission_ = plan_.permissions[id]; 
+            AccessControl host = AccessControl(permission_.host);
+
+            // `revokeRole` won't revert if the role is not granted, but we need
+            // to revert because otherwise operators with `execute` and `restore`
+            // permissions will be able to restore removed roles if the plan is not
+            // updated to reflect the removed roles.
+            // By reverting, a plan that is not up to date will revert on execution,
+            // but that seems like a lesser evil versus allowing operators to override
+            // governance decisions.
             require(
-                contact.hasRole(signature_, target),
+                host.hasRole(permission_.signature, user),
                 "Permission not found"
             );
-            contact.revokeRole(signature_, target);
+            host.revokeRole(permission_.signature, user);
         }
-        emit Executed(target);
+
+        emit Executed(user);
     }
 
-    /// @dev Restore the orchestration from an isolated target
-    function restore(address target)
+    /// @dev Restore the orchestration from an isolated user
+    function restore(address user)
         external override auth
     {
-        require(plans[target].state == State.EXECUTED, "Emergency plan not executed.");
-        plans[target].state = State.PLANNED;
+        Plan storage plan_ = plans[user];
+        require(plan_.executed, "Plan not executed");
+        plan_.executed = false;
 
-        Permission[] memory permissions_ = plans[target].permissions;
+        // Loop through the ids array, and grant all roles.
+        uint length = uint(plan_.ids.length);
 
-        for (uint256 i = 0; i < permissions_.length; i++){
-            Permission memory permission_ = permissions_[i]; 
-            AccessControl contact = AccessControl(permission_.contact);
+        for (uint i = 0; i < length; ++i ) {
+            bytes32 id = plan_.ids[i];
+            Permission memory permission_ = plan_.permissions[id]; 
+            AccessControl host = AccessControl(permission_.host);
             bytes4 signature_ = permission_.signature;
-            contact.grantRole(signature_, target);
+            host.grantRole(signature_, user);
         }
-        emit Restored(target);
+
+        emit Restored(user);
     }
 
-    /// @dev Remove the restoring option from an isolated target
-    function terminate(address target)
-        external override auth
-    {
-        require(plans[target].state == State.EXECUTED, "Emergency plan not executed.");
-        delete plans[target];
-        emit Terminated(target);
-    }
 
     /// @dev used to calculate the id of a Permission so it can be indexed within a Plan
-    /// @param permission a permission, containing a contact address and a function signature
-    function permissionToId(Permission memory permission)
+    /// @param permission a permission, containing a host address and a function signature
+    function permissionToId(Permission calldata permission)
         external pure returns(bytes32 id)
     {
         id = _permissionToId(permission);
@@ -202,14 +292,14 @@ contract EmergencyBrake is AccessControl, IEmergencyBrake {
     function _permissionToId(Permission memory permission) 
         internal pure returns(bytes32 id) 
     {
-        id = (bytes32(permission.signature) >> 160 | bytes32(bytes20(permission.contact)));
+        id = bytes32(abi.encodePacked(permission.signature, permission.host));
     }
 
     function _idToPermission(bytes32 id) 
         internal pure returns(Permission memory permission)
     {
-        address contact = address(bytes20(id));
+        address host = address(bytes20(id));
         bytes4 signature = bytes4(id << 160);
-        permission = Permission(contact, signature);
+        permission = Permission(host, signature);
     }
 }
