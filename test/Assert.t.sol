@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
 import "../contracts/utils/Timelock.sol";
-import { OnChainTest } from "../contracts/utils/OnChainTest.sol";
+import { Assert } from "../contracts/utils/Assert.sol";
 import { ERC20Mock } from "../contracts/mocks/ERC20Mock.sol";
 import { TestExtensions } from "./utils/TestExtensions.sol";
 import { TestConstants } from "./utils/TestConstants.sol";
@@ -15,11 +15,11 @@ using stdStorage for StdStorage;
 
 abstract contract Deployed is Test, TestExtensions, TestConstants {
 
-    OnChainTest public onChainTest;
+    Assert public assertContract;
     ERC20Mock public target;
 
     function setUpMock() public {
-        onChainTest = new OnChainTest();
+        assertContract = new Assert();
         target = new ERC20Mock("Test", "TST");
         target.mint(address(this), 1000);
     }
@@ -41,42 +41,42 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
 
 contract DeployedTest is Deployed {
 
-    function testTwoEqualValues() public {
+    function testTwoEqualValues() public view {
         bytes memory value1 = abi.encodePacked(uint256(1));
         bytes memory value2 = abi.encodePacked(uint256(1));
-        onChainTest.twoValuesEquator(value1, value2);
+        assertContract.assertEq(value1, value2);
     }
 
     function testTwoUnequalValues() public {
         bytes memory value1 = abi.encodePacked(uint256(1));
         bytes memory value2 = abi.encodePacked(uint256(2));
-        vm.expectRevert("Mismatched value");
-        onChainTest.twoValuesEquator(value1, value2);
+        vm.expectRevert("Not equal to expected");
+        assertContract.assertEq(value1, value2);
     }
 
     function testTwoEqualCalls() public {
         bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
         bytes memory call2 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
-        onChainTest.twoCallsEquator(address(target), address(target), call1, call2);
+        assertContract.assertEq(address(target), call1, address(target), call2);
     }
 
     function testTwoUnequalCalls() public {
         bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
         bytes memory call2 = abi.encodeWithSelector(target.balanceOf.selector, address(target));
-        vm.expectRevert("Mismatched value");
-        onChainTest.twoCallsEquator(address(target), address(target), call1, call2);
+        vm.expectRevert("Not equal to expected");
+        assertContract.assertEq(address(target), call1, address(target), call2);
     }
 
     function testCallAndValue() public {
         bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
         bytes memory value1 = abi.encodePacked(target.totalSupply());
-        onChainTest.valueAndCallEquator(address(target), call1, value1);
+        assertContract.assertEq(address(target), call1, value1);
     }
 
     function testUnequalCallAndValue() public {
         bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
         bytes memory value1 = abi.encodePacked(target.balanceOf(address(target)));
-        vm.expectRevert("Mismatched value");
-        onChainTest.valueAndCallEquator(address(target), call1, value1);
+        vm.expectRevert("Not equal to expected");
+        assertContract.assertEq(address(target), call1, value1);
     }
 }
