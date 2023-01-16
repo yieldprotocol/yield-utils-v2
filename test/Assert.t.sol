@@ -22,6 +22,7 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
         assertContract = new Assert();
         target = new ERC20Mock("Test", "TST");
         target.mint(address(this), 1000);
+        target.mint(address(target), 1000);
     }
 
     function setUpHarness(string memory network) public {
@@ -42,41 +43,207 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
 contract DeployedTest is Deployed {
 
     function testTwoEqualValues() public view {
-        bytes memory value1 = abi.encodePacked(uint256(1));
-        bytes memory value2 = abi.encodePacked(uint256(1));
-        assertContract.assertEq(value1, value2);
+        assertContract.assertEq(1, 1);
     }
 
     function testTwoUnequalValues() public {
-        bytes memory value1 = abi.encodePacked(uint256(1));
-        bytes memory value2 = abi.encodePacked(uint256(2));
         vm.expectRevert("Not equal to expected");
-        assertContract.assertEq(value1, value2);
+        assertContract.assertEq(1, 2);
     }
 
     function testTwoEqualCalls() public {
-        bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
-        bytes memory call2 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
-        assertContract.assertEq(address(target), call1, address(target), call2);
+        bytes memory actualCalldata = abi.encodeWithSelector(target.totalSupply.selector, address(target));
+        bytes memory expectedCalldata = abi.encodeWithSelector(target.totalSupply.selector, address(target));
+        assertContract.assertEq(address(target), actualCalldata, address(target), expectedCalldata);
     }
 
     function testTwoUnequalCalls() public {
-        bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
-        bytes memory call2 = abi.encodeWithSelector(target.balanceOf.selector, address(target));
+        bytes memory actualCalldata = abi.encodeWithSelector(target.totalSupply.selector, address(target));
+        bytes memory expectedCalldata = abi.encodeWithSelector(target.balanceOf.selector, address(target));
         vm.expectRevert("Not equal to expected");
-        assertContract.assertEq(address(target), call1, address(target), call2);
+        assertContract.assertEq(address(target), actualCalldata, address(target), expectedCalldata);
     }
 
     function testCallAndValue() public {
-        bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
-        bytes memory value1 = abi.encodePacked(target.totalSupply());
-        assertContract.assertEq(address(target), call1, value1);
+        bytes memory actualCalldata = abi.encodeWithSelector(target.totalSupply.selector, address(target));
+        uint actual = target.totalSupply();
+        assertContract.assertEq(address(target), actualCalldata, actual);
     }
 
     function testUnequalCallAndValue() public {
-        bytes memory call1 = abi.encodeWithSelector(target.totalSupply.selector, address(target));
-        bytes memory value1 = abi.encodePacked(target.balanceOf(address(target)));
+        bytes memory actualCalldata = abi.encodeWithSelector(target.totalSupply.selector, address(target));
+        uint actual = target.balanceOf(address(target));
         vm.expectRevert("Not equal to expected");
-        assertContract.assertEq(address(target), call1, value1);
+        assertContract.assertEq(address(target), actualCalldata, actual);
+    }
+
+    function testGreaterThan() public {
+        assertContract.assertGt(2, 1);
+        
+        assertContract.assertGt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1
+        );
+
+        assertContract.assertGt(
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target))
+        );
+
+        vm.expectRevert("Not greater than expected");
+        assertContract.assertGt(1, 2);
+
+        vm.expectRevert("Not greater than expected");
+        assertContract.assertGt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            2000
+        );
+
+        vm.expectRevert("Not greater than expected");
+        assertContract.assertGt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target))
+        );
+    }
+
+    function testLessThan() public {
+        assertContract.assertLt(1, 2);
+
+        assertContract.assertLt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            2000
+        );
+        
+        assertContract.assertLt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target))
+        );
+
+        vm.expectRevert("Not less than expected");
+        assertContract.assertLt(2, 1);
+
+        vm.expectRevert("Not less than expected");
+        assertContract.assertLt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1000
+        );
+        
+        vm.expectRevert("Not less than expected");
+        assertContract.assertLt(
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target))
+        );
+    }
+
+    function testGreaterThanOrEqual() public {
+        assertContract.assertGe(2, 1);
+
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1
+        );
+        
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target))
+        );
+
+        assertContract.assertGe(2, 2);
+
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1000
+        );
+        
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target))
+        );
+
+        vm.expectRevert("Not greater or equal to expected");
+        assertContract.assertGe(1, 2);
+
+        vm.expectRevert("Not greater or equal to expected");
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            2000
+        );
+        
+        vm.expectRevert("Not greater or equal to expected");
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target))
+        );
+    }
+
+    function testTwoLessThanOrEqualValues() public {
+        assertContract.assertLe(1, 2);
+
+        assertContract.assertLe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            2000
+        );
+        
+        assertContract.assertLe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target))
+        );
+
+        assertContract.assertLe(2, 2);
+        
+        assertContract.assertLe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1000
+        );
+        
+        assertContract.assertLe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target))
+        );
+
+        vm.expectRevert("Not less or equal to expected");
+        assertContract.assertLe(2, 1);
+
+        vm.expectRevert("Not less or equal to expected");
+        assertContract.assertLe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1
+        );
+
+        vm.expectRevert("Not less or equal to expected");
+        assertContract.assertLe(
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target))
+        );
     }
 }
