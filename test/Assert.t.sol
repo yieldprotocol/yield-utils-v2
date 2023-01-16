@@ -77,6 +77,59 @@ contract DeployedTest is Deployed {
         assertContract.assertEq(address(target), actualCalldata, actual);
     }
 
+    function testEqAbs() public {
+        assertContract.assertEqAbs(2, 1, 1);
+
+        vm.expectRevert("Higher than expected");
+        assertContract.assertEqAbs(3, 1, 1);
+
+        vm.expectRevert("Lower than expected");
+        assertContract.assertEqAbs(1, 3, 1);
+
+
+        assertContract.assertEqAbs(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1500,
+            500
+        );
+
+        assertContract.assertEqAbs(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            1000
+        );
+    }
+
+
+    function testEqRel() public {
+        assertContract.assertEqRel(2200, 2000, 1e17);
+
+        vm.expectRevert("Higher than expected");
+        assertContract.assertEqRel(2201, 2000, 1e17);
+
+        vm.expectRevert("Lower than expected");
+        assertContract.assertEqRel(1799, 2000, 1e17);
+
+
+        assertContract.assertEqRel(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1100,
+            1e17
+        );
+
+        assertContract.assertEqRel(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            1e18
+        );
+    }
+
     function testGreaterThan() public {
         assertContract.assertGt(2, 1);
         
@@ -197,7 +250,7 @@ contract DeployedTest is Deployed {
         );
     }
 
-    function testTwoLessThanOrEqualValues() public {
+    function testLessThanOrEqual() public {
         assertContract.assertLe(1, 2);
 
         assertContract.assertLe(

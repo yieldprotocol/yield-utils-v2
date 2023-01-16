@@ -149,7 +149,7 @@ contract Assert {
         public
     {
         (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        assertEqRel(abi.decode(actual, (uint)), expected, abs);
+        assertEqAbs(abi.decode(actual, (uint)), expected, abs);
     }
 
     /// @notice Compare two function outputs for equality, within an absolute tolerance
@@ -169,7 +169,7 @@ contract Assert {
     {
         (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
         (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
-        assertEqRel(abi.decode(actual, (uint)), abi.decode(expected, (uint)), abs);
+        assertEqAbs(abi.decode(actual, (uint)), abi.decode(expected, (uint)), abs);
     }
 
     /// --- GREATER THAN ---
