@@ -1,11 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "forge-std/console2.sol";
+
+import { RevertMsgExtractor } from "./RevertMsgExtractor.sol";
+
+library LimitedCall {
+    /// @dev Call a function with zero value and 5000 gas, and revert if the call fails.
+    function limitedCall(address target, bytes memory data) internal returns (bytes memory) {
+        (bool success, bytes memory output) = target.call{value: 0, gas: 5000}(data);
+        if (!success) {
+            revert(RevertMsgExtractor.getRevertMsg(output));
+        } else {
+            return output;
+        }
+    }
+}
 
 /// @notice Compare values on-chain, and revert if the comparison fails.
 /// This contract is useful to append checks at in a batch of transactions, so that
 /// if any of the checks fail, the entire batch of transactions will revert.
 contract Assert {
+    using LimitedCall for address;
 
     /// --- EQUALITY ---
 
@@ -48,7 +62,7 @@ contract Assert {
         bytes memory actualCalldata,
         uint expected
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
 
         assertEq(abi.decode(actual, (uint)), expected);
     }
@@ -64,8 +78,8 @@ contract Assert {
         address expectedTarget,
         bytes memory expectedCalldata
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
+        bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
 
         assertEq(abi.decode(actual, (uint)), abi.decode(expected, (uint)));
     }
@@ -97,7 +111,7 @@ contract Assert {
     )
         public
     {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
         assertEqRel(abi.decode(actual, (uint)), expected, rel);
     }
 
@@ -116,8 +130,8 @@ contract Assert {
     )
         public
     {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
+        bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
         assertEqRel(abi.decode(actual, (uint)), abi.decode(expected, (uint)), rel);
     }
 
@@ -148,7 +162,7 @@ contract Assert {
     )
         public
     {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
         assertEqAbs(abi.decode(actual, (uint)), expected, abs);
     }
 
@@ -167,8 +181,8 @@ contract Assert {
     )
         public
     {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
+        bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
         assertEqAbs(abi.decode(actual, (uint)), abi.decode(expected, (uint)), abs);
     }
 
@@ -193,8 +207,7 @@ contract Assert {
         bytes memory actualCalldata,
         uint expected
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
         assertGt(abi.decode(actual, (uint)), expected);
     }
 
@@ -209,8 +222,8 @@ contract Assert {
         address expectedTarget,
         bytes memory expectedCalldata
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
+        bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
 
         assertGt(abi.decode(actual, (uint)), abi.decode(expected, (uint)));
     }
@@ -236,8 +249,7 @@ contract Assert {
         bytes memory actualCalldata,
         uint expected
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
         assertLt(abi.decode(actual, (uint)), expected);
     }
 
@@ -252,9 +264,8 @@ contract Assert {
         address expectedTarget,
         bytes memory expectedCalldata
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
-
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
+        bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
         assertLt(abi.decode(actual, (uint)), abi.decode(expected, (uint)));
     }
 
@@ -279,8 +290,7 @@ contract Assert {
         bytes memory actualCalldata,
         uint expected
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
         assertGe(abi.decode(actual, (uint)), expected);
     }
 
@@ -295,9 +305,8 @@ contract Assert {
         address expectedTarget,
         bytes memory expectedCalldata
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
-
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
+        bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
         assertGe(abi.decode(actual, (uint)), abi.decode(expected, (uint)));
     }
 
@@ -322,8 +331,7 @@ contract Assert {
         bytes memory actualCalldata,
         uint expected
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
         assertLe(abi.decode(actual, (uint)), expected);
     }
 
@@ -338,9 +346,8 @@ contract Assert {
         address expectedTarget,
         bytes memory expectedCalldata
     ) public {
-        (, bytes memory actual) = actualTarget.call{value: 0}(actualCalldata);
-        (, bytes memory expected) = expectedTarget.call{value: 0}(expectedCalldata);
-
+        bytes memory actual = actualTarget.limitedCall(actualCalldata);
+        bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
         assertLe(abi.decode(actual, (uint)), abi.decode(expected, (uint)));
     }
 }
