@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Audit: https://hackmd.io/@devtooligan/YieldEmergencyBrakeSecurityReview2022-10-11
+// Audit: https://hackmd.io/@devtooligan/YieldEmergencyBrakeSecurityReview2022-12-201
 
 pragma solidity ^0.8.0;
 import "../access/AccessControl.sol";
