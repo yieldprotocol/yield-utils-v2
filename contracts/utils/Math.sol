@@ -114,4 +114,9 @@ library WMath {
             }
         }
     }
+
+    /// @dev Divide an amount by a fixed point factor with 27 decimals
+    function rdiv(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        z = (x * 1e27) / y;
+    }
 }
