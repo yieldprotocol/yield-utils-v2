@@ -3,20 +3,20 @@ pragma solidity ^0.8.0;
 
 import "ds-test/test.sol";
 
-import "contracts/math/WPow.sol";
+import "contracts/utils/Math.sol";
 
 contract FixedPointMathLibTest is DSTest {
     // test a couple of concrete cases
     function testWPow() public {
-        assertEq(WPow.wpow(2e18, 2), 4e18);
-        assertEq(WPow.wpow(2e18, 4), 16e18);
+        assertEq(Math.wpow(2e18, 2), 4e18);
+        assertEq(Math.wpow(2e18, 4), 16e18);
 
-        assertEq(WPow.wpow(0, 0), 1e18);
-        assertEq(WPow.wpow(0, 1), 0);
-        assertEq(WPow.wpow(0, 10), 0);
+        assertEq(Math.wpow(0, 0), 1e18);
+        assertEq(Math.wpow(0, 1), 0);
+        assertEq(Math.wpow(0, 10), 0);
 
-        assertEq(WPow.wpow(1, 0), 1e18);
-        assertEq(WPow.wpow(1e18, 0), 1e18);
+        assertEq(Math.wpow(1, 0), 1e18);
+        assertEq(Math.wpow(1e18, 0), 1e18);
     }
 
     // helper method
@@ -43,7 +43,7 @@ contract FixedPointMathLibTest is DSTest {
                 }
             }
         }
-        uint256 result = WPow.wpow(x, n);
+        uint256 result = Math.wpow(x, n);
         uint256 distance = (result > expected)
             ? result - expected
             : expected - result;

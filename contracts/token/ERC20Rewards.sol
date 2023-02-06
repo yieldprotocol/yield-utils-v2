@@ -6,8 +6,7 @@ import "./ERC20Permit.sol";
 import "../access/AccessControl.sol";
 import "../utils/RevertMsgExtractor.sol";
 import "../token/MinimalTransferHelper.sol";
-import "../cast/CastU256U128.sol";
-import "../cast/CastU256U32.sol";
+import "../utils/Cast.sol";
 
 
 /// @dev A token inheriting from ERC20Rewards will reward token holders with a rewards token.
@@ -15,8 +14,7 @@ import "../cast/CastU256U32.sol";
 /// by the size of their holdings.
 contract ERC20Rewards is AccessControl, ERC20Permit {
     using MinimalTransferHelper for IERC20;
-    using CastU256U32 for uint256;
-    using CastU256U128 for uint256;
+    using Cast for uint256;
 
     event RewardsTokenSet(IERC20 token);
     event RewardsSet(uint32 start, uint32 end, uint256 rate);
