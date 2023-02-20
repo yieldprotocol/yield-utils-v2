@@ -4,8 +4,8 @@ pragma solidity >=0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "../contracts/token/IERC20.sol";
-import { RestrictedERC20Mock } from "../contracts/mocks/RestrictedERC20Mock.sol";
+import "../src/token/IERC20.sol";
+import { RestrictedERC20Mock } from "../src/mocks/RestrictedERC20Mock.sol";
 import { TestExtensions } from "./utils/TestExtensions.sol";
 import { TestConstants } from "./utils/TestConstants.sol";
 

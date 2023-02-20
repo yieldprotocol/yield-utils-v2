@@ -4,8 +4,8 @@ pragma solidity >=0.8.13;
 import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
-import "../contracts/utils/Timelock.sol";
-import { ERC20Mock } from "../contracts/mocks/ERC20Mock.sol";
+import "../src/utils/Timelock.sol";
+import { ERC20Mock } from "../src/mocks/ERC20Mock.sol";
 import { TestExtensions } from "./utils/TestExtensions.sol";
 import { TestConstants } from "./utils/TestConstants.sol";
 
@@ -255,12 +255,13 @@ contract AfterETATest is afterETA {
     }
 
     function testExecuteWithValue() public {
+        uint256 otherBalance = address(other).balance;
         vm.deal(address(timelock), 1);
         vm.prank(executor);
         timelock.execute(proposalWithValue);
 
         // Check that the proposal was executed
-        assertEq(address(other).balance, 1);
+        assertEq(address(other).balance, otherBalance + 1);
     }
 
     function testExecuteSetDelay() public {

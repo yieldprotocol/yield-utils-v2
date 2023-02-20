@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Taken from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/IERC20Metadata.sol
+// Taken from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/src/token/ERC20/extensions/IERC20Metadata.sol
 
 pragma solidity ^0.8.0;
 

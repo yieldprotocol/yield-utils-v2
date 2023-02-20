@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 library Math {
-    // Taken from https://github.com/usmfum/USM/blob/master/contracts/WadMath.sol
+    // Taken from https://github.com/usmfum/USM/blob/master/src/WadMath.sol
     /// @dev Multiply an amount by a fixed point factor with 18 decimals, rounds down.
     function wmul(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = x * y;
@@ -11,7 +11,7 @@ library Math {
         }
     }
 
-    // Taken from https://github.com/usmfum/USM/blob/master/contracts/WadMath.sol
+    // Taken from https://github.com/usmfum/USM/blob/master/src/WadMath.sol
     /// @dev Multiply x and y, with y being fixed point. If both are integers, the result is a fixed point factor. Rounds up.
     function wmulup(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = x * y + 1e18 - 1; // Rounds up.  So (again imagining 2 decimal places):
@@ -20,13 +20,13 @@ library Math {
         } // 383 (3.83) * 235 (2.35) -> 90005 (9.0005), + 99 (0.0099) -> 90104, / 100 -> 901 (9.01).
     }
 
-    // Taken from https://github.com/usmfum/USM/blob/master/contracts/WadMath.sol
+    // Taken from https://github.com/usmfum/USM/blob/master/src/WadMath.sol
     /// @dev Divide an amount by a fixed point factor with 18 decimals
     function wdiv(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = (x * 1e18) / y;
     }
 
-    // Taken from https://github.com/usmfum/USM/blob/master/contracts/WadMath.sol
+    // Taken from https://github.com/usmfum/USM/blob/master/src/WadMath.sol
     /// @dev Divide x and y, with y being fixed point. If both are integers, the result is a fixed point factor. Rounds up.
     function wdivup(uint256 x, uint256 y) internal pure returns (uint256 z) {
         z = x * 1e18 + y; // 101 (1.01) / 1000 (10) -> (101 * 100 + 1000 - 1) / 1000 -> 11 (0.11 = 0.101 rounded up).

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Taken from https://github.com/Uniswap/uniswap-lib/blob/master/contracts/libraries/TransferHelper.sol
+// Taken from https://github.com/Uniswap/uniswap-lib/blob/master/src/libraries/TransferHelper.sol
 pragma solidity ^0.8.0;
 
 import "./IERC20.sol";

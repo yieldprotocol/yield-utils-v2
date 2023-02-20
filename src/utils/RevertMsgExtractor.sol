@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Taken from https://github.com/sushiswap/BoringSolidity/blob/441e51c0544cf2451e6116fe00515e71d7c42e2c/contracts/BoringBatchable.sol
+// Taken from https://github.com/sushiswap/BoringSolidity/blob/441e51c0544cf2451e6116fe00515e71d7c42e2c/src/BoringBatchable.sol
 
 pragma solidity >=0.6.0;
 
