@@ -1,46 +1,20 @@
 {
   "name": "@yield-protocol/utils-v2",
-  "version": "2.6.9-rc.1",
+  "version": "2.6.10",
   "description": "Yield v2 utility contracts",
   "author": "Yield Inc.",
   "files": [
     "contracts",
-    "!contracts/mocks",
-    "dist"
+    "!contracts/mocks"
   ],
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
   "scripts": {
     "prepublishOnly": "npx tsdx build --tsconfig ./tsconfig-publish.json"
   },
   "devDependencies": {
-    "@ethersproject/providers": "5.0.15",
-    "@nomiclabs/hardhat-ethers": "^2.0.1",
-    "@nomiclabs/hardhat-etherscan": "^2.1.0",
-    "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@truffle/hdwallet-provider": "^1.0.40",
-    "@typechain/ethers-v5": "^10.0.0",
-    "@typechain/hardhat": "^6.0.0",
-    "@types/mocha": "^8.0.0",
-    "chai": "4.2.0",
-    "erc3156": "^0.4.8",
-    "ethereum-waffle": "^3.2.2",
-    "hardhat": "2.9.1",
-    "hardhat-abi-exporter": "^2.0.3",
-    "hardhat-contract-sizer": "^2.0.3",
-    "hardhat-deploy": "^0.7.0-beta.44",
-    "hardhat-gas-reporter": "^1.0.3",
-    "mocha": "^7.1.0",
-    "prettier": "^2.0.5",
-    "solhint": "^3.3.3",
-    "solidity-coverage": "^0.7.14",
     "ts-node": "^8.10.2",
     "tsdx": "^0.14.1",
     "typechain": "^8.0.0",
     "typescript": "^4.6.3"
-  },
-  "dependencies": {
-    "ethereumjs-util": "^7.0.8"
   },
   "license": "GPL-3.0-or-later"
 }

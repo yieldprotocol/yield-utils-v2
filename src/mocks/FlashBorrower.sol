@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "../token/IERC20.sol";
-import "erc3156/contracts/interfaces/IERC3156FlashBorrower.sol";
-import "erc3156/contracts/interfaces/IERC3156FlashLender.sol";
+import "lib/ERC3156/contracts/interfaces/IERC3156FlashBorrower.sol";
+import "lib/ERC3156/contracts/interfaces/IERC3156FlashLender.sol";
 
 
 contract FlashBorrower is IERC3156FlashBorrower {
