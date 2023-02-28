@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import { RevertMsgExtractor } from "./RevertMsgExtractor.sol";
 
 library LimitedCall {
-    /// @dev Call a function with zero value and 5000 gas, and revert if the call fails.
+    /// @dev Call a function with zero value, and revert if the call fails.
     function limitedCall(address target, bytes memory data) internal returns (bytes memory) {
-        (bool success, bytes memory output) = target.call{value: 0, gas: 5000}(data);
+        (bool success, bytes memory output) = target.call{value: 0}(data);
         if (!success) {
             revert(RevertMsgExtractor.getRevertMsg(output));
         } else {
