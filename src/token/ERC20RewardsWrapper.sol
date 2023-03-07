@@ -7,9 +7,9 @@ import { TransferHelper } from "./TransferHelper.sol";
 
 /**
  * @dev This ERC20 tokenized vault overcomes the ERC20Rewards limitation of not being able to change the rewards token.
- * A permissioned function allows to mint shares to an address, if the asset is set.
- * A permissioned function allows to set or change the asset. If changing the asset, any old funds are transferred out.
- * When changing the asset, the caller may consider keeping the value of teh assets held constant.
+ * A permissioned function allows to mint shares to an address.
+ * A permissioned function allows to set or change the asset.
+ * When changing the asset, the caller may consider keeping the price per share constant.
  * A permissioned function allows to extract any tokens except the asset to any address.
  * On transfer, the token is burned and the recipient receives his share of assets.
  * Two helper functions allow to convert between assets and shares.
@@ -69,7 +69,7 @@ contract ERC20RewardsWrapper is ERC20, AccessControl() {
     }
 
     /// @dev On transfer, the token is burned and the recipient receives his share of assets.
-    /// @notice If the asset is not a valid ERC20, the transfer will fail.
+    /// @notice If the asset is not a valid ERC20, the transfer may fail.
     function _transfer(address sender, address recipient, uint256 shares) internal virtual override returns (bool) {
         uint assetAmount = asset.balanceOf(address(this)) * shares / _totalSupply;
         _burn(sender, shares);
