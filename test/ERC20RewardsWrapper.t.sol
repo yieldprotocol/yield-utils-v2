@@ -60,7 +60,7 @@ contract DeployedTest is Deployed {
         emit AssetSet(token);
 
         vm.prank(admin);
-        vault.set(token, address(0));
+        vault.set(token);
 
         assertEq(address(vault.asset()), address(token));
     }
@@ -73,12 +73,6 @@ contract DeployedTest is Deployed {
     function testConvertToAssetsRevertsIfAssetNotSet() public {
         vm.expectRevert("Asset not set");
         vault.convertToAssets(0);
-    }
-
-    function testMintRevertsIfAssetNotSet() public {
-        vm.expectRevert("Asset not set");
-        vm.prank(admin);
-        vault.mint(address(0), 0);
     }
 
     function testSkim(address to, uint amount) public {
@@ -96,7 +90,7 @@ contract DeployedTest is Deployed {
 
     function testSetRevertIfNotAuth() public {
         vm.expectRevert("Access denied");
-        vault.set(asset, address(0));
+        vault.set(asset);
     }
 
     function testMintRevertIfNotAuth() public {
@@ -108,6 +102,10 @@ contract DeployedTest is Deployed {
         vm.expectRevert("Access denied");
         vault.skim(asset, address(0));
     }
+
+    function testTotalAssetsIfNotSet() public {
+        assertEq(vault.totalAssets(), 0);
+    }
 }
 
 abstract contract WithAsset is Deployed {
@@ -115,7 +113,7 @@ abstract contract WithAsset is Deployed {
         super.setUp();
 
         vm.prank(admin);
-        vault.set(asset, address(0));
+        vault.set(asset);
     }
 }
 
@@ -126,12 +124,6 @@ contract WithAssetTest is WithAsset {
 
     function testConvertToAssetsIfZero() public {
         assertEq(vault.convertToAssets(0), 0);
-    }
-
-    function testMintRevertIfNotEnoughAssets() public {
-        vm.expectRevert("Not enough assets");
-        vm.prank(admin);
-        vault.mint(address(0), 1);
     }
 
     function testSkimRevertForAsset() public {
@@ -161,25 +153,14 @@ contract WithFundsTest is WithFunds {
     }
 
     function testSetAgain() public {
+        ERC20 token = ERC20(address(new ERC20Mock("Other Token", "OTH")));
         vm.expectEmit(true, false, false, false);
-        emit AssetSet(asset);
-
-        uint assetAmount = asset.balanceOf(address(vault));
+        emit AssetSet(token);
 
         vm.prank(admin);
-        vault.set(asset, user);
+        vault.set(token);
 
-        assertEq(address(vault.asset()), address(asset));
-        assertEq(vault.asset().balanceOf(user), assetAmount);
-    }
-
-    function testMintRevertsIfNotMultipleOfAssets() public {
-        uint assetAmount = asset.balanceOf(address(vault));
-        uint sharesAmount = assetAmount / assetUnit;
-
-        vm.expectRevert("Not a multiple of assets");
-        vm.prank(admin);
-        vault.mint(address(0), sharesAmount + 1);
+        assertEq(address(vault.asset()), address(token));
     }
 
     function testMint() public {
