@@ -77,17 +77,17 @@ contract DeployedTest is Deployed {
     function testEqAbs() public {
         assertContract.assertEqAbs(2, 1, 1);
 
-        vm.expectRevert("Higher than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqAbs(3, 1, 1);
 
-        vm.expectRevert("Lower than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqAbs(1, 3, 1);
 
-        vm.expectRevert("Higher than expected");
-        assertContract.assertEqAbs(3, 1, 1, "Higher than expected", "Lower than expected");
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqAbs(3, 1, 1, "Not within expected range");
 
-        vm.expectRevert("Lower than expected");
-        assertContract.assertEqAbs(1, 3, 1, "Higher than expected", "Lower than expected");
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqAbs(1, 3, 1, "Not within expected range");
 
 
         assertContract.assertEqAbs(
@@ -110,17 +110,17 @@ contract DeployedTest is Deployed {
     function testEqRel() public {
         assertContract.assertEqRel(2200, 2000, 1e17);
 
-        vm.expectRevert("Higher than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqRel(2201, 2000, 1e17);
 
-        vm.expectRevert("Lower than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqRel(1799, 2000, 1e17);
 
-        vm.expectRevert("Higher than expected");
-        assertContract.assertEqRel(2201, 2000, 1e17, "Higher than expected", "Lower than expected");
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqRel(2201, 2000, 1e17, "Not within expected range");
 
-        vm.expectRevert("Lower than expected");
-        assertContract.assertEqRel(1799, 2000, 1e17, "Higher than expected", "Lower than expected");
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqRel(1799, 2000, 1e17, "Not within expected range");
 
         assertContract.assertEqRel(
             address(target),

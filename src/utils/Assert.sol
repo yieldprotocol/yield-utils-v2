@@ -167,27 +167,26 @@ contract Assert {
     /// @param actual The value we are comparing
     /// @param expected The value we want to obtain
     /// @param rel The relative tolerance for the equality, with 18 decimals of precision. 10e16 is ±1%
-    function _assertEqRel(bytes memory  actual, bytes memory expected, uint rel, string memory errmsg1, string memory errmsg2)
+    /// @param errmsg The error message to revert with if the comparison fails
+    function _assertEqRel(bytes memory  actual, bytes memory expected, uint rel, string memory errmsg)
         internal
         pure
     {
         uint actual_ = abi.decode(actual, (uint));
         uint expected_ = abi.decode(expected, (uint));
-        require(actual_ <= expected_ * (1e18 + rel) / 1e18, errmsg1);
-        require(actual_ >= expected_ * (1e18 - rel) / 1e18, errmsg2);
+        require(actual_ <= expected_ * (1e18 + rel) / 1e18 && actual_ >= expected_ * (1e18 - rel) / 1e18, errmsg);
     }
 
     /// @notice Compare two uint for equality, within a relative tolerance
     /// @param actual The value we are comparing
     /// @param expected The value we want to obtain
     /// @param rel The relative tolerance for the equality, with 18 decimals of precision. 10e16 is ±1%
-    /// @param errmsg1 The error message to revert with if the comparison fails high
-    /// @param errmsg2 The error message to revert with if the comparison fails low
-    function assertEqRel(uint actual, uint expected, uint rel, string memory errmsg1, string memory errmsg2)
+    /// @param errmsg The error message to revert with if the comparison fails
+    function assertEqRel(uint actual, uint expected, uint rel, string memory errmsg)
         public
         pure
     {
-        _assertEqRel(abi.encode(actual), abi.encode(expected), rel, errmsg1, errmsg2);
+        _assertEqRel(abi.encode(actual), abi.encode(expected), rel, errmsg);
     }
 
     /// @notice Compare two uint for equality, within a relative tolerance
@@ -198,7 +197,7 @@ contract Assert {
         public
         pure
     {
-        _assertEqRel(abi.encode(actual), abi.encode(expected), rel, "Higher than expected", "Lower than expected");
+        _assertEqRel(abi.encode(actual), abi.encode(expected), rel, "Not within expected range");
     }
 
     /// @notice Compare a function output to an expected value for equality, within a relative tolerance
@@ -215,7 +214,7 @@ contract Assert {
         public
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
-        _assertEqRel(actual, abi.encode(expected), rel, "Higher than expected", "Lower than expected");
+        _assertEqRel(actual, abi.encode(expected), rel, "Not within expected range");
     }
 
     /// @notice Compare a function output to an expected value for equality, within a relative tolerance
@@ -223,20 +222,18 @@ contract Assert {
     /// @param actualCalldata The encoded function call that will provide the value we are comparing
     /// @param expected The value we want to obtain
     /// @param rel The relative tolerance for the equality, with 18 decimals of precision. 10e16 is ±1%
-    /// @param errmsg1 The error message to revert with if the comparison fails high
-    /// @param errmsg2 The error message to revert with if the comparison fails low
+    /// @param errmsg The error message to revert with if the comparison fails
     function assertEqRel(
         address actualTarget,
         bytes memory actualCalldata,
         uint expected,
         uint256 rel,
-        string memory errmsg1,
-        string memory errmsg2
+        string memory errmsg
     )
         public
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
-        _assertEqRel(actual, abi.encode(expected), rel, errmsg1, errmsg2);
+        _assertEqRel(actual, abi.encode(expected), rel, errmsg);
     }
 
     /// @notice Compare two function outputs for equality, within a relative tolerance
@@ -256,7 +253,7 @@ contract Assert {
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
         bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
-        _assertEqRel(actual, expected, rel, "Higher than expected", "Lower than expected");
+        _assertEqRel(actual, expected, rel, "Not within expected range");
     }
 
     /// @notice Compare two function outputs for equality, within a relative tolerance
@@ -265,22 +262,20 @@ contract Assert {
     /// @param expectedTarget The contract that will provide the value we want to obtain
     /// @param expectedCalldata The encoded function call that will provide the value we want to obtain
     /// @param rel The relative tolerance for the equality, with 18 decimals of precision. 10e16 is ±1%
-    /// @param errmsg1 The error message to revert with if the comparison fails high
-    /// @param errmsg2 The error message to revert with if the comparison fails low
+    /// @param errmsg The error message to revert with if the comparison fails
     function assertEqRel(
         address actualTarget,
         bytes memory actualCalldata,
         address expectedTarget,
         bytes memory expectedCalldata,
         uint256 rel,
-        string memory errmsg1,
-        string memory errmsg2
+        string memory errmsg
     )
         public
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
         bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
-        _assertEqRel(actual, expected, rel, errmsg1, errmsg2);
+        _assertEqRel(actual, expected, rel, errmsg);
     }
 
     /// --- ABSOLUTE EQUALITY ---
@@ -289,14 +284,13 @@ contract Assert {
     /// @param actual The value we are comparing
     /// @param expected The value we want to obtain
     /// @param abs The absolute tolerance for equality, with 18 decimals of precision.
-    function _assertEqAbs(bytes memory actual, bytes memory expected, uint abs, string memory errmsg1, string memory errmsg2)
+    function _assertEqAbs(bytes memory actual, bytes memory expected, uint abs, string memory errmsg)
         public
         pure
     {
         uint actual_ = abi.decode(actual, (uint));
         uint expected_ = abi.decode(expected, (uint));
-        require(actual_ <= expected_ + abs, errmsg1);
-        require(actual_ >= expected_ - abs, errmsg2);
+        require(actual_ <= expected_ + abs && actual_ >= expected_ - abs, errmsg);
     }
 
     /// @notice Compare two uint for equality, within an absolute tolerance
@@ -307,20 +301,19 @@ contract Assert {
         public
         pure
     {
-        _assertEqAbs(abi.encode(actual), abi.encode(expected), abs, "Higher than expected", "Lower than expected");
+        _assertEqAbs(abi.encode(actual), abi.encode(expected), abs, "Not within expected range");
     }
 
     /// @notice Compare two uint for equality, within an absolute tolerance
     /// @param actual The value we are comparing
     /// @param expected The value we want to obtain
     /// @param abs The absolute tolerance for equality, with 18 decimals of precision.
-    /// @param errmsg1 The error message to revert with if the comparison fails high
-    /// @param errmsg2 The error message to revert with if the comparison fails low
-    function assertEqAbs(uint actual, uint expected, uint abs, string memory errmsg1, string memory errmsg2)
+    /// @param errmsg The error message to revert with if the comparison fails
+    function assertEqAbs(uint actual, uint expected, uint abs, string memory errmsg)
         public
         pure
     {
-        _assertEqAbs(abi.encode(actual), abi.encode(expected), abs, errmsg1, errmsg2);
+        _assertEqAbs(abi.encode(actual), abi.encode(expected), abs, errmsg);
     }
 
     /// @notice Compare a function output to an expected value for equality, within an absolute tolerance
@@ -337,7 +330,7 @@ contract Assert {
         public
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
-        _assertEqAbs(actual, abi.encode(expected), abs, "Higher than expected", "Lower than expected");
+        _assertEqAbs(actual, abi.encode(expected), abs, "Not within expected range");
     }
 
     /// @notice Compare a function output to an expected value for equality, within an absolute tolerance
@@ -345,20 +338,18 @@ contract Assert {
     /// @param actualCalldata The encoded function call that will provide the value we are comparing
     /// @param expected The value we want to obtain
     /// @param abs The absolute tolerance for equality, with 18 decimals of precision.
-    /// @param errmsg1 The error message to revert with if the comparison fails high
-    /// @param errmsg2 The error message to revert with if the comparison fails low
+    /// @param errmsg The error message to revert with if the comparison fails
     function assertEqAbs(
         address actualTarget,
         bytes memory actualCalldata,
         uint expected,
         uint256 abs,
-        string memory errmsg1,
-        string memory errmsg2
+        string memory errmsg
     )
         public
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
-        _assertEqAbs(actual, abi.encode(expected), abs, errmsg1, errmsg2);
+        _assertEqAbs(actual, abi.encode(expected), abs, errmsg);
     }
 
     /// @notice Compare two function outputs for equality, within an absolute tolerance
@@ -378,7 +369,7 @@ contract Assert {
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
         bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
-        _assertEqAbs(actual, expected, abs, "Higher than expected", "Lower than expected");
+        _assertEqAbs(actual, expected, abs, "Not within expected range");
     }
 
     /// @notice Compare two function outputs for equality, within an absolute tolerance
@@ -387,22 +378,20 @@ contract Assert {
     /// @param expectedTarget The contract that will provide the value we want to obtain
     /// @param expectedCalldata The encoded function call that will provide the value we want to obtain
     /// @param abs The absolute tolerance for equality, with 18 decimals of precision.
-    /// @param errmsg1 The error message to revert with if the comparison fails high
-    /// @param errmsg2 The error message to revert with if the comparison fails low
+    /// @param errmsg The error message to revert with if the comparison fails
     function assertEqAbs(
         address actualTarget,
         bytes memory actualCalldata,
         address expectedTarget,
         bytes memory expectedCalldata,
         uint256 abs,
-        string memory errmsg1,
-        string memory errmsg2
+        string memory errmsg
     )
         public
     {
         bytes memory actual = actualTarget.limitedCall(actualCalldata);
         bytes memory expected = expectedTarget.limitedCall(expectedCalldata);
-        _assertEqAbs(actual, expected, abs, errmsg1, errmsg2);
+        _assertEqAbs(actual, expected, abs, errmsg);
     }
     /// --- GREATER THAN ---
 
