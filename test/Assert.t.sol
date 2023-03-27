@@ -18,23 +18,11 @@ abstract contract Deployed is Test, TestExtensions, TestConstants {
     Assert public assertContract;
     ERC20Mock public target;
 
-    function setUpMock() public {
+    function setUp() public virtual {
         assertContract = new Assert();
         target = new ERC20Mock("Test", "TST");
         target.mint(address(this), 1000);
         target.mint(address(target), 1000);
-    }
-
-    function setUpHarness(string memory network) public {
-        setUpMock(); // TODO: Think about a test harness.
-    }
-
-    function setUp() public virtual {
-        string memory network = vm.envString(NETWORK);
-        if (!equal(network, LOCALHOST)) vm.createSelectFork(network);
-
-        if (vm.envBool(MOCK)) setUpMock();
-        else setUpHarness(network);
 
         vm.label(address(target), "target");
     }
@@ -49,6 +37,9 @@ contract DeployedTest is Deployed {
     function testTwoUnequalValues() public {
         vm.expectRevert("Not equal to expected");
         assertContract.assertEq(1, 2);
+
+        vm.expectRevert("Not equal");
+        assertContract.assertEq(1, 2, "Not equal");
     }
 
     function testTwoEqualCalls() public {
@@ -62,6 +53,9 @@ contract DeployedTest is Deployed {
         bytes memory expectedCalldata = abi.encodeWithSelector(target.balanceOf.selector, address(target));
         vm.expectRevert("Not equal to expected");
         assertContract.assertEq(address(target), actualCalldata, address(target), expectedCalldata);
+
+        vm.expectRevert("Not equal");
+        assertContract.assertEq(address(target), actualCalldata, address(target), expectedCalldata, "Not equal");
     }
 
     function testCallAndValue() public {
@@ -75,16 +69,25 @@ contract DeployedTest is Deployed {
         uint actual = target.balanceOf(address(target));
         vm.expectRevert("Not equal to expected");
         assertContract.assertEq(address(target), actualCalldata, actual);
+
+        vm.expectRevert("Not equal");
+        assertContract.assertEq(address(target), actualCalldata, actual, "Not equal");
     }
 
     function testEqAbs() public {
         assertContract.assertEqAbs(2, 1, 1);
 
-        vm.expectRevert("Higher than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqAbs(3, 1, 1);
 
-        vm.expectRevert("Lower than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqAbs(1, 3, 1);
+
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqAbs(3, 1, 1, "Not within expected range");
+
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqAbs(1, 3, 1, "Not within expected range");
 
 
         assertContract.assertEqAbs(
@@ -107,12 +110,17 @@ contract DeployedTest is Deployed {
     function testEqRel() public {
         assertContract.assertEqRel(2200, 2000, 1e17);
 
-        vm.expectRevert("Higher than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqRel(2201, 2000, 1e17);
 
-        vm.expectRevert("Lower than expected");
+        vm.expectRevert("Not within expected range");
         assertContract.assertEqRel(1799, 2000, 1e17);
 
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqRel(2201, 2000, 1e17, "Not within expected range");
+
+        vm.expectRevert("Not within expected range");
+        assertContract.assertEqRel(1799, 2000, 1e17, "Not within expected range");
 
         assertContract.assertEqRel(
             address(target),
@@ -150,6 +158,9 @@ contract DeployedTest is Deployed {
         assertContract.assertGt(1, 2);
 
         vm.expectRevert("Not greater than expected");
+        assertContract.assertGt(1, 2, "Not greater than expected");
+
+        vm.expectRevert("Not greater than expected");
         assertContract.assertGt(
             address(target),
             abi.encodeWithSelector(target.balanceOf.selector, address(target)),
@@ -159,9 +170,25 @@ contract DeployedTest is Deployed {
         vm.expectRevert("Not greater than expected");
         assertContract.assertGt(
             address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target), "Not greater than expected"),
+            2000
+        );
+
+        vm.expectRevert("Not greater than expected");
+        assertContract.assertGt(
+            address(target),
             abi.encodeWithSelector(target.balanceOf.selector, address(target)),
             address(target),
             abi.encodeWithSelector(target.totalSupply.selector, address(target))
+        );
+
+        vm.expectRevert("Not greater than expected");
+        assertContract.assertGt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            "Not greater than expected"
         );
     }
 
@@ -185,18 +212,38 @@ contract DeployedTest is Deployed {
         assertContract.assertLt(2, 1);
 
         vm.expectRevert("Not less than expected");
+        assertContract.assertLt(2, 1, "Not less than expected");
+
+        vm.expectRevert("Not less than expected");
         assertContract.assertLt(
             address(target),
             abi.encodeWithSelector(target.balanceOf.selector, address(target)),
             1000
         );
-        
+         
+        vm.expectRevert("Not less than expected");
+        assertContract.assertLt(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1000,
+            "Not less than expected"
+        );
+
         vm.expectRevert("Not less than expected");
         assertContract.assertLt(
             address(target),
             abi.encodeWithSelector(target.totalSupply.selector, address(target)),
             address(target),
             abi.encodeWithSelector(target.balanceOf.selector, address(target))
+        );
+
+        vm.expectRevert("Not less than expected");
+        assertContract.assertLt(
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            "Not less than expected"
         );
     }
 
@@ -235,10 +282,21 @@ contract DeployedTest is Deployed {
         assertContract.assertGe(1, 2);
 
         vm.expectRevert("Not greater or equal to expected");
+        assertContract.assertGe(1, 2, "Not greater or equal to expected");
+
+        vm.expectRevert("Not greater or equal to expected");
         assertContract.assertGe(
             address(target),
             abi.encodeWithSelector(target.balanceOf.selector, address(target)),
             2000
+        );
+
+        vm.expectRevert("Not greater or equal to expected");
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            2000,
+            "Not greater or equal to expected"
         );
         
         vm.expectRevert("Not greater or equal to expected");
@@ -247,6 +305,15 @@ contract DeployedTest is Deployed {
             abi.encodeWithSelector(target.balanceOf.selector, address(target)),
             address(target),
             abi.encodeWithSelector(target.totalSupply.selector, address(target))
+        );
+
+        vm.expectRevert("Not greater or equal to expected");
+        assertContract.assertGe(
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            "Not greater or equal to expected"
         );
     }
 
@@ -285,6 +352,9 @@ contract DeployedTest is Deployed {
         assertContract.assertLe(2, 1);
 
         vm.expectRevert("Not less or equal to expected");
+        assertContract.assertLe(2, 1, "Not less or equal to expected");
+
+        vm.expectRevert("Not less or equal to expected");
         assertContract.assertLe(
             address(target),
             abi.encodeWithSelector(target.balanceOf.selector, address(target)),
@@ -294,9 +364,26 @@ contract DeployedTest is Deployed {
         vm.expectRevert("Not less or equal to expected");
         assertContract.assertLe(
             address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            1,
+            "Not less or equal to expected"
+        );
+
+        vm.expectRevert("Not less or equal to expected");
+        assertContract.assertLe(
+            address(target),
             abi.encodeWithSelector(target.totalSupply.selector, address(target)),
             address(target),
             abi.encodeWithSelector(target.balanceOf.selector, address(target))
+        );
+
+        vm.expectRevert("Not less or equal to expected");
+        assertContract.assertLe(
+            address(target),
+            abi.encodeWithSelector(target.totalSupply.selector, address(target)),
+            address(target),
+            abi.encodeWithSelector(target.balanceOf.selector, address(target)),
+            "Not less or equal to expected"
         );
     }
 }
