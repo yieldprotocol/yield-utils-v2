@@ -8,7 +8,7 @@ import "../utils/Cast.sol";
 /// @dev TokenSwap is a contract that can be used swap tokens at a fixed rate, with
 /// the aim of completely replacing the supply of a token by the funds supplied to
 /// this contract. It is meant to be used as a token upgrade, when other mechanisms fail.
-contract TokenSwap is AccessControl() {
+contract TokenUpgrade is AccessControl() {
     using Cast for uint256;
     using TransferHelper for IERC20;
 
