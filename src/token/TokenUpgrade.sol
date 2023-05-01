@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.15;
 
+import "openzeppelin-contracts/utils/cryptography/MerkleProof.sol";
 import "./TransferHelper.sol";
 import "../access/AccessControl.sol";
 import "../utils/Cast.sol";
@@ -11,6 +12,8 @@ import "../utils/Cast.sol";
 contract TokenUpgrade is AccessControl() {
     using Cast for uint256;
     using TransferHelper for IERC20;
+
+    error NotInMerkleTree();
 
     event Registered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance, uint96 ratio);
     event Unregistered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance);
@@ -29,8 +32,13 @@ contract TokenUpgrade is AccessControl() {
         uint256 balance;     
     }
 
+    bytes32 immutable public merkleRoot;
     mapping (IERC20 => TokenIn) public tokensIn;
     mapping (IERC20 => TokenOut) public tokensOut;
+
+    constructor(bytes32 _merkleRoot) {
+        merkleRoot = _merkleRoot;
+    }
 
     /// @dev Register a token to be replaced, and the token to replace it with.
     /// The ratio is calculated as the funds of the replacement token divided by the supply of the token to be replaced.
@@ -106,13 +114,18 @@ contract TokenUpgrade is AccessControl() {
 
     /// @dev Swap a token for its replacement, at the registered ratio. The tokens must have been sent to the contract before this call.
     /// @param tokenIn_ The token to be replaced
-    function swap(IERC20 tokenIn_, address to) external {
+    function swap(IERC20 tokenIn_, address to, bytes32[] calldata proof) external {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
         require(address(tokenIn.reverse) != address(0), "TokenIn not registered");
         IERC20 tokenOut_ = tokenIn.reverse;
 
         uint256 tokenInAmount = tokenIn_.balanceOf(address(this)) - tokenIn.balance;
         uint256 tokenOutAmount = tokenInAmount * tokenIn.ratio / 1e18;
+
+        bytes32 leaf = keccak256(abi.encodePacked(to, tokenOutAmount));
+        bool isValidLeaf = MerkleProof.verify(proof, merkleRoot, leaf);
+        if (!isValidLeaf) revert NotInMerkleTree();
+
         tokensIn[tokenIn_].balance += tokenInAmount;
         tokensOut[tokenOut_].balance -= tokenOutAmount;
         
