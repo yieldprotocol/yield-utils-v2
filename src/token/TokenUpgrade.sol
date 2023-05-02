@@ -114,15 +114,15 @@ contract TokenUpgrade is AccessControl() {
 
     /// @dev Swap a token for its replacement, at the registered ratio. The tokens must have been sent to the contract before this call.
     /// @param tokenIn_ The token to be replaced
-    function swap(IERC20 tokenIn_, address to, bytes32[] calldata proof) external {
+    function swap(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof) external {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
         require(address(tokenIn.reverse) != address(0), "TokenIn not registered");
         IERC20 tokenOut_ = tokenIn.reverse;
 
-        uint256 tokenInAmount = tokenIn_.balanceOf(address(this)) - tokenIn.balance;
+        tokenIn_.safeTransferFrom(from, address(this), tokenInAmount);
         uint256 tokenOutAmount = tokenInAmount * tokenIn.ratio / 1e18;
 
-        bytes32 leaf = keccak256(abi.encodePacked(to, tokenOutAmount));
+        bytes32 leaf = keccak256(abi.encodePacked(from, tokenInAmount));
         bool isValidLeaf = MerkleProof.verify(proof, merkleRoot, leaf);
         if (!isValidLeaf) revert NotInMerkleTree();
 
