@@ -25,6 +25,7 @@ contract TokenUpgrade is AccessControl() {
         IERC20 reverse;
         uint96 ratio;
         uint256 balance;
+        bytes32 merkleRoot;
     }
 
     struct TokenOut {
@@ -32,20 +33,15 @@ contract TokenUpgrade is AccessControl() {
         uint256 balance;     
     }
 
-    bytes32 immutable public merkleRoot;
     mapping (IERC20 => TokenIn) public tokensIn;
     mapping (IERC20 => TokenOut) public tokensOut;
-
-    constructor(bytes32 _merkleRoot) {
-        merkleRoot = _merkleRoot;
-    }
 
     /// @dev Register a token to be replaced, and the token to replace it with.
     /// The ratio is calculated as the funds of the replacement token divided by the supply of the token to be replaced.
     /// The tokens used as a replacement must have been sent to the contract before this call.
     /// @param tokenIn_ The token to be replaced
     /// @param tokenOut_ The token to replace it with
-    function register(IERC20 tokenIn_, IERC20 tokenOut_) external auth {
+    function register(IERC20 tokenIn_, IERC20 tokenOut_, bytes32 merkleRoot_) external auth {
         require(address(tokenIn_) != address(tokenOut_), "Same token");
         require(address(tokensIn[tokenIn_].reverse) == address(0), "TokenIn already registered");
         require(address(tokensOut[tokenOut_].reverse) == address(0), "TokenOut already registered");
@@ -56,7 +52,8 @@ contract TokenUpgrade is AccessControl() {
         tokensIn[tokenIn_] = TokenIn(
             tokenOut_, 
             ratio,
-            tokenInBalance
+            tokenInBalance,
+            merkleRoot_
         );
         tokensOut[tokenOut_] = TokenOut(
             tokenIn_,
@@ -112,7 +109,7 @@ contract TokenUpgrade is AccessControl() {
         emit Recovered(token, recovered);
     }
 
-    /// @dev Swap a token for its replacement, at the registered ratio. The tokens must have been sent to the contract before this call.
+    /// @dev Swap a token for its replacement, at the registered ratio.
     /// @param tokenIn_ The token to be replaced
     function swap(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof) external {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
@@ -123,7 +120,7 @@ contract TokenUpgrade is AccessControl() {
         uint256 tokenOutAmount = tokenInAmount * tokenIn.ratio / 1e18;
 
         bytes32 leaf = keccak256(abi.encodePacked(from, tokenInAmount));
-        bool isValidLeaf = MerkleProof.verify(proof, merkleRoot, leaf);
+        bool isValidLeaf = MerkleProof.verify(proof, tokenIn.merkleRoot, leaf);
         if (!isValidLeaf) revert NotInMerkleTree();
 
         tokensIn[tokenIn_].balance += tokenInAmount;

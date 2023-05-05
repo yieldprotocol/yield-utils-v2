@@ -36,6 +36,11 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
     IERC20 public tokenOut;
     IERC20 public tokenOther;
     TokenUpgrade public tokenUpgrade;
+    // From generator config
+    address whitelisted = 0x185a4dc360CE69bDCceE33b3784B0282f7961aea;
+    bytes32 merkleRoot = 0xd0aa6a4e5b4e13462921d7518eebdb7b297a7877d6cfe078b0c318827392fb55;
+    bytes32[] proof;
+    bytes32[] invalidProof;
 
     address user;
     address other;
@@ -60,6 +65,11 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
         tokenUpgrade.grantRole(TokenUpgrade.extract.selector, admin);
         tokenUpgrade.grantRole(TokenUpgrade.recover.selector, admin);
 
+        proof = new bytes32[](1);
+        proof[0] = 0xceeae64152a2deaf8c661fccd5645458ba20261b16d2f6e090fe908b0ac9ca88;
+        invalidProof = new bytes32[](1);
+        invalidProof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
+
         vm.label(user, "user");
         vm.label(other, "other");
         vm.label(admin, "admin");
@@ -74,7 +84,7 @@ contract DeployedTest is DeployedState {
     function testRegisterRevertsOnSameToken() public {
         vm.expectRevert(bytes("Same token"));
         vm.prank(admin);
-        tokenUpgrade.register(tokenIn, tokenIn);
+        tokenUpgrade.register(tokenIn, tokenIn, merkleRoot);
     }
 
     function testUnregisterRevertsIfNotRegistered() public {
@@ -99,7 +109,7 @@ contract DeployedTest is DeployedState {
         // emit Registered(tokenIn, tokenOut, tokenInSupply, tokenOutSupply, ratio);
 
         vm.prank(admin);
-        tokenUpgrade.register(tokenIn, tokenOut);
+        tokenUpgrade.register(tokenIn, tokenOut, merkleRoot);
 
         ITokenUpgrade.TokenIn memory tokenIn_ = ITokenUpgrade(address(tokenUpgrade)).tokensIn(tokenIn);
         ITokenUpgrade.TokenOut memory tokenOut_ = ITokenUpgrade(address(tokenUpgrade)).tokensOut(tokenOut);
@@ -118,9 +128,10 @@ abstract contract RegisteredState is DeployedState {
         uint256 tokenInSupply = 100e18;
         uint256 tokenOutSupply = 101e18;
         ERC20Mock(address(tokenIn)).mint(user, tokenInSupply);
+        ERC20Mock(address(tokenIn)).mint(whitelisted, tokenInSupply);
         ERC20Mock(address(tokenOut)).mint(address(tokenUpgrade), tokenOutSupply);
         vm.prank(admin);
-        tokenUpgrade.register(tokenIn, tokenOut);
+        tokenUpgrade.register(tokenIn, tokenOut, merkleRoot);
     }
 }
 
@@ -130,14 +141,14 @@ contract RegisteredTest is RegisteredState {
     function testRegisterRevertsOnSameTokenIn() public {
         vm.expectRevert(bytes("TokenIn already registered"));
         vm.prank(admin);
-        tokenUpgrade.register(tokenIn, tokenOther);
+        tokenUpgrade.register(tokenIn, tokenOther, merkleRoot);
     }
 
     /// @dev Test you can't register the same token twice as tokenOut
     function testRegisterRevertsOnSameTokenOut() public {
         vm.expectRevert(bytes("TokenOut already registered"));
         vm.prank(admin);
-        tokenUpgrade.register(tokenOther, tokenOut);
+        tokenUpgrade.register(tokenOther, tokenOut, merkleRoot);
     }
 
     function testRecoverRevertsIfTokenIn() public {
@@ -154,28 +165,42 @@ contract RegisteredTest is RegisteredState {
 
     function testSwapRevertsIfNotRegistered() public {
         vm.expectRevert(bytes("TokenIn not registered"));
+        vm.prank(whitelisted);
+        tokenUpgrade.swap(tokenOther, whitelisted, whitelisted, 100e18, proof);
+    }
+
+    function testSwapRevertIfInvalidProof() public {
+        vm.prank(whitelisted);
+        tokenIn.approve(address(tokenUpgrade), 100e18);
+        vm.expectRevert(0xaf37a324); // error selector
+        tokenUpgrade.swap(tokenIn, whitelisted, whitelisted, 100e18, invalidProof);
+    }
+
+    function testSwapRevertOnInvalidSender() public {
         vm.prank(user);
-        tokenUpgrade.swap(tokenOther, other);
+        tokenIn.approve(address(tokenUpgrade), 100e18);
+        vm.expectRevert(0xaf37a324); // error selector
+        tokenUpgrade.swap(tokenIn, user, user, 100e18, proof);
     }
 
     function testSwap() public {
         ITokenUpgrade.TokenIn memory tokenIn_ = ITokenUpgrade(address(tokenUpgrade)).tokensIn(tokenIn);
         ITokenUpgrade.TokenOut memory tokenOut_ = ITokenUpgrade(address(tokenUpgrade)).tokensOut(tokenOut);
         
-        uint256 tokenInAmount = tokenIn.balanceOf(user) / 10;
+        uint256 tokenInAmount = tokenIn.balanceOf(whitelisted);
         assertGt(tokenInAmount, 0);
 
         uint256 expectedTokenInBalance = tokenIn_.balance + tokenInAmount;
         uint256 expectedTokenOut = tokenInAmount * tokenIn_.ratio / 1e18;
         uint256 expectedTokenOutBalance = tokenOut_.balance - expectedTokenOut;
 
-        vm.startPrank(user);
-        tokenIn.transfer(address(tokenUpgrade), tokenInAmount);
+        vm.startPrank(whitelisted);
+        tokenIn.approve(address(tokenUpgrade), 100e18);
 
         vm.expectEmit(true, true, true, true);
         emit Swapped(tokenIn, tokenOut, tokenInAmount, expectedTokenOut);
 
-        tokenUpgrade.swap(tokenIn, other);
+        tokenUpgrade.swap(tokenIn, whitelisted, other, 100e18, proof);
         vm.stopPrank();
 
         tokenIn_ = ITokenUpgrade(address(tokenUpgrade)).tokensIn(tokenIn);
@@ -206,13 +231,12 @@ abstract contract SwappedState is RegisteredState {
     function setUp() public virtual override {
         super.setUp();
         
-        uint256 tokenInAmount = tokenIn.balanceOf(user) / 10;
+        uint256 tokenInAmount = tokenIn.balanceOf(whitelisted);
         assertGt(tokenInAmount, 0);
 
-        vm.startPrank(user);
-        tokenIn.transfer(address(tokenUpgrade), tokenInAmount);
-
-        tokenUpgrade.swap(tokenIn, address(0));
+        vm.startPrank(whitelisted);
+        tokenIn.approve(address(tokenUpgrade), tokenInAmount);
+        tokenUpgrade.swap(tokenIn, whitelisted, address(0), tokenInAmount, proof);
         vm.stopPrank();
     }
 }
