@@ -46,6 +46,7 @@ contract TokenUpgrade is AccessControl() {
     /// The tokens used as a replacement must have been sent to the contract before this call.
     /// @param tokenIn_ The token to be replaced
     /// @param tokenOut_ The token to replace it with
+    /// @param merkleRoot_ the root of the merkle tree for tokenIn_
     function register(IERC20 tokenIn_, IERC20 tokenOut_, bytes32 merkleRoot_) external auth {
         if (address(tokenIn_) == address(tokenOut_)) revert SameToken(address(tokenIn_));
         if (address(tokensIn[tokenIn_].reverse) != address(0)) revert TokenInAlreadyRegistered(address(tokenIn_));
@@ -116,6 +117,10 @@ contract TokenUpgrade is AccessControl() {
 
     /// @dev Swap a token for its replacement, at the registered ratio.
     /// @param tokenIn_ The token to be replaced
+    /// @param from the owner of tokenIn_
+    /// @param to the receiver of tokenOut_
+    /// @param tokenInAmount The amount of tokenIn_ to swap
+    /// @param proof The merkle proof to verify the swap
     function swap(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof) external {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
         if (address(tokenIn.reverse) == address(0)) revert TokenInNotRegistered(address(tokenIn_));
