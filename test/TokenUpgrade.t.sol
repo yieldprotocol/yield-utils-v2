@@ -82,19 +82,19 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
 contract DeployedTest is DeployedState {
 
     function testRegisterRevertsOnSameToken() public {
-        vm.expectRevert(bytes("Same token"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.SameToken.selector, address(tokenIn)));
         vm.prank(admin);
         tokenUpgrade.register(tokenIn, tokenIn, merkleRoot);
     }
 
     function testUnregisterRevertsIfNotRegistered() public {
-        vm.expectRevert(bytes("TokenIn not registered"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInNotRegistered.selector, address(tokenIn)));
         vm.prank(admin);
         tokenUpgrade.unregister(tokenIn, other);
     }
 
     function testExtractRevertsIfNotRegistered() public {
-        vm.expectRevert(bytes("TokenIn not registered"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInNotRegistered.selector, address(tokenIn)));
         vm.prank(admin);
         tokenUpgrade.extract(tokenIn, other);
     }
@@ -139,32 +139,32 @@ contract RegisteredTest is RegisteredState {
 
     /// @dev Test you can't register the same token twice as tokenIn
     function testRegisterRevertsOnSameTokenIn() public {
-        vm.expectRevert(bytes("TokenIn already registered"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInAlreadyRegistered.selector, address(tokenIn)));
         vm.prank(admin);
         tokenUpgrade.register(tokenIn, tokenOther, merkleRoot);
     }
 
     /// @dev Test you can't register the same token twice as tokenOut
     function testRegisterRevertsOnSameTokenOut() public {
-        vm.expectRevert(bytes("TokenOut already registered"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenOutAlreadyRegistered.selector, address(tokenOut)));
         vm.prank(admin);
         tokenUpgrade.register(tokenOther, tokenOut, merkleRoot);
     }
 
     function testRecoverRevertsIfTokenIn() public {
-        vm.expectRevert(bytes("TokenIn registered"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInAlreadyRegistered.selector, address(tokenIn)));
         vm.prank(admin);
         tokenUpgrade.recover(tokenIn, other);
     }
 
     function testRecoverRevertsIfTokenOut() public {
-        vm.expectRevert(bytes("TokenOut registered"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenOutAlreadyRegistered.selector, address(tokenOut)));
         vm.prank(admin);
         tokenUpgrade.recover(tokenOut, other);
     }
 
     function testSwapRevertsIfNotRegistered() public {
-        vm.expectRevert(bytes("TokenIn not registered"));
+        vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInNotRegistered.selector, address(tokenOther)));
         vm.prank(whitelisted);
         tokenUpgrade.swap(tokenOther, whitelisted, whitelisted, 100e18, proof);
     }
@@ -172,7 +172,7 @@ contract RegisteredTest is RegisteredState {
     function testSwapRevertIfInvalidProof() public {
         vm.prank(whitelisted);
         tokenIn.approve(address(tokenUpgrade), 100e18);
-        vm.expectRevert(0xaf37a324); // error selector
+        vm.expectRevert(TokenUpgrade.NotInMerkleTree.selector);
         tokenUpgrade.swap(tokenIn, whitelisted, whitelisted, 100e18, invalidProof);
     }
 

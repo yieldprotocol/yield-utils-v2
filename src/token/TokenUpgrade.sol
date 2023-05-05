@@ -13,6 +13,11 @@ contract TokenUpgrade is AccessControl() {
     using Cast for uint256;
     using TransferHelper for IERC20;
 
+    error SameToken(address token);
+    error TokenInNotRegistered(address tokenIn);
+    error TokenInAlreadyRegistered(address tokenIn);
+    error TokenOutNotRegistered(address tokenOut);
+    error TokenOutAlreadyRegistered(address tokenOut);
     error NotInMerkleTree();
 
     event Registered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance, uint96 ratio);
@@ -42,9 +47,9 @@ contract TokenUpgrade is AccessControl() {
     /// @param tokenIn_ The token to be replaced
     /// @param tokenOut_ The token to replace it with
     function register(IERC20 tokenIn_, IERC20 tokenOut_, bytes32 merkleRoot_) external auth {
-        require(address(tokenIn_) != address(tokenOut_), "Same token");
-        require(address(tokensIn[tokenIn_].reverse) == address(0), "TokenIn already registered");
-        require(address(tokensOut[tokenOut_].reverse) == address(0), "TokenOut already registered");
+        if (address(tokenIn_) == address(tokenOut_)) revert SameToken(address(tokenIn_));
+        if (address(tokensIn[tokenIn_].reverse) != address(0)) revert TokenInAlreadyRegistered(address(tokenIn_));
+        if (address(tokensOut[tokenOut_].reverse) != address(0)) revert TokenOutAlreadyRegistered(address(tokenOut_));
 
         uint96 ratio = (tokenOut_.balanceOf(address(this)) * 1e18 / tokenIn_.totalSupply()).u96();
         uint256 tokenInBalance = tokenIn_.balanceOf(address(this));
@@ -68,7 +73,7 @@ contract TokenUpgrade is AccessControl() {
     /// @param to The address to send all tokens to
     function unregister(IERC20 tokenIn_, address to) external auth {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
-        require(address(tokenIn.reverse) != address(0), "TokenIn not registered");
+        if (address(tokenIn.reverse) == address(0)) revert TokenInNotRegistered(address(tokenIn_));
         IERC20 tokenOut_ = tokenIn.reverse;
 
         delete tokensIn[tokenIn_];
@@ -88,7 +93,7 @@ contract TokenUpgrade is AccessControl() {
     /// @param to The address to send the tokens to
     function extract(IERC20 tokenIn_, address to) external auth {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
-        require(address(tokenIn.reverse) != address(0), "TokenIn not registered");
+        if (address(tokenIn.reverse) == address(0)) revert TokenInNotRegistered(address(tokenIn_));
 
         tokensIn[tokenIn_].balance = 0;
         tokenIn_.safeTransfer(to, tokenIn.balance);
@@ -101,8 +106,8 @@ contract TokenUpgrade is AccessControl() {
     /// @param token The token to be recovered
     /// @param to The address to send the tokens to
     function recover(IERC20 token, address to) external auth {
-        require(address(tokensIn[token].reverse) == address(0), "TokenIn registered");
-        require(address(tokensOut[token].reverse) == address(0), "TokenOut registered");
+        if (address(tokensIn[token].reverse) != address(0)) revert TokenInAlreadyRegistered(address(token));
+        if (address(tokensOut[token].reverse) != address(0)) revert TokenOutAlreadyRegistered(address(token));
         uint256 recovered = token.balanceOf(address(this));
         token.safeTransfer(to, token.balanceOf(address(this)));
 
@@ -113,7 +118,7 @@ contract TokenUpgrade is AccessControl() {
     /// @param tokenIn_ The token to be replaced
     function swap(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof) external {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
-        require(address(tokenIn.reverse) != address(0), "TokenIn not registered");
+        if (address(tokenIn.reverse) == address(0)) revert TokenInNotRegistered(address(tokenIn_));
         IERC20 tokenOut_ = tokenIn.reverse;
 
         tokenIn_.safeTransferFrom(from, address(this), tokenInAmount);
