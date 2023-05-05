@@ -9,7 +9,7 @@ import "../utils/Cast.sol";
 /// @dev TokenSwap is a contract that can be used swap tokens at a fixed rate, with
 /// the aim of completely replacing the supply of a token by the funds supplied to
 /// this contract. It is meant to be used as a token upgrade, when other mechanisms fail.
-contract TokenUpgrade is AccessControl() {
+contract TokenUpgrade is AccessControl {
     using Cast for uint256;
     using TransferHelper for IERC20;
 
@@ -20,8 +20,12 @@ contract TokenUpgrade is AccessControl() {
     error TokenOutAlreadyRegistered(address tokenOut);
     error NotInMerkleTree();
 
-    event Registered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance, uint96 ratio);
-    event Unregistered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance);
+    event Registered(
+        IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance, uint96 ratio
+    );
+    event Unregistered(
+        IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance
+    );
     event Swapped(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInAmount, uint256 tokenOutAmount);
     event Extracted(IERC20 indexed tokenIn, uint256 tokenInBalance);
     event Recovered(IERC20 indexed token, uint256 recovered);
@@ -35,11 +39,11 @@ contract TokenUpgrade is AccessControl() {
 
     struct TokenOut {
         IERC20 reverse;
-        uint256 balance;     
+        uint256 balance;
     }
 
-    mapping (IERC20 => TokenIn) public tokensIn;
-    mapping (IERC20 => TokenOut) public tokensOut;
+    mapping(IERC20 => TokenIn) public tokensIn;
+    mapping(IERC20 => TokenOut) public tokensOut;
 
     /// @dev Register a token to be replaced, and the token to replace it with.
     /// The ratio is calculated as the funds of the replacement token divided by the supply of the token to be replaced.
@@ -55,16 +59,8 @@ contract TokenUpgrade is AccessControl() {
         uint96 ratio = (tokenOut_.balanceOf(address(this)) * 1e18 / tokenIn_.totalSupply()).u96();
         uint256 tokenInBalance = tokenIn_.balanceOf(address(this));
         uint256 tokenOutBalance = tokenOut_.balanceOf(address(this));
-        tokensIn[tokenIn_] = TokenIn(
-            tokenOut_, 
-            ratio,
-            tokenInBalance,
-            merkleRoot_
-        );
-        tokensOut[tokenOut_] = TokenOut(
-            tokenIn_,
-            tokenOutBalance
-        );
+        tokensIn[tokenIn_] = TokenIn(tokenOut_, ratio, tokenInBalance, merkleRoot_);
+        tokensOut[tokenOut_] = TokenOut(tokenIn_, tokenOutBalance);
 
         emit Registered(tokenIn_, tokenOut_, tokenInBalance, tokenOutBalance, ratio);
     }
@@ -121,7 +117,9 @@ contract TokenUpgrade is AccessControl() {
     /// @param to the receiver of tokenOut_
     /// @param tokenInAmount The amount of tokenIn_ to swap
     /// @param proof The merkle proof to verify the swap
-    function swap(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof) external {
+    function swap(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof)
+        external
+    {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
         if (address(tokenIn.reverse) == address(0)) revert TokenInNotRegistered(address(tokenIn_));
         IERC20 tokenOut_ = tokenIn.reverse;
@@ -135,7 +133,7 @@ contract TokenUpgrade is AccessControl() {
 
         tokensIn[tokenIn_].balance += tokenInAmount;
         tokensOut[tokenOut_].balance -= tokenOutAmount;
-        
+
         tokenOut_.safeTransfer(to, tokenOutAmount);
 
         emit Swapped(tokenIn_, tokenOut_, tokenInAmount, tokenOutAmount);
