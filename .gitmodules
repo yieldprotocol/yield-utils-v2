@@ -4,3 +4,6 @@
 [submodule "lib/ERC3156"]
 	path = lib/ERC3156
 	url = https://github.com/alcueca/ERC3156
+[submodule "lib/openzeppelin-contracts"]
+	path = lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts
