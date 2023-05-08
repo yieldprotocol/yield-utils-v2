@@ -5,12 +5,15 @@ import "openzeppelin-contracts/utils/cryptography/MerkleProof.sol";
 import "./TransferHelper.sol";
 import "../access/AccessControl.sol";
 import "../utils/Cast.sol";
+import "../utils/Math.sol";
 
 /// @dev TokenSwap is a contract that can be used swap tokens at a fixed rate, with
 /// the aim of completely replacing the supply of a token by the funds supplied to
 /// this contract. It is meant to be used as a token upgrade, when other mechanisms fail.
+/// @dev This contract is currently under audit and not eligible for any bounties.
 contract TokenUpgrade is AccessControl {
     using Cast for uint256;
+    using Math for uint256;
     using TransferHelper for IERC20;
 
     error SameToken(address token);
@@ -56,7 +59,7 @@ contract TokenUpgrade is AccessControl {
         if (address(tokensIn[tokenIn_].reverse) != address(0)) revert TokenInAlreadyRegistered(address(tokenIn_));
         if (address(tokensOut[tokenOut_].reverse) != address(0)) revert TokenOutAlreadyRegistered(address(tokenOut_));
 
-        uint96 ratio = (tokenOut_.balanceOf(address(this)) * 1e18 / tokenIn_.totalSupply()).u96();
+        uint96 ratio = tokenOut_.balanceOf(address(this)).wdiv(tokenIn_.totalSupply()).u96();
         uint256 tokenInBalance = tokenIn_.balanceOf(address(this));
         uint256 tokenOutBalance = tokenOut_.balanceOf(address(this));
         tokensIn[tokenIn_] = TokenIn(tokenOut_, ratio, tokenInBalance, merkleRoot_);
@@ -112,6 +115,8 @@ contract TokenUpgrade is AccessControl {
     }
 
     /// @dev Swap a token for its replacement, at the registered ratio.
+    /// The rounding for tokenOutAmount means that the TokenUpgrade contract
+    /// gets the left over wei.
     /// @param tokenIn_ The token to be replaced
     /// @param from the owner of tokenIn_
     /// @param to the receiver of tokenOut_
@@ -124,12 +129,12 @@ contract TokenUpgrade is AccessControl {
         if (address(tokenIn.reverse) == address(0)) revert TokenInNotRegistered(address(tokenIn_));
         IERC20 tokenOut_ = tokenIn.reverse;
 
-        tokenIn_.safeTransferFrom(from, address(this), tokenInAmount);
-        uint256 tokenOutAmount = tokenInAmount * tokenIn.ratio / 1e18;
-
         bytes32 leaf = keccak256(abi.encodePacked(from, tokenInAmount));
         bool isValidLeaf = MerkleProof.verify(proof, tokenIn.merkleRoot, leaf);
         if (!isValidLeaf) revert NotInMerkleTree();
+
+        tokenIn_.safeTransferFrom(from, address(this), tokenInAmount);
+        uint256 tokenOutAmount = tokenInAmount.wmul(tokenIn.ratio);
 
         tokensIn[tokenIn_].balance += tokenInAmount;
         tokensOut[tokenOut_].balance -= tokenOutAmount;
