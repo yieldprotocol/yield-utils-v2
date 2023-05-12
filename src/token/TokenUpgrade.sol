@@ -110,7 +110,7 @@ contract TokenUpgrade is AccessControl {
         if (address(tokensIn[token].reverse) != address(0)) revert TokenInAlreadyRegistered(address(token));
         if (address(tokensOut[token].reverse) != address(0)) revert TokenOutAlreadyRegistered(address(token));
         uint256 recovered = token.balanceOf(address(this));
-        token.safeTransfer(to, token.balanceOf(address(this)));
+        token.safeTransfer(to, recovered);
 
         emit Recovered(token, recovered);
     }
