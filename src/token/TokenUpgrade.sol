@@ -4,10 +4,11 @@ pragma solidity >=0.8.15;
 import "openzeppelin-contracts/utils/cryptography/MerkleProof.sol";
 import "./TransferHelper.sol";
 import "../access/AccessControl.sol";
+import "../interfaces/ITokenUpgrade.sol";
 import "../utils/Cast.sol";
 import "../utils/Math.sol";
 
-/// @dev TokenSwap is a contract that can be used swap tokens at a fixed rate, with
+/// @dev TokenUpgrade is a contract that can be used upgrade tokens at a fixed rate, with
 /// the aim of completely replacing the supply of a token by the funds supplied to
 /// this contract. It is meant to be used as a token upgrade, when other mechanisms fail.
 /// @dev This contract is currently under audit and not eligible for any bounties.
@@ -29,7 +30,7 @@ contract TokenUpgrade is AccessControl {
     event Unregistered(
         IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance
     );
-    event Swapped(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInAmount, uint256 tokenOutAmount);
+    event Upgraded(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInAmount, uint256 tokenOutAmount);
     event Extracted(IERC20 indexed tokenIn, uint256 tokenInBalance);
     event Recovered(IERC20 indexed token, uint256 recovered);
 
@@ -114,15 +115,15 @@ contract TokenUpgrade is AccessControl {
         emit Recovered(token, recovered);
     }
 
-    /// @dev Swap a token for its replacement, at the registered ratio.
+    /// @dev Upgrade a token for its replacement, at the registered ratio.
     /// The rounding for tokenOutAmount means that the TokenUpgrade contract
     /// gets the left over wei.
     /// @param tokenIn_ The token to be replaced
     /// @param from the owner of tokenIn_
     /// @param to the receiver of tokenOut_
-    /// @param tokenInAmount The amount of tokenIn_ to swap
-    /// @param proof The merkle proof to verify the swap
-    function swap(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof)
+    /// @param tokenInAmount The amount of tokenIn_ to upgrade
+    /// @param proof The merkle proof to verify the upgrade
+    function upgrade(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof)
         external
     {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
@@ -141,6 +142,6 @@ contract TokenUpgrade is AccessControl {
 
         tokenOut_.safeTransfer(to, tokenOutAmount);
 
-        emit Swapped(tokenIn_, tokenOut_, tokenInAmount, tokenOutAmount);
+        emit Upgraded(tokenIn_, tokenOut_, tokenInAmount, tokenOutAmount);
     }
 }

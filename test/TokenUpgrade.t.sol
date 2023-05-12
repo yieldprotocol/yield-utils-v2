@@ -28,7 +28,7 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
 
     event Registered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance, uint96 ratio);
     event Unregistered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance);
-    event Swapped(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance);
+    event Upgraded(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInAmount, uint256 tokenOutAmount);
     event Extracted(IERC20 indexed tokenIn, uint256 tokenInBalance);
     event Recovered(IERC20 indexed token, uint256 recovered);
 
@@ -166,21 +166,21 @@ contract RegisteredTest is RegisteredState {
     function testSwapRevertsIfNotRegistered() public {
         vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInNotRegistered.selector, address(tokenOther)));
         vm.prank(whitelisted);
-        tokenUpgrade.swap(tokenOther, whitelisted, whitelisted, 100e18, proof);
+        tokenUpgrade.upgrade(tokenOther, whitelisted, whitelisted, 100e18, proof);
     }
 
     function testSwapRevertIfInvalidProof() public {
         vm.prank(whitelisted);
         tokenIn.approve(address(tokenUpgrade), 100e18);
         vm.expectRevert(TokenUpgrade.NotInMerkleTree.selector);
-        tokenUpgrade.swap(tokenIn, whitelisted, whitelisted, 100e18, invalidProof);
+        tokenUpgrade.upgrade(tokenIn, whitelisted, whitelisted, 100e18, invalidProof);
     }
 
     function testSwapRevertOnInvalidSender() public {
         vm.prank(user);
         tokenIn.approve(address(tokenUpgrade), 100e18);
         vm.expectRevert(0xaf37a324); // error selector
-        tokenUpgrade.swap(tokenIn, user, user, 100e18, proof);
+        tokenUpgrade.upgrade(tokenIn, user, user, 100e18, proof);
     }
 
     function testSwap() public {
@@ -198,9 +198,9 @@ contract RegisteredTest is RegisteredState {
         tokenIn.approve(address(tokenUpgrade), 100e18);
 
         vm.expectEmit(true, true, true, true);
-        emit Swapped(tokenIn, tokenOut, tokenInAmount, expectedTokenOut);
+        emit Upgraded(tokenIn, tokenOut, tokenInAmount, expectedTokenOut);
 
-        tokenUpgrade.swap(tokenIn, whitelisted, other, 100e18, proof);
+        tokenUpgrade.upgrade(tokenIn, whitelisted, other, 100e18, proof);
         vm.stopPrank();
 
         tokenIn_ = ITokenUpgrade(address(tokenUpgrade)).tokensIn(tokenIn);
@@ -236,7 +236,7 @@ abstract contract SwappedState is RegisteredState {
 
         vm.startPrank(whitelisted);
         tokenIn.approve(address(tokenUpgrade), tokenInAmount);
-        tokenUpgrade.swap(tokenIn, whitelisted, address(0), tokenInAmount, proof);
+        tokenUpgrade.upgrade(tokenIn, whitelisted, address(0), tokenInAmount, proof);
         vm.stopPrank();
     }
 }
