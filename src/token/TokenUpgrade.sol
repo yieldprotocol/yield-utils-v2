@@ -131,7 +131,7 @@ contract TokenUpgrade is AccessControl {
         IERC20 tokenOut_ = tokenIn.reverse;
 
         bytes32 leaf = keccak256(abi.encodePacked(from, tokenInAmount));
-        bool isValidLeaf = MerkleProof.verify(proof, tokenIn.merkleRoot, leaf);
+        bool isValidLeaf = MerkleProof.verifyCalldata(proof, tokenIn.merkleRoot, leaf);
         if (!isValidLeaf) revert NotInMerkleTree();
 
         tokenIn_.safeTransferFrom(from, address(this), tokenInAmount);
