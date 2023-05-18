@@ -23,6 +23,7 @@ contract TokenUpgrade is AccessControl {
     error TokenOutNotRegistered(address tokenOut);
     error TokenOutAlreadyRegistered(address tokenOut);
     error TotalSupplyNotPresent();
+    error AlreadyClaimed();
     error NotInMerkleTree();
 
     event Registered(
@@ -49,6 +50,7 @@ contract TokenUpgrade is AccessControl {
 
     mapping(IERC20 => TokenIn) public tokensIn;
     mapping(IERC20 => TokenOut) public tokensOut;
+    mapping(bytes32 => bool) public isClaimed;
 
     /// @dev Register a token to be replaced, and the token to replace it with.
     /// The ratio is calculated as the funds of the replacement token divided by the supply of the token to be replaced.
@@ -132,6 +134,8 @@ contract TokenUpgrade is AccessControl {
         IERC20 tokenOut_ = tokenIn.reverse;
 
         bytes32 leaf = keccak256(abi.encodePacked(from, tokenInAmount));
+        if (isClaimed[leaf]) revert AlreadyClaimed();
+        isClaimed[leaf] = true;
         bool isValidLeaf = MerkleProof.verifyCalldata(proof, tokenIn.merkleRoot, leaf);
         if (!isValidLeaf) revert NotInMerkleTree();
 
