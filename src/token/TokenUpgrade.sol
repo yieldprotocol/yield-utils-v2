@@ -22,6 +22,7 @@ contract TokenUpgrade is AccessControl {
     error TokenInAlreadyRegistered(address tokenIn);
     error TokenOutNotRegistered(address tokenOut);
     error TokenOutAlreadyRegistered(address tokenOut);
+    error TotalSupplyNotPresent();
     error NotInMerkleTree();
 
     event Registered(
@@ -59,6 +60,7 @@ contract TokenUpgrade is AccessControl {
         if (address(tokenIn_) == address(tokenOut_)) revert SameToken(address(tokenIn_));
         if (address(tokensIn[tokenIn_].reverse) != address(0)) revert TokenInAlreadyRegistered(address(tokenIn_));
         if (address(tokensOut[tokenOut_].reverse) != address(0)) revert TokenOutAlreadyRegistered(address(tokenOut_));
+        if (tokenOut_.balanceOf(address(this)) != tokenOut_.totalSupply()) revert TotalSupplyNotPresent();
 
         uint96 ratio = tokenOut_.balanceOf(address(this)).wdiv(tokenIn_.totalSupply()).u96();
         uint256 tokenInBalance = tokenIn_.balanceOf(address(this));
