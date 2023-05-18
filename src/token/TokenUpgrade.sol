@@ -120,10 +120,9 @@ contract TokenUpgrade is AccessControl {
     /// gets the left over wei.
     /// @param tokenIn_ The token to be replaced
     /// @param from the owner of tokenIn_
-    /// @param to the receiver of tokenOut_
     /// @param tokenInAmount The amount of tokenIn_ to upgrade
     /// @param proof The merkle proof to verify the upgrade
-    function upgrade(IERC20 tokenIn_, address from, address to, uint256 tokenInAmount, bytes32[] calldata proof)
+    function upgrade(IERC20 tokenIn_, address from, uint256 tokenInAmount, bytes32[] calldata proof)
         external
     {
         TokenIn memory tokenIn = tokensIn[tokenIn_];
@@ -140,7 +139,7 @@ contract TokenUpgrade is AccessControl {
         tokensIn[tokenIn_].balance += tokenInAmount;
         tokensOut[tokenOut_].balance -= tokenOutAmount;
 
-        tokenOut_.safeTransfer(to, tokenOutAmount);
+        tokenOut_.safeTransfer(from, tokenOutAmount);
 
         emit Upgraded(tokenIn_, tokenOut_, tokenInAmount, tokenOutAmount);
     }

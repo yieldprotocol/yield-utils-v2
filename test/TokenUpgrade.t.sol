@@ -163,27 +163,27 @@ contract RegisteredTest is RegisteredState {
         tokenUpgrade.recover(tokenOut, other);
     }
 
-    function testSwapRevertsIfNotRegistered() public {
+    function testUpgradeRevertsIfNotRegistered() public {
         vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInNotRegistered.selector, address(tokenOther)));
         vm.prank(whitelisted);
-        tokenUpgrade.upgrade(tokenOther, whitelisted, whitelisted, 100e18, proof);
+        tokenUpgrade.upgrade(tokenOther, whitelisted, 100e18, proof);
     }
 
-    function testSwapRevertIfInvalidProof() public {
+    function testUpgradeRevertIfInvalidProof() public {
         vm.prank(whitelisted);
         tokenIn.approve(address(tokenUpgrade), 100e18);
         vm.expectRevert(TokenUpgrade.NotInMerkleTree.selector);
-        tokenUpgrade.upgrade(tokenIn, whitelisted, whitelisted, 100e18, invalidProof);
+        tokenUpgrade.upgrade(tokenIn, whitelisted, 100e18, invalidProof);
     }
 
-    function testSwapRevertOnInvalidSender() public {
+    function testUpgradeRevertOnInvalidSender() public {
         vm.prank(user);
         tokenIn.approve(address(tokenUpgrade), 100e18);
         vm.expectRevert(0xaf37a324); // error selector
-        tokenUpgrade.upgrade(tokenIn, user, user, 100e18, proof);
+        tokenUpgrade.upgrade(tokenIn, user, 100e18, proof);
     }
 
-    function testSwap() public {
+    function testUpgrade() public {
         ITokenUpgrade.TokenIn memory tokenIn_ = ITokenUpgrade(address(tokenUpgrade)).tokensIn(tokenIn);
         ITokenUpgrade.TokenOut memory tokenOut_ = ITokenUpgrade(address(tokenUpgrade)).tokensOut(tokenOut);
         
@@ -200,7 +200,7 @@ contract RegisteredTest is RegisteredState {
         vm.expectEmit(true, true, true, true);
         emit Upgraded(tokenIn, tokenOut, tokenInAmount, expectedTokenOut);
 
-        tokenUpgrade.upgrade(tokenIn, whitelisted, other, 100e18, proof);
+        tokenUpgrade.upgrade(tokenIn, whitelisted, 100e18, proof);
         vm.stopPrank();
 
         tokenIn_ = ITokenUpgrade(address(tokenUpgrade)).tokensIn(tokenIn);
@@ -208,7 +208,7 @@ contract RegisteredTest is RegisteredState {
 
         assertEq(tokenIn_.balance, expectedTokenInBalance);
         assertEq(tokenOut_.balance, expectedTokenOutBalance);
-        assertEq(tokenOut.balanceOf(other), expectedTokenOut);
+        assertEq(tokenOut.balanceOf(whitelisted), expectedTokenOut);
     }
 
     function testRecover() public {
@@ -227,7 +227,7 @@ contract RegisteredTest is RegisteredState {
     }
 }
 
-abstract contract SwappedState is RegisteredState {
+abstract contract UpgradedState is RegisteredState {
     function setUp() public virtual override {
         super.setUp();
         
@@ -236,12 +236,12 @@ abstract contract SwappedState is RegisteredState {
 
         vm.startPrank(whitelisted);
         tokenIn.approve(address(tokenUpgrade), tokenInAmount);
-        tokenUpgrade.upgrade(tokenIn, whitelisted, address(0), tokenInAmount, proof);
+        tokenUpgrade.upgrade(tokenIn, whitelisted, tokenInAmount, proof);
         vm.stopPrank();
     }
 }
 
-contract SwappedTest is SwappedState {
+contract UpgradedTest is UpgradedState {
     function testUnregister() public {
         uint256 tokenInBalance = tokenIn.balanceOf(address(tokenUpgrade));
         uint256 tokenOutBalance = tokenOut.balanceOf(address(tokenUpgrade));
