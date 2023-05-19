@@ -38,6 +38,7 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
     TokenUpgrade public tokenUpgrade;
     // From generator config
     address whitelisted = 0x185a4dc360CE69bDCceE33b3784B0282f7961aea;
+    bytes32 tosHash = 0x9f6699a0964b1bd6fe6c9fb8bebea236c08311ddd25781bbf5d372d00d32936b;
     bytes32 merkleRoot = 0xd0aa6a4e5b4e13462921d7518eebdb7b297a7877d6cfe078b0c318827392fb55;
     bytes32[] proof;
     bytes32[] invalidProof;
@@ -166,21 +167,36 @@ contract RegisteredTest is RegisteredState {
     function testUpgradeRevertsIfNotRegistered() public {
         vm.expectRevert(abi.encodeWithSelector(TokenUpgrade.TokenInNotRegistered.selector, address(tokenOther)));
         vm.prank(whitelisted);
-        tokenUpgrade.upgrade(tokenOther, whitelisted, 100e18, proof);
+        bytes32 acceptanceToken = keccak256(abi.encodePacked(whitelisted, tosHash));
+        tokenUpgrade.upgrade(tokenOther, acceptanceToken, whitelisted, 100e18, proof);
+        console2.logBytes32(acceptanceToken);
     }
 
     function testUpgradeRevertIfInvalidProof() public {
-        vm.prank(whitelisted);
+        vm.startPrank(whitelisted);
         tokenIn.approve(address(tokenUpgrade), 100e18);
+        bytes32 acceptanceToken = keccak256(abi.encodePacked(whitelisted, tosHash));
         vm.expectRevert(TokenUpgrade.NotInMerkleTree.selector);
-        tokenUpgrade.upgrade(tokenIn, whitelisted, 100e18, invalidProof);
+        tokenUpgrade.upgrade(tokenIn, acceptanceToken, whitelisted, 100e18, invalidProof);
+        vm.stopPrank();
+    }
+
+    function testUpgradeReversOnInvalidAcceptanceToken() public {
+        vm.startPrank(user);
+        tokenIn.approve(address(tokenUpgrade), 100e18);
+        bytes32 acceptanceToken = keccak256(abi.encodePacked(whitelisted, tosHash));
+        vm.expectRevert(TokenUpgrade.InvalidAcceptanceToken.selector);
+        tokenUpgrade.upgrade(tokenIn, acceptanceToken, user, 100e18, proof);
+        vm.stopPrank();
     }
 
     function testUpgradeRevertOnInvalidSender() public {
-        vm.prank(user);
+        vm.startPrank(user);
         tokenIn.approve(address(tokenUpgrade), 100e18);
-        vm.expectRevert(0xaf37a324); // error selector
-        tokenUpgrade.upgrade(tokenIn, user, 100e18, proof);
+        bytes32 acceptanceToken = keccak256(abi.encodePacked(user, tosHash));
+        vm.expectRevert(TokenUpgrade.NotInMerkleTree.selector);
+        tokenUpgrade.upgrade(tokenIn, acceptanceToken, user, 100e18, proof);
+        vm.stopPrank();
     }
 
     function testUpgrade() public {
@@ -200,7 +216,8 @@ contract RegisteredTest is RegisteredState {
         vm.expectEmit(true, true, true, true);
         emit Upgraded(tokenIn, tokenOut, tokenInAmount, expectedTokenOut);
 
-        tokenUpgrade.upgrade(tokenIn, whitelisted, 100e18, proof);
+        bytes32 acceptanceToken = keccak256(abi.encodePacked(whitelisted, tosHash));
+        tokenUpgrade.upgrade(tokenIn, acceptanceToken, whitelisted, 100e18, proof);
         vm.stopPrank();
 
         tokenIn_ = ITokenUpgrade(address(tokenUpgrade)).tokensIn(tokenIn);
@@ -236,7 +253,8 @@ abstract contract UpgradedState is RegisteredState {
 
         vm.startPrank(whitelisted);
         tokenIn.approve(address(tokenUpgrade), tokenInAmount);
-        tokenUpgrade.upgrade(tokenIn, whitelisted, tokenInAmount, proof);
+        bytes32 acceptanceToken = keccak256(abi.encodePacked(whitelisted, tosHash));
+        tokenUpgrade.upgrade(tokenIn, acceptanceToken, whitelisted, tokenInAmount, proof);
         vm.stopPrank();
     }
 }

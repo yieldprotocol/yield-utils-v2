@@ -8,6 +8,30 @@ import "../interfaces/ITokenUpgrade.sol";
 import "../utils/Cast.sol";
 import "../utils/Math.sol";
 
+/*  
+    By signing this Release and clicking "I Agree" on the web interface at https://yieldprotocol.com/ and accessing 
+    the smart contract to redeem my [existing LP Tokens] for [updated LP Tokens], I and any protocol I represent hereby 
+    irrevocably and unconditionally release all claims I and any protocol I represent (or other separate related or 
+    affiliated legal entities) ("Releasing Parties") may have against Yield, Inc. and any of its agents, affiliates, 
+    officers, employees, or principals ("Released Parties") related to this matter whether such claims are known or 
+    unknown at this time and regardless of how such claims arise and the laws governing such claims (which shall include 
+    but not be limited to any claims arising out of Yield Protocol's terms of use). This release constitutes an express 
+    and voluntary binding waiver and relinquishment to the fullest extent permitted by law. Releasing Parties further 
+    agree to indemnify the Released Parties from any and all third-party claims arising or related to this matter, including
+    damages, attorneys' fees, and any other costs related to those claims. If I am acting for or on behalf of a company 
+    (or other such separate related or affiliated legal entity), by signing this Release, clicking "I Agree" on the web 
+    interface at https://yieldprotocol.com/ or executing the smart contract and accepting the redemption, I confirm that I 
+    am duly authorized to enter into this contract on its behalf. I and any Releasing Parties I represent further acknowledge 
+    and agree that the Released Parties are not the issuer of the [updated LP Tokens] that I may redeem through the smart 
+    contracts accessible at https://yieldprotocol.com/, the Released Parties are not issuing such [updated LP Token] to me, 
+    and I have no expectations from or rights with respect to any Released Party with respect to the [updated LP Token]. This 
+    agreement and all disputes relating to or arising under this agreement (including the interpretation, validity or 
+    enforcement thereof) will be governed by and subject to Yield, Inc.'s Terms of Service, including, but not limited to, the 
+    Limitation of Liability, Dispute Resolution by Binding Arbitration, and General provisions within the Terms of Service. 
+    To the extent that the terms of this release are inconsistent with any previous agreement and/or Yield, Inc.'s Terms of 
+    Service, I accept that these terms take priority and, where necessary, replace the previous terms.
+*/
+
 /// @dev TokenUpgrade is a contract that can be used upgrade tokens at a fixed rate, with
 /// the aim of completely replacing the supply of a token by the funds supplied to
 /// this contract. It is meant to be used as a token upgrade, when other mechanisms fail.
@@ -23,6 +47,7 @@ contract TokenUpgrade is AccessControl {
     error TokenOutNotRegistered(address tokenOut);
     error TokenOutAlreadyRegistered(address tokenOut);
     error TotalSupplyNotPresent();
+    error InvalidAcceptanceToken();
     error AlreadyClaimed();
     error NotInMerkleTree();
 
@@ -47,6 +72,9 @@ contract TokenUpgrade is AccessControl {
         IERC20 reverse;
         uint256 balance;
     }
+
+    // Hash of the above terms of service
+    bytes32 tosHash = 0x9f6699a0964b1bd6fe6c9fb8bebea236c08311ddd25781bbf5d372d00d32936b;
 
     mapping(IERC20 => TokenIn) public tokensIn;
     mapping(IERC20 => TokenOut) public tokensOut;
@@ -126,9 +154,11 @@ contract TokenUpgrade is AccessControl {
     /// @param from the owner of tokenIn_
     /// @param tokenInAmount The amount of tokenIn_ to upgrade
     /// @param proof The merkle proof to verify the upgrade
-    function upgrade(IERC20 tokenIn_, address from, uint256 tokenInAmount, bytes32[] calldata proof)
+    function upgrade(IERC20 tokenIn_, bytes32 acceptanceToken, address from, uint256 tokenInAmount, bytes32[] calldata proof)
         external
     {
+        if (acceptanceToken != keccak256(abi.encodePacked(from, tosHash))) revert InvalidAcceptanceToken();
+
         TokenIn memory tokenIn = tokensIn[tokenIn_];
         if (address(tokenIn.reverse) == address(0)) revert TokenInNotRegistered(address(tokenIn_));
         IERC20 tokenOut_ = tokenIn.reverse;
