@@ -8,13 +8,20 @@
     "!src/mocks"
   ],
   "scripts": {
-    "prepublishOnly": "npx tsdx build --tsconfig ./tsconfig-publish.json"
+    "prepublishOnly": "npx tsdx build --tsconfig ./tsconfig-publish.json",
+    "start": "ts-node generator/src/app.ts"
   },
   "devDependencies": {
     "ts-node": "^8.10.2",
     "tsdx": "^0.14.1",
     "typechain": "^8.0.0",
     "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "ethers": "^5.5.2",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.2.27",
+    "winston": "^3.3.3"
   },
   "license": "GPL-3.0-or-later"
 }
