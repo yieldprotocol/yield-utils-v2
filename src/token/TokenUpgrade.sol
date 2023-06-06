@@ -149,7 +149,8 @@ contract TokenUpgrade is AccessControl {
     /// The rounding for tokenOutAmount means that the TokenUpgrade contract
     /// gets the left over wei.
     /// @param tokenIn_ The token to be replaced
-    /// @param from the owner of tokenIn_
+    /// @param acceptanceToken The acceptance token for the terms of service
+    /// @param from The owner of tokenIn_
     /// @param tokenInAmount The amount of tokenIn_ to upgrade
     /// @param proof The merkle proof to verify the upgrade
     function upgrade(IERC20 tokenIn_, bytes32 acceptanceToken, address from, uint256 tokenInAmount, bytes32[] calldata proof)
