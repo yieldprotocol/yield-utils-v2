@@ -26,9 +26,26 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
         uint256 balance;     
     }
 
-    event Registered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance, uint96 ratio);
-    event Unregistered(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInBalance, uint256 tokenOutBalance);
-    event Upgraded(IERC20 indexed tokenIn, IERC20 indexed tokenOut, uint256 tokenInAmount, uint256 tokenOutAmount);
+    event Registered(
+        IERC20 indexed tokenIn, 
+        IERC20 indexed tokenOut, 
+        uint256 tokenInBalance, 
+        uint256 tokenOutBalance, 
+        uint96 ratio, 
+        bytes32 merkleRoot
+    );
+    event Unregistered(
+        IERC20 indexed tokenIn, 
+        IERC20 indexed tokenOut, 
+        uint256 tokenInBalance, 
+        uint256 tokenOutBalance
+    );
+    event Upgraded(
+        IERC20 indexed tokenIn, 
+        IERC20 indexed tokenOut, 
+        uint256 tokenInAmount, 
+        uint256 tokenOutAmount
+    );
     event Extracted(IERC20 indexed tokenIn, uint256 tokenInBalance);
     event Recovered(IERC20 indexed token, uint256 recovered);
 
@@ -39,7 +56,7 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
     // From generator config
     address whitelisted = 0x185a4dc360CE69bDCceE33b3784B0282f7961aea;
     bytes32 tosHash = 0x9f6699a0964b1bd6fe6c9fb8bebea236c08311ddd25781bbf5d372d00d32936b;
-    bytes32 merkleRoot = 0xd0aa6a4e5b4e13462921d7518eebdb7b297a7877d6cfe078b0c318827392fb55;
+    bytes32 merkleRoot = 0x6e1cf800e87b91489637cdf163e341d93bff0ab519bcbad6725ff29ccbdf7d2a;
     bytes32[] proof;
     bytes32[] invalidProof;
 
@@ -67,7 +84,7 @@ abstract contract DeployedState is Test, TestExtensions, TestConstants {
         tokenUpgrade.grantRole(TokenUpgrade.recover.selector, admin);
 
         proof = new bytes32[](1);
-        proof[0] = 0xceeae64152a2deaf8c661fccd5645458ba20261b16d2f6e090fe908b0ac9ca88;
+        proof[0] = 0x2582e1a57b72c0e7723d34122d5633550f42d7317b1e426a7664ac004b2e605c;
         invalidProof = new bytes32[](1);
         invalidProof[0] = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
@@ -106,8 +123,8 @@ contract DeployedTest is DeployedState {
         ERC20Mock(address(tokenIn)).mint(user, tokenInSupply);
         ERC20Mock(address(tokenOut)).mint(address(tokenUpgrade), tokenOutSupply);
         uint96 ratio = uint96(tokenOutSupply * 1e18 / tokenInSupply);
-        // vm.expectEmit(true, true, true, true);
-        // emit Registered(tokenIn, tokenOut, tokenInSupply, tokenOutSupply, ratio);
+        vm.expectEmit(false, false, false, false);
+        emit Registered(tokenIn, tokenOut, tokenInSupply, tokenOutSupply, ratio, merkleRoot);
 
         vm.prank(admin);
         tokenUpgrade.register(tokenIn, tokenOut, merkleRoot);
@@ -169,7 +186,6 @@ contract RegisteredTest is RegisteredState {
         vm.prank(whitelisted);
         bytes32 acceptanceToken = keccak256(abi.encodePacked(whitelisted, tosHash));
         tokenUpgrade.upgrade(tokenOther, acceptanceToken, whitelisted, 100e18, proof);
-        console2.logBytes32(acceptanceToken);
     }
 
     function testUpgradeRevertIfInvalidProof() public {
