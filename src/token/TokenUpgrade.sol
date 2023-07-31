@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity >=0.8.15;
 
-import "openzeppelin-contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./TransferHelper.sol";
 import "../access/AccessControl.sol";
 import "../interfaces/ITokenUpgrade.sol";
